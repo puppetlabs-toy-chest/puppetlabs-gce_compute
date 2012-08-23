@@ -1,0 +1,23 @@
+manage as puppet devices (I really wish they supported puppet apply)
+
+# each device entry is for a project
+# each device is actually a project!!!
+
+The google compute engine native types and providers can be used
+to describe application stacks using Puppet resources.
+
+These resource types have been implement as devices.
+
+Each project should have an entry in
+
+/etc/puppet/device.conf
+
+[certname]
+  type cisco
+  url [~/gcutil_auth]:my_project
+
+This is the first iteration of native types for google compute.
+
+Only the gce_instance type has been implemented.
+It has no properties
+It currently supports create and destroy
