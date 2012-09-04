@@ -1,0 +1,17 @@
+# this is absolutely an MVP that was written as quickly as possible.
+
+for the next iteration, the following features should be added:
+
+* optimize to make less calls to gcutil
+* currently calls "get#{subcommand}" once per instance that is being managed.
+* it should probably be making one: "list#{subcommand}s" call per project_id
+
+* more properties
+* * right now, everything is implemneted as parameters, they should be implemented as
+properties so that the values can show up with puppet apply
+
+* implement classification
+* * the real power of this implemntation can be demonstrated by implementing
+classification
+
+-- can we patch puppet for cert management?
