@@ -30,13 +30,13 @@ credentials will not be exposed as part of the catalog)
 
 In order to use these resources, you will need to
 [signup](https://developers.google.com/compute/docs/signup)
-] for a Google Compute account:
+ for a Google Compute account:
 
 You will also need to designate one machine to be your Puppet Device Agent.
 This machine will be responsible for interacting with the Google Compute APIs
 and will be used to store your credentials for Google Compute.
 
-On your Puppet Device Agent, (install and authenticate)[https://developers.google.com/compute/docs/gcutil_setup] gcutil.
+On your Puppet Device Agent, [install and authenticate](https://developers.google.com/compute/docs/gcutil_setup) gcutil.
 
 You should generate a credential file as a part of this process: ~/.gcutil_auth.
 
@@ -61,6 +61,8 @@ path to the credentials file appended to the name of the project.
     [certname2]
       type gce
       url [~/gcutil_auth]:group:my_project2
+
+### Specify Resources
 
 Now create a Puppet manifest that describes the google compute
 resources that you wish to manage:
@@ -89,6 +91,8 @@ resources that you wish to manage:
       network     => 'mynetwork',
       tags        => [test, 'one']
     }
+
+### Profit!
 
 This manifest can be applied by running either puppet apply or puppet device on the
 Puppet Device Agent.
