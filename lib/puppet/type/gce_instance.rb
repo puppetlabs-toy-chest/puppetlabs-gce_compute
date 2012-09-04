@@ -8,12 +8,15 @@ Puppet::Type.newtype(:gce_instance) do
 
   EOT
 
-  apply_to_device
-
   ensurable
 
   newparam(:name, :namevar => true) do
     desc 'name used to identify the instance'
+    validate do |v|
+      unless v =~ /[a-z]([-a-z0-9]*[a-z0-9])?/
+        raise(Puppet::Error, "Invalid instance name: #{v}")
+      end
+    end
   end
 
   newparam(:authorized_ssh_keys) do
@@ -28,8 +31,14 @@ Puppet::Type.newtype(:gce_instance) do
   end
 
   # I am not entirely sure what this looks like
+  # can multiple disks be attached?
   newparam(:disk) do
     desc 'Disk that should be attached to an instance'
+  end
+
+  # this assumes that disk is just the disk name
+  autorequire :gce_disk do
+    self[:disk]
   end
 
   newparam(:external_ip_address) do
@@ -40,7 +49,7 @@ Puppet::Type.newtype(:gce_instance) do
    desc 'image used to launch your instance'
   end
 
-  newparam(:machine_type) do
+  newparam(:machine) do
     desc 'Machines resource profile. Determines amount of CPU, RAM, and disk.'
   end
 
@@ -48,15 +57,29 @@ Puppet::Type.newtype(:gce_instance) do
     desc 'Network that an instance belongs to'
   end
 
+  autorequire :gce_network do
+    self[:network]
+  end
+
   newparam(:service_account)
   newparam(:service_account_scopes)
 
+  # needs to support arrays
   newparam(:tags) do
     desc 'tags that can be used for filtering and to create firewall rules'
+    validate do |v|
+      raise(Puppet::Error, 'Tags can only be arrays or strings') unless v.is_a?(Array) || v.is_a?(String)
+    end
+    munge do |v|
+      v.is_a?(Array) ? v.join(',') : v
+    end
   end
 
   newparam(:metadata) do
     desc 'meta data that can be associated with an instance'
+    validate do |v|
+      raise(Puppet::Error, "metadata expects a Hash") unless v.is_a?(Hash)
+    end
   end
 
   newparam(:use_compute_key) do
@@ -72,13 +95,13 @@ Puppet::Type.newtype(:gce_instance) do
     desc 'zone where the instance will reside'
   end
 
-  newparam(:auth_file) do
-    desc 'Authorization file. In general, this is retrieved from device.conf'
-  end
-
-  newparam(:project_id) do
-    desc 'id of the project. In the general case, this is retrieved from device.conf.'
-  end
+#  newparam(:auth_file) do
+#    desc 'Authorization file. In general, this is retrieved from device.conf'
+#  end
+#
+#  newparam(:project_id) do
+#    desc 'id of the project. In the general case, this is retrieved from device.conf.'
+#  end
 
   # classification specific parameters
   # newparam(:classes)
@@ -93,10 +116,5 @@ Puppet::Type.newtype(:gce_instance) do
   # desc 'a hash of Puppet classes that should be applied to an instance'
   # end
 
-  validate do
-    raise(Puppet::Error, "Did not specify required param machine_type") unless self[:machine_type]
-    raise(Puppet::Error, "Did not specify required param zone") unless self[:zone]
-    #raise(Puppet::Error, "Did not specify required param image") unless self[:image]
-  end
 
 end

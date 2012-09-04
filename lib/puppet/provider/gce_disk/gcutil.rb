@@ -1,10 +1,18 @@
+require File.expand_path(File.join(File.dirname(__FILE__), '..', 'gce'))
+
 Puppet::Type.type(:gce_disk).provide(
-  :gce_util,
-  :parent => Puppet::Provider::Gce) do
+  :gcutil,
+  :parent => Puppet::Provider::Gce
+) do
 
-  commands 'gceutil' => :gceutil
+  commands :gcutil => 'gcutil'
 
-  def exists?
+  def self.subcommand
+    'disk'
+  end
+
+  def subcommand
+    self.class.subcommand
   end
 
 end
