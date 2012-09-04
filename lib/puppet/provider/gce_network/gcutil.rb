@@ -1,13 +1,18 @@
-require File.expand_path(File.join(File.dirname("__FILE__", '..', 'gce')))
+require File.expand_path(File.join(File.dirname(__FILE__), '..', 'gce'))
 
 Puppet::Type.type(:gce_network).provide(
-  :gce_util,
+  :gcutil,
   :parent => Puppet::Provider::Gce
 ) do
 
-  commands 'gceutil' => :gceutil
+  commands :gcutil => 'gcutil'
 
-  def exists?
+  def self.subcommand
+    'network'
+  end
+
+  def subcommand
+    self.class.subcommand
   end
 
 end
