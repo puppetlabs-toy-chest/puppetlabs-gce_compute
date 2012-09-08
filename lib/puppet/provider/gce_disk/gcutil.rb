@@ -15,4 +15,8 @@ Puppet::Type.type(:gce_disk).provide(
     self.class.subcommand
   end
 
+  def parameter_list
+    [ 'zone', 'size_gb', 'description' ]
+  end
+
 end
