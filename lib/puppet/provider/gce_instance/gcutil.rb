@@ -20,6 +20,23 @@ Puppet::Type.type(:gce_instance).provide(
     raise(Puppet::Error, "Did not specify required param zone") unless resource[:zone]
     raise(Puppet::Error, "Did not specify required param image") unless resource[:image]
     super
+  def parameter_list
+    [
+      'authorized_ssh_keys',
+      'description',
+      'disk',
+      'external_ip_address',
+      'internal_ip_address',
+      'image',
+      'machine',
+      'network',
+      'service_account',
+      'service_account_scopes',
+      'tags',
+      'use_compute_key',
+      'zone'
+    ]
+  end
   end
 
 end

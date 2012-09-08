@@ -15,4 +15,9 @@ Puppet::Type.type(:gce_firewall).provide(
     self.class.subcommand
   end
 
+  def parameter_list
+    ['description', 'allowed', 'allowed_ip_sources', 'allowed_tag_sources',
+     'network', 'target_tags']
+  end
+
 end

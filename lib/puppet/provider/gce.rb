@@ -55,12 +55,39 @@ class Puppet::Provider::Gce < Puppet::Provider
     gcutil(args, conn_opts)
   end
 
+  def self.prefetch(r)
+    clear_all_objects
+  end
+
+  def self.clear_all_objects
+    @compute_object_hash = nil
+  end
+
+  def self.clear_device_objects(device)
+    @compute_object_hash[device_string(device)] = nil
+  end
+
+  def all_compute_objects(device)
+    self.class.all_compute_objects(device)
+  end
+
+  # cache the full list of objects
+  def self.all_compute_objects(device)
+    @compute_object_hash ||= {}
+    @compute_object_hash[device_string(device)] ||=
+      map_all_objects(gcutilcmd(device, "list#{subcommand}s"))
+  end
+
+  def self.device_string(device)
+    "[#{device.auth_file}]:#{device.project_id}"
+  end
+
   # parses out all of the rows from gcutil return
   # return an array of hashes for each row that maps
   # the colume names to the values for each row
-  def self.parse_rows(output)
+  def self.map_all_objects(output)
     header   = nil
-    ret_list = []
+    ret_hash = {}
     (output.split(/\+\n|\|\n/) || []).each do |row|
 
       if row.start_with?('|')
@@ -71,21 +98,21 @@ class Puppet::Provider::Gce < Puppet::Provider
           header.each_index do |i|
             row_hash[header[i].to_sym] = cells[i]
           end
-          ret_list.push(row_hash)
+          ret_hash[row_hash[:name]] = row_hash
         else
           header = cells
         end
       elsif row.start_with?('+')
       else
-        raise(Puppet::Error, "Invalid gutil list output line: #{row}")
+        Puppet.warning("Unexpted line: #{row}")
       end
     end
-    ret_list
+    ret_hash
   end
 
   def self.instances
     gce_devices.values.collect do |dev|
-      parse_rows(gcutilcmd(dev, "list#{subcommand}s")).collect do |row|
+      all_compute_objects(dev).values.collect do |row|
         new(:name => row[:name], :auth_file => dev.auth_file, :project_id => dev.project_id)
       end
     end.flatten
@@ -98,8 +125,7 @@ class Puppet::Provider::Gce < Puppet::Provider
     # This is potentially brittle. Everything should really be changed
     # to read only providers.
     #
-    args = (self.resource.parameters.keys - [:provider, :loglevel, :name, :ensure]
-           ).collect do |attr|
+    args = parameter_list.collect do |attr|
       resource[attr] && "--#{attr}=#{resource[attr]}"
     end.compact
     gcutilcmd("add#{subcommand}", resource[:name], args)
@@ -110,11 +136,7 @@ class Puppet::Provider::Gce < Puppet::Provider
   end
 
   def exists?
-    begin
-      instance_output = gcutilcmd("get#{subcommand}", resource[:name])
-    rescue Puppet::ExecutionFailure
-      return false
-    end
+    all_compute_objects(gce_device)[resource[:name]]
   end
 
 end
