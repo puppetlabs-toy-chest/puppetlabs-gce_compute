@@ -15,4 +15,8 @@ Puppet::Type.type(:gce_network).provide(
     self.class.subcommand
   end
 
+  def parameter_list
+    ['gateway', 'description', 'range', 'reserve']
+  end
+
 end

@@ -41,8 +41,12 @@ Puppet::Type.newtype(:gce_instance) do
     self[:disk]
   end
 
-  newparam(:external_ip_address) do
+  newproperty(:external_ip_address) do
     desc 'external ip address to assign. Takes ephemeral, None, or an ip addr'
+  end
+
+  newproperty(:internal_ip_address) do
+    desc 'internal ip address to assign.'
   end
 
   newparam(:image) do
@@ -74,22 +78,25 @@ Puppet::Type.newtype(:gce_instance) do
       v.is_a?(Array) ? v.join(',') : v
     end
   end
-
-  newparam(:metadata) do
-    desc 'meta data that can be associated with an instance'
-    validate do |v|
-      raise(Puppet::Error, "metadata expects a Hash") unless v.is_a?(Hash)
-    end
-  end
+# TODO I am going to use metadata for my own custom purposes.
+# The laziest way to avoid conflicts is just to not yet users modify
+# it. I will likely have to figure out a better solution for this... later
+#  newparam(:metadata) do
+#    desc 'meta data that can be associated with an instance'
+#    validate do |v|
+#      raise(Puppet::Error, "metadata expects a Hash") unless v.is_a?(Hash)
+#    end
+#  end
 
   newparam(:use_compute_key) do
     desc 'If the default google compute key should be added to the instance'
     newvalues(true, false)
   end
 
-  newparam(:wait_until_running) do
-    desc 'rather the program should wait until the instance is in a running state'
-  end
+#  NOTE this should always be set to true
+#  newparam(:wait_until_running) do
+#    desc 'rather the program should wait until the instance is in a running state'
+#  end
 
   newparam(:zone) do
     desc 'zone where the instance will reside'
@@ -104,10 +111,46 @@ Puppet::Type.newtype(:gce_instance) do
 #  end
 
   # classification specific parameters
-  # newparam(:classes)
-  # newparam(:puppet_run_mode)
-  # newparam(:content)
-  # should this only support agent?
+  newparam(:classes) do
+    desc 'A hash of classes used to assign a Puppet class to this instance.'
+    validate do |v|
+      raise(Puppet::Error, "Classes expects a Hash.") unless v.is_a?(Hash)
+    end
+  end
+
+  newparam(:modules) do
+    desc 'list of modules to be downloaded from the forge. This is only needed for puppet masters or when running in puppet apply mode'
+    defaultto []
+    munge do |v|
+      v.to_a.join(',')
+    end
+  end
+
+  newparam(:module_repos) do
+    desc 'Hash of module repos (repo -> localdir) to be downloaded from github.'
+    defaultto {}
+    validate do |v|
+      raise(Puppet::Error, "Classes expects a Hash.") unless v.is_a?(Hash)
+    end
+    munge do |v|
+      new_value = []
+      v.each do |k,v|
+        new_value << "#{k}:#{v}"
+      end
+      new_value.join(',')
+    end
+  end
+
+# TODO add support for setting top scope parameters
+#  newparam(:parameters) do
+#    desc 'a hash of '
+#  end
+
+# TODO be able to set puppet run mode so users can select either puppet apply
+# or puppet agent
+#  newparam(:puppet_run_mode) do
+#    defaultto 'apply'
+#  end
 
   # I may create somekind of referencing language to retrieve the
   # fact that we will use to fire this sucker up!!
