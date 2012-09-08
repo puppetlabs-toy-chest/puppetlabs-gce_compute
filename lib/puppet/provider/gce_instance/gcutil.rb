@@ -19,7 +19,28 @@ Puppet::Type.type(:gce_instance).provide(
     raise(Puppet::Error, "Did not specify required param machine_type") unless resource[:machine]
     raise(Puppet::Error, "Did not specify required param zone") unless resource[:zone]
     raise(Puppet::Error, "Did not specify required param image") unless resource[:image]
-    super
+    args = parameter_list.collect do |attr|
+      resource[attr] && "--#{attr}=#{resource[attr]}"
+    end.compact
+    if resource[:classes]
+      # TODO - this needs to be better tested
+      # it would be awesome if I can pass entire class manifests to
+      # instead of a hash (b/c transforing a hash in bash is going to be
+      # a nightmare
+      # this will not work as well for puppet agent, but I can look into that later
+      manifest = to_manifest(resource[:classes])
+      args.push("--metadata=puppet_classes:#{parse_refs_from_manifest(manifest)}")
+    end
+    if resource[:modules]
+      args.push("--metadata=puppet_modules:#{resource[:modules]}")
+    end
+    if resource[:module_repos]
+      args.push("--metadata=puppet_repos:#{resource[:module_repos]}")
+    end
+    # always install puppet
+    gcutilcmd("add#{subcommand}", resource[:name], args, '--wait_until_running')
+  end
+
   def parameter_list
     [
       'authorized_ssh_keys',
