@@ -41,8 +41,12 @@ Puppet::Type.newtype(:gce_instance) do
     self[:disk]
   end
 
-  newparam(:external_ip_address) do
+  newproperty(:external_ip_address) do
     desc 'external ip address to assign. Takes ephemeral, None, or an ip addr'
+  end
+
+  newproperty(:internal_ip_address) do
+    desc 'internal ip address to assign.'
   end
 
   newparam(:image) do
