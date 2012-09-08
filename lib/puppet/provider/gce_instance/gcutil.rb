@@ -15,6 +15,31 @@ Puppet::Type.type(:gce_instance).provide(
     self.class.subcommand
   end
 
+  def to_manifest(resources)
+    str = ''
+    resources.each do |title, attrs|
+      # this code is blatently stolen from the Puppet::Resource class
+      str << "class { '%s':\n%s\n}" % [title,
+        attrs.collect { |p, v|
+          if v.is_a? Array
+            "  #{p} => [\'#{v.join("','")}\']"
+          elsif v.is_a? Hash
+            str << "  { '#{p}' => { "
+            a = []
+            v.each do |k,v|
+              a.push("\'#{k}\' =>\' #{v}\'")
+            end
+            str << a.join(',')
+            "} }"
+          else
+            "  #{p} => \'#{v}\'"
+          end
+        }.join(",\n")
+      ]
+    end
+    str
+  end
+
   def create
     raise(Puppet::Error, "Did not specify required param machine_type") unless resource[:machine]
     raise(Puppet::Error, "Did not specify required param zone") unless resource[:zone]
@@ -37,6 +62,10 @@ Puppet::Type.type(:gce_instance).provide(
     if resource[:module_repos]
       args.push("--metadata=puppet_repos:#{resource[:module_repos]}")
     end
+    if resource[:modules] || resource[:classes]
+      script_file = File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..', '..', 'files', 'puppet-community.sh'))
+      args.push("--metadata_from_file=startup-script:#{script_file}")
+    end
     # always install puppet
     gcutilcmd("add#{subcommand}", resource[:name], args, '--wait_until_running')
   end
@@ -58,6 +87,18 @@ Puppet::Type.type(:gce_instance).provide(
       'zone'
     ]
   end
+
+  def parse_refs_from_manifest(str)
+    new_string = ''
+    while(m = /Gce_instance\[(\S+)\]\[(\S+)\]/.match(str))
+      new_string << m.pre_match
+      require 'ruby-debug';debugger
+      new_string << model.catalog.resource("Gce_instance[#{m[1]}]").provider.send($2.intern)
+      str = m.post_match
+    end
+    new_string << str
+  end
+
   def external_ip_address
     # rebuild the cache if we do not find the property that we are looking for
     # this is b/c I did not implement create to rebuild elements on the cache
