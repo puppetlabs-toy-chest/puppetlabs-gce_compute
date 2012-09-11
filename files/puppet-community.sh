@@ -39,7 +39,7 @@ function rpm_install() {
   rpm -q fedora-release && fedora_repo || el_repo
 
   # Install Puppet from yum.puppetlabs.com
-  yum install -y puppet
+  yum install -y puppet git
 }
 
 function apt_install() {
@@ -64,7 +64,7 @@ deb http://apt.puppetlabs.com/ ${release} main
 EOFAPTREPO
   apt-get update
   # Install Puppet from Debian repositories
-  apt-get -y install puppet
+  apt-get -y install puppet git
 }
 
 function install_puppet() {
@@ -127,6 +127,7 @@ function run_puppet_apply() {
     puppet apply /etc/puppet/manifests/apply.pp
   fi
 }
+
 
 function provision_puppet() {
   if [ -f /etc/redhat-release ]; then
