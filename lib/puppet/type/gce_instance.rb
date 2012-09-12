@@ -128,14 +128,14 @@ Puppet::Type.newtype(:gce_instance) do
 
   newparam(:module_repos) do
     desc 'Hash of module repos (repo -> localdir) to be downloaded from github.'
-    defaultto {}
+    defaultto ''
     validate do |v|
-      raise(Puppet::Error, "Classes expects a Hash.") unless v.is_a?(Hash)
+      raise(Puppet::Error, "Classes expects a Hash.") unless(v.is_a?(Hash) || v.empty?)
     end
     munge do |v|
       new_value = []
       v.each do |k,v|
-        new_value << "#{k}:#{v}"
+        new_value << "#{k}##{v}"
       end
       new_value.join(',')
     end
