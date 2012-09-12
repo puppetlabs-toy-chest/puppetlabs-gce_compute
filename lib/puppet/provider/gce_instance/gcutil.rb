@@ -15,31 +15,6 @@ Puppet::Type.type(:gce_instance).provide(
     self.class.subcommand
   end
 
-  def to_manifest(resources)
-    str = ''
-    resources.each do |title, attrs|
-      # this code is blatently stolen from the Puppet::Resource class
-      str << "class { '%s':\n%s\n}" % [title,
-        attrs.collect { |p, v|
-          if v.is_a? Array
-            "  #{p} => [\'#{v.join("','")}\']"
-          elsif v.is_a? Hash
-            str << "  { '#{p}' => { "
-            a = []
-            v.each do |k,v|
-              a.push("\'#{k}\' =>\' #{v}\'")
-            end
-            str << a.join(',')
-            "} }"
-          else
-            "  #{p} => \'#{v}\'"
-          end
-        }.join(",\n")
-      ]
-    end
-    str
-  end
-
   def create
     raise(Puppet::Error, "Did not specify required param machine_type") unless resource[:machine]
     raise(Puppet::Error, "Did not specify required param zone") unless resource[:zone]
@@ -53,8 +28,8 @@ Puppet::Type.type(:gce_instance).provide(
       # instead of a hash (b/c transforing a hash in bash is going to be
       # a nightmare
       # this will not work as well for puppet agent, but I can look into that later
-      manifest = to_manifest(resource[:classes])
-      args.push("--metadata=puppet_classes:#{parse_refs_from_manifest(manifest)}")
+      class_hash = { 'classes' => parse_refs_from_hash(resource[:classes]) }
+      args.push("--metadata=puppet_classes:#{class_hash.to_yaml}")
     end
     if resource[:modules]
       args.push("--metadata=puppet_modules:#{resource[:modules]}")
@@ -106,15 +81,22 @@ Puppet::Type.type(:gce_instance).provide(
     ]
   end
 
-  def parse_refs_from_manifest(str)
+  def parse_refs_from_hash(hash)
+    str = hash.to_pson
     new_string = ''
     while(m = /Gce_instance\[(\S+)\]\[(\S+)\]/.match(str))
       new_string << m.pre_match
-      require 'ruby-debug';debugger
-      new_string << model.catalog.resource("Gce_instance[#{m[1]}]").provider.send($2.intern)
+      unless resource = model.catalog.resource("Gce_instance[#{m[1]}]")
+        raise(Puppet::Error, "Expected Resource Gce_instance[#{m[1]}] does not exist")
+      end
+      unless property_value = resource.provider.send($2.intern)
+        raise(Puppet::Error, "Could not find #{$2.intern} from resource.to_s")
+      end
+      new_string << property_value
       str = m.post_match
     end
     new_string << str
+    PSON.parse(new_string)
   end
 
   def external_ip_address
@@ -124,7 +106,7 @@ Puppet::Type.type(:gce_instance).provide(
     instance = all_compute_objects(gce_device)[resource[:name]]
     (instance && instance[:external_ip]) ||
       (
-        self.class.clear_device_objects(gce_device) &&
+        self.class.clear_device_objects(gce_device)
         all_compute_objects(gce_device)[resource[:name]][:external_ip]
       )
   end
@@ -137,7 +119,7 @@ Puppet::Type.type(:gce_instance).provide(
     instance = all_compute_objects(gce_device)[resource[:name]]
     (instance && instance[:network_ip]) ||
       (
-        self.class.clear_device_objects(gce_device) &&
+        self.class.clear_device_objects(gce_device)
         all_compute_objects(gce_device)[resource[:name]][:network_ip]
       )
   end

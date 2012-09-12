@@ -121,10 +121,17 @@ function clone_modules() {
 
 
 function run_puppet_apply() {
-  if [ ! -n "$1" ]; then
-    mkdir -p /etc/puppet/manifest
-    echo "$1" > /etc/puppet/manifests/apply.pp
-    puppet apply /etc/puppet/manifests/apply.pp
+  if [ -n "$1" ]; then
+    mkdir -p /etc/puppet/manifests
+    mkdir -p /etc/puppet/nodes
+    echo '' > /etc/puppet/manifests/empty.pp
+    echo '#!/bin/bash
+      cat /etc/puppet/nodes/$1.yaml' > /etc/puppet/nodes/enc.sh
+    chmod a+x /etc/puppet/nodes/enc.sh
+    echo "$1" > /etc/puppet/nodes/"$2".yaml
+    # yaml terminus does not merge facts, so it failed with puppet
+    # apply
+    puppet apply --trace --debug --node_terminus=exec --external_nodes=/etc/puppet/nodes/enc.sh /etc/puppet/manifests/empty.pp
   fi
 }
 
