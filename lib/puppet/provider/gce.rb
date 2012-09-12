@@ -48,11 +48,11 @@ class Puppet::Provider::Gce < Puppet::Provider
   end
 
   def self.gcutilcmd(device, *args)
-    gcutil(args, ["--credentials_file=#{device.auth_file}", "--project_id=#{device.project_id}"])
+    gcutil(["--credentials_file=#{device.auth_file}", "--project_id=#{device.project_id}"], args)
   end
 
   def gcutilcmd(*args)
-    gcutil(args, conn_opts)
+    gcutil(conn_opts, args)
   end
 
   def self.prefetch(r)
