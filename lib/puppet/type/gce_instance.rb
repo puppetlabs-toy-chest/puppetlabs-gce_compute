@@ -97,6 +97,17 @@ Puppet::Type.newtype(:gce_instance) do
 #  newparam(:wait_until_running) do
 #    desc 'rather the program should wait until the instance is in a running state'
 #  end
+  newparam(:block_for_startup_script) do
+    desc 'whether the resource should block until after the startup script executes'
+    newvalues(:true, :false)
+  end
+  newparam(:startup_script_timeout) do
+    desc 'timeout for bootstrap script. If this time is passed before the bootstrap script has finished, the resource will fail'
+    defaultto '300'
+    munge do |value|
+      Integer(value)
+    end
+  end
 
   newparam(:zone) do
     desc 'zone where the instance will reside'

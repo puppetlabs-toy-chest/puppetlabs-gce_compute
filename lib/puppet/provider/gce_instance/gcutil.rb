@@ -68,6 +68,24 @@ Puppet::Type.type(:gce_instance).provide(
     end
     # always install puppet
     gcutilcmd("add#{subcommand}", resource[:name], args, '--wait_until_running')
+    result = nil
+    if resource[:block_for_startup_script]
+      status = Timeout::timeout(resource[:startup_script_timeout]) do
+        while ( ! result )
+          begin
+            result = gcutilcmd('ssh', resource[:name], 'cat /tmp/puppet_bootstrap_output')
+          rescue Puppet::ExecutionFailure => detail
+            sleep 10
+      puts result
+      puts detail
+            result = nil
+          end
+        end
+      end
+      exit_code = result.split("\n").last.to_s
+
+      self.fail("Startup script failed with exit code: #{exit_code}") unless exit_code == '0'
+    end
   end
 
   def parameter_list
