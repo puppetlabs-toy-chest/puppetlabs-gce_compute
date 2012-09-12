@@ -103,19 +103,21 @@ EOFPUPPETDEFAULT
 }
 
 function download_modules() {
-  if [ ! -n $1 ]; then
+  if [ -n $1 ]; then
     MODULE_LIST=`echo "$1" | sed 's/,/ /g'`
     for i in $MODULE_LIST; do puppet module install --force $i ; done;
   fi
 }
 
 function clone_modules() {
-  if [ ! -n "$1" ]; then
+  if [ -n "$1" ]; then
     pushd /etc/puppet/modules
     MODULE_LIST=`echo "$1" | sed 's/,/ /g'`
     for i in $MODULE_LIST; do
-      MODULE=`echo "$1" | sed 's/:/ /g'`
-      puppet git clone $i ;
+      MODULE=`echo "$i" | sed 's/#/ /'`
+      if [ ! -d `echo $MODULE | cut -d' ' -f2` ]; then
+        git clone $MODULE ;
+      fi
     done;
     popd
   fi
