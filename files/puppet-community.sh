@@ -6,6 +6,8 @@
 set -u
 set -e
 
+trap "echo '1' > /tmp/puppet_bootstrap_output" ERR
+
 function fedora_repo() {
   cat >/etc/yum.repos.d/puppet.repo <<'EOFYUMREPO'
 [puppetlabs]
@@ -155,7 +157,8 @@ function provision_puppet() {
   configure_puppet "$PUPPET_HOSTNAME"
   download_modules "$PUPPET_MODULES"
   clone_modules    "$PUPPET_REPOS"
-  run_puppet_apply "$PUPPET_CLASSES"
+  run_puppet_apply "$PUPPET_CLASSES" "$PUPPET_HOSTNAME"
+  echo $? > /tmp/puppet_bootstrap_output
   echo "Puppet installation finished!"
   exit 0
 }
