@@ -58,19 +58,24 @@ Puppet::Type.type(:gce_instance).provide(
     end
     # always install puppet
     gcutilcmd("add#{subcommand}", resource[:name], args, '--wait_until_running')
+
+    # block for the startup script
     result = nil
     if resource[:block_for_startup_script]
-      status = Timeout::timeout(resource[:startup_script_timeout]) do
-        while ( ! result )
-          begin
-            result = gcutilcmd('ssh', resource[:name], 'cat /tmp/puppet_bootstrap_output')
-          rescue Puppet::ExecutionFailure => detail
-            sleep 10
-      puts result
-      puts detail
-            result = nil
+      begin
+        status = Timeout::timeout(resource[:startup_script_timeout]) do
+          while ( ! result )
+            begin
+              result = gcutilcmd('ssh', resource[:name], 'cat /tmp/puppet_bootstrap_output')
+            rescue Puppet::ExecutionFailure => detail
+              sleep 10
+              Puppet.debug(detail)
+              result = nil
+            end
           end
         end
+      rescue Timeout::Error
+        self.fail('Timed-out waiting for bootstrap script to execute')
       end
       exit_code = result.split("\n").last.to_s
 
