@@ -17,8 +17,7 @@ define media_wiki_stack($ensure) {
     image                    => 'projects/google/images/ubuntu-12-04-v20120621',
     network                  => "${name}",
     block_for_startup_script => true,
-    startup_script_timeout   => 660,
-
+    startup_script_timeout   => 300,
   }
 
   Gce_disk {
@@ -129,6 +128,6 @@ define media_wiki_stack($ensure) {
 media_wiki_stack { 'duder':
   ensure => $::ensure
 }
-#media_wiki_stack { 'myduder':
-#  ensure => $::ensure
-#}
+media_wiki_stack { 'myduder':
+  ensure => $::ensure
+}
