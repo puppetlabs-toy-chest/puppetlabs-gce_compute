@@ -52,7 +52,7 @@ Puppet::Type.type(:gce_instance).provide(
     if resource[:module_repos]
       args.push("--metadata=puppet_repos:#{resource[:module_repos]}")
     end
-    if resource[:modules] || resource[:classes]
+    if resource[:modules] || resource[:classes] || resource[:module_repos]
       script_file = File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..', '..', 'files', 'puppet-community.sh'))
       args.push("--metadata_from_file=startup-script:#{script_file}")
     end
