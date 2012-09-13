@@ -34,9 +34,6 @@ Puppet::Type.type(:gce_instance).provide(
   end
 
   def create
-    raise(Puppet::Error, "Did not specify required param machine_type") unless resource[:machine]
-    raise(Puppet::Error, "Did not specify required param zone") unless resource[:zone]
-    raise(Puppet::Error, "Did not specify required param image") unless resource[:image]
     args = parameter_list.collect do |attr|
       resource[attr] && "--#{attr}=#{resource[attr]}"
     end.compact

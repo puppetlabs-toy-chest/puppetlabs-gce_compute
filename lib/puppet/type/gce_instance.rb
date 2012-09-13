@@ -170,5 +170,12 @@ Puppet::Type.newtype(:gce_instance) do
   # desc 'a hash of Puppet classes that should be applied to an instance'
   # end
 
+  validate do
+    if self[:ensure] == :present
+      raise(Puppet::Error, "Did not specify required param machine_type") unless self[:machine]
+      raise(Puppet::Error, "Did not specify required param zone") unless self[:zone]
+      raise(Puppet::Error, "Did not specify required param image") unless self[:image]
+    end
+  end
 
 end
