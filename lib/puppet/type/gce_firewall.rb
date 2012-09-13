@@ -20,9 +20,9 @@ Puppet::Type.newtype(:gce_firewall) do
   newparam(:allowed) do
     desc 'List of allowed protocols and ports'
     validate do |v|
-      unless v =~ /(\w+)?:\d+(-\d+)?/
-        raise(Puppet::Error, "Invalid allowed string: #{v}.")
-      end
+     # unless v =~ /(\w+)?:?\d+(-\d+)?/
+     #   raise(Puppet::Error, "Invalid allowed string: #{v}.")
+     # end
     end
   end
 
