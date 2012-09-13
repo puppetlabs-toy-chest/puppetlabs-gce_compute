@@ -34,15 +34,11 @@ Puppet::Type.type(:gce_instance).provide(
   end
 
   def create
+    # set up options
     args = parameter_list.collect do |attr|
       resource[attr] && "--#{attr}=#{resource[attr]}"
     end.compact
     if resource[:classes]
-      # TODO - this needs to be better tested
-      # it would be awesome if I can pass entire class manifests to
-      # instead of a hash (b/c transforing a hash in bash is going to be
-      # a nightmare
-      # this will not work as well for puppet agent, but I can look into that later
       class_hash = { 'classes' => parse_refs_from_hash(resource[:classes]) }
       args.push("--metadata=puppet_classes:#{class_hash.to_yaml}")
     end
@@ -53,10 +49,12 @@ Puppet::Type.type(:gce_instance).provide(
       args.push("--metadata=puppet_repos:#{resource[:module_repos]}")
     end
     if resource[:modules] || resource[:classes] || resource[:module_repos]
+      # is we specified any classification info, we should call the bootstrap script
       script_file = File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..', '..', 'files', 'puppet-community.sh'))
       args.push("--metadata_from_file=startup-script:#{script_file}")
     end
-    # always install puppet
+
+    # create instance, wait until it is running
     gcutilcmd("add#{subcommand}", resource[:name], args, '--wait_until_running')
 
     # block for the startup script
@@ -78,11 +76,13 @@ Puppet::Type.type(:gce_instance).provide(
         self.fail('Timed-out waiting for bootstrap script to execute')
       end
       exit_code = result.split("\n").last.to_s
-
       self.fail("Startup script failed with exit code: #{exit_code}") unless exit_code == '0'
     end
   end
 
+  # parse inter-node references out of classification data
+  # this is used to allow machines to retrieve the external or internal
+  # ip addresses from instances that have been started on the same run
   def parse_refs_from_hash(hash)
     str = hash.to_pson
     new_string = ''

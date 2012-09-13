@@ -33,12 +33,12 @@ In order to use these resources, you will need to
  for a Google Compute account:
 
 You will also need to designate one machine to be your Puppet Device Agent.
-This machine will be responsible for interacting with the Google Compute APIs
+This machine will be responsible for provisioning objects into Google Compute using its API
 and will be used to store your credentials for Google Compute.
 
 On your Puppet Device Agent, [install and authenticate](https://developers.google.com/compute/docs/gcutil_setup) gcutil.
 
-You should generate a credential file as a part of this process: ~/.gcutil_auth.
+The authentication process should generate this credential file: ~/.gcutil_auth.
 
 Next, create your device.conf file on the Device Agent.
 
@@ -92,7 +92,13 @@ resources that you wish to manage:
       tags        => [test, 'one']
     }
 
-### Profit!
+Run puppet apply on this manifest
+
+    puppet apply --certname certname1 manifests/site.pp
+
+and wait for your instances to be provisioned into google compute.
+
+### Classifying resources
 
 This manifest can be applied by running either puppet apply or puppet device on the
 Puppet Device Agent.
