@@ -97,6 +97,17 @@ Puppet::Type.newtype(:gce_instance) do
 #  newparam(:wait_until_running) do
 #    desc 'rather the program should wait until the instance is in a running state'
 #  end
+  newparam(:block_for_startup_script) do
+    desc 'whether the resource should block until after the startup script executes'
+    newvalues(:true, :false)
+  end
+  newparam(:startup_script_timeout) do
+    desc 'timeout for bootstrap script. If this time is passed before the bootstrap script has finished, the resource will fail'
+    defaultto '300'
+    munge do |value|
+      Integer(value)
+    end
+  end
 
   newparam(:zone) do
     desc 'zone where the instance will reside'
@@ -128,14 +139,14 @@ Puppet::Type.newtype(:gce_instance) do
 
   newparam(:module_repos) do
     desc 'Hash of module repos (repo -> localdir) to be downloaded from github.'
-    defaultto {}
+    defaultto ''
     validate do |v|
-      raise(Puppet::Error, "Classes expects a Hash.") unless v.is_a?(Hash)
+      raise(Puppet::Error, "Classes expects a Hash.") unless(v.is_a?(Hash) || v.empty?)
     end
     munge do |v|
       new_value = []
       v.each do |k,v|
-        new_value << "#{k}:#{v}"
+        new_value << "#{k}##{v}"
       end
       new_value.join(',')
     end
@@ -159,5 +170,12 @@ Puppet::Type.newtype(:gce_instance) do
   # desc 'a hash of Puppet classes that should be applied to an instance'
   # end
 
+  validate do
+    if self[:ensure] == :present
+      raise(Puppet::Error, "Did not specify required param machine_type") unless self[:machine]
+      raise(Puppet::Error, "Did not specify required param zone") unless self[:zone]
+      raise(Puppet::Error, "Did not specify required param image") unless self[:image]
+    end
+  end
 
 end
