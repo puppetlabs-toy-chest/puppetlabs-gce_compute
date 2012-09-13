@@ -6,7 +6,15 @@
 set -u
 set -e
 
-trap "echo '1' > /tmp/puppet_bootstrap_output" ERR
+RESULTS_FILE='/tmp/puppet_bootstrap_output'
+
+function check_exit_status() {
+  if [ ! -f $RESULTS_FILE ]; then
+    echo '1' > $RESULTS_FILE
+  fi
+}
+
+trap check_exit_status INT TERM EXIT
 
 function fedora_repo() {
   cat >/etc/yum.repos.d/puppet.repo <<'EOFYUMREPO'
@@ -172,7 +180,7 @@ function provision_puppet() {
   download_modules "$PUPPET_MODULES"
   clone_modules    "$PUPPET_REPOS"
   run_puppet_apply "$PUPPET_CLASSES" "$PUPPET_HOSTNAME"
-  echo $? > /tmp/puppet_bootstrap_output
+  echo $? > $RESULTS_FILE
   echo "Puppet installation finished!"
   exit 0
 }
