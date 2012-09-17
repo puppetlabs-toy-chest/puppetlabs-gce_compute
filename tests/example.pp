@@ -28,6 +28,7 @@ define media_wiki_stack($ensure) {
     network     => "${name}",
   }
 
+
   gce_network { "${name}":
     ensure      => $ensure,
     description => 'test network',
@@ -116,6 +117,7 @@ define media_wiki_stack($ensure) {
         'instances'        => {
           'dans_wiki' =>
             { 'db_password'        => 'db_pw',
+            # this is magical!
               'db_server'          => "Gce_instance[${name}1][internal_ip_address]",
             }
         }
@@ -125,9 +127,13 @@ define media_wiki_stack($ensure) {
     require      => Gce_instance["${name}1"],
   }
 }
+
+
+
+
 media_wiki_stack { 'duder':
   ensure => $::ensure
 }
-media_wiki_stack { 'myduder':
-  ensure => $::ensure
-}
+#media_wiki_stack { 'myduder':
+#  ensure => $::ensure
+#}
