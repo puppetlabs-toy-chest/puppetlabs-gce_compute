@@ -36,7 +36,7 @@ On your Puppet Device Agent, [install and authenticate](https://developers.googl
 
 The authentication process should generate this credential file: ~/.gcutil_auth.
 
-Next, create your device.conf file on the Device Agent.
+Next, create your device.conf file on the Agent.
 
 The default location for this file can be discovered by running the command:
 
@@ -100,11 +100,6 @@ Run puppet apply on this manifest
     puppet apply --certname certname1 manifests/site.pp
 
 and wait for your instances to be provisioned using GCE.
-
-It is also possible to store the manifest on a central puppet master and use the following command
-for provisioning:
-
-    puppet device --certname certname1 --server mymaster
 
 ### Classifying resources
 
