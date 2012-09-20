@@ -7,7 +7,7 @@ Puppet::Type.newtype(:gce_firewall) do
   newparam(:name, :namevar => true) do
     desc 'name of firewall'
     validate do |v|
-      unless v =~ /[a-z]([-a-z0-9]*[a-z0-9])?/
+      unless v =~ /^[a-z]([-a-z0-9]*[a-z0-9])?$/
         raise(Puppet::Error, "Invalid firewall name: #{v}")
       end
     end

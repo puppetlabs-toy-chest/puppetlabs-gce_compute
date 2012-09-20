@@ -13,7 +13,7 @@ Puppet::Type.newtype(:gce_instance) do
   newparam(:name, :namevar => true) do
     desc 'name used to identify the instance'
     validate do |v|
-      unless v =~ /[a-z]([-a-z0-9]*[a-z0-9])?/
+      unless v =~ /^[a-z]([-a-z0-9]*[a-z0-9])?$/
         raise(Puppet::Error, "Invalid instance name: #{v}")
       end
     end
