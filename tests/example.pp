@@ -76,11 +76,9 @@ define media_wiki_stack($ensure) {
     ensure      => $ensure,
     description => 'DB instance',
     disk        => "${name}disk",
-    #modules     => ['puppetlabs-mysql'],
+    modules     => ['puppetlabs-mysql'],
     module_repos => {
       'git://github.com/bodepd/puppet-mediawiki'      => 'mediawiki',
-      'git://github.com/puppetlabs/puppetlabs-stdlib' => 'stdlib',
-      'git://github.com/puppetlabs/puppetlabs-mysql'  => 'mysql'
     },
     classes     => {
       'mysql::server' => {
@@ -88,7 +86,7 @@ define media_wiki_stack($ensure) {
       },
       'mediawiki::db::access' => { 'host' => '10.0.1.%', 'password' => 'root_password' }
     },
-    #tags        => [$name, 'one']
+    tags        => [$name, 'one']
     # authorized_ssh_keys
     # external_ip_address
     # internal_ip_address
@@ -99,13 +97,9 @@ define media_wiki_stack($ensure) {
   gce_instance { "${name}2":
     ensure       => $ensure,
     description  => 'Mediawiki instnace',
-    #modules      => ['puppetlabs-apache', 'saz-memcached', 'puppetlabs-stdlib', 'puppetlabs-firewall'],
+    modules      => ['puppetlabs-apache', 'saz-memcached', 'puppetlabs-stdlib', 'puppetlabs-firewall'],
     module_repos => {
       'git://github.com/bodepd/puppet-mediawiki'        => 'mediawiki',
-      'git://github.com/saz/puppet-memcached'           => 'memcached',
-      'git://github.com/puppetlabs/puppetlabs-apache'   => 'apache',
-      'git://github.com/puppetlabs/puppetlabs-firewall' => 'firewall',
-      'git://github.com/puppetlabs/puppetlabs-stdlib'   => 'stdlib',
     },
     classes      => {
       'mediawiki' => {

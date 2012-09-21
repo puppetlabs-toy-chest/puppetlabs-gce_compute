@@ -7,7 +7,7 @@ Puppet::Type.newtype(:gce_disk) do
   newparam(:name, :namevar => true) do
     desc 'name of disk to create'
     validate do |v|
-      unless v =~ /[a-z]([-a-z0-9]*[a-z0-9])?/
+      unless v =~ /^[a-z]([-a-z0-9]*[a-z0-9])?$/
         raise(Puppet::Error, "Invalid disk name: #{v}")
       end
     end

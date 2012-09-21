@@ -5,7 +5,7 @@ Puppet::Type.newtype(:gce_network) do
 
   newparam(:name, :namevar => true) do
     validate do |value|
-      unless value =~ /[a-z]([-a-z0-9]*[a-z0-9])?/
+      unless value =~ /^[a-z]([-a-z0-9]*[a-z0-9])?$/
         raise(Puppet::Error, "Invalid network name: #{v}")
       end
     end
