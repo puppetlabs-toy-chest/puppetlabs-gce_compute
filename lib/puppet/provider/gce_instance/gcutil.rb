@@ -23,7 +23,7 @@ Puppet::Type.type(:gce_instance).provide(
       'external_ip_address',
       'internal_ip_address',
       'image',
-      'machine',
+      'machine_type',
       'network',
       'service_account',
       'service_account_scopes',

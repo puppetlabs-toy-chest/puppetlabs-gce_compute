@@ -1,4 +1,5 @@
 require 'puppet'
+require 'spec_helper'
 
 gce_instance = Puppet::Type.type(:gce_instance)
 
@@ -10,16 +11,16 @@ describe gce_instance do
      :authorized_ssh_keys,
      :description,
      :disk,
-     :external_ip_address,
      :zone,
      :tags,
-     :wait_until_running,
      :use_compute_key,
-     :metadata,
      :tags,
      :network,
      :image,
-     :machine
+     :machine_type,
+     #property :metadata,
+     #property :wait_until_running,
+     #property :external_ip_address,
     ]
   end
 

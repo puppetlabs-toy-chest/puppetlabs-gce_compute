@@ -6,7 +6,7 @@ class Puppet::Provider::Gce < Puppet::Provider
   def conn_opts
     [
       "--credentials_file=#{gce_device.auth_file}",
-      "--project_id=#{gce_device.project_id}"
+      "--project=#{gce_device.project_id}"
     ]
   end
 
@@ -48,7 +48,7 @@ class Puppet::Provider::Gce < Puppet::Provider
   end
 
   def self.gcutilcmd(device, *args)
-    gcutil(["--credentials_file=#{device.auth_file}", "--project_id=#{device.project_id}"], args)
+    gcutil(["--credentials_file=#{device.auth_file}", "--project=#{device.project_id}"], args)
   end
 
   def gcutilcmd(*args)
