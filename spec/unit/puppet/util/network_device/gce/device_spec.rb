@@ -1,9 +1,7 @@
 require 'puppet'
 require 'puppet/util/network_device/gce/device'
-require 'mocha'
-RSpec.configure do |config|
-  config.mock_with :mocha
-end
+require 'spec_helper'
+
 describe 'when creating gce devices' do
   it 'should initialize devices with valid urls' do
     File.expects(:exists?).with(File.expand_path('~/.gcutil.file')).returns(true)

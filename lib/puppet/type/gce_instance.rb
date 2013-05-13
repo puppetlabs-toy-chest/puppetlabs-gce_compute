@@ -13,7 +13,7 @@ Puppet::Type.newtype(:gce_instance) do
   newparam(:name, :namevar => true) do
     desc 'name used to identify the instance'
     validate do |v|
-      unless v =~ /^[a-z]([-a-z0-9]*[a-z0-9])?$/
+      unless v =~ /[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?/
         raise(Puppet::Error, "Invalid instance name: #{v}")
       end
     end
@@ -53,7 +53,7 @@ Puppet::Type.newtype(:gce_instance) do
    desc 'image used to launch your instance'
   end
 
-  newparam(:machine) do
+  newparam(:machine_type) do
     desc 'Machines resource profile. Determines amount of CPU, RAM, and disk.'
   end
 
@@ -172,7 +172,7 @@ Puppet::Type.newtype(:gce_instance) do
 
   validate do
     if self[:ensure] == :present
-      raise(Puppet::Error, "Did not specify required param machine_type") unless self[:machine]
+      raise(Puppet::Error, "Did not specify required param machine_type") unless self[:machine_type]
       raise(Puppet::Error, "Did not specify required param zone") unless self[:zone]
       raise(Puppet::Error, "Did not specify required param image") unless self[:image]
     end

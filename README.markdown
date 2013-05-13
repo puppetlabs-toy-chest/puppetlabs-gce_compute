@@ -26,13 +26,13 @@ Puppet's DSL. This provides the following benefits:
 
 In order to use these resources, you will need to
 [signup](https://developers.google.com/compute/docs/signup)
- for a Google Compute account: (note, GCE is currently only allowing restricted BETA access)
+ for a Google Compute account.
 
 You will also need to designate one machine to be your Puppet Device Agent.
 This machine will be responsible for provisioning objects into Google Compute using its API
 and will be used to store your credentials for Google Compute.
 
-On your Puppet Device Agent, [install and authenticate](https://developers.google.com/compute/docs/gcutil_setup) gcutil.
+On your Puppet Device Agent, [install and authenticate](https://developers.google.com/compute/docs/gcutil_setup) gcutil.  Note that this module was last updated to use gcutil-1.7.2.
 
 The authentication process should generate this credential file: ~/.gcutil_auth.
 
@@ -48,7 +48,9 @@ The device.conf file is used to map multiple certificate names to google compute
 
 Each section header in this file is the name of the certificate that is associated with a specified set of credentials and project identifier.
 The element type should be set to 'gce' and the url should contain both the
-path to the credentials file appended to the name of the project in the format below:
+path to the credentials file appended to the name of the project in the format below.
+If your Agent is itself running on a Google Compute Engine instance, you can
+specify `/dev/null` as your credential_file.
 
     #/etc/puppet/device.conf
     [my_project1]
@@ -60,10 +62,10 @@ The example below show how multiple certificate names can be used to represent m
     #/etc/puppet/device.conf
     [certname1]
       type gce
-      url [~/gcutil_auth]:group:my_project1
+      url [~/.gcutil_auth]:group:my_project1
     [certname2]
       type gce
-      url [~/gcutil_auth]:group:my_project2
+      url [~/.gcutil_auth]:group:my_project2
 
 ### Specify Resources
 
@@ -75,6 +77,7 @@ resources that you wish to manage:
       ensure      => present,
       description => 'new_network',
       range       => '10.1.0.0/16',
+      gateway     => '10.1.0.1',
     }
     gce_disk { 'mydisk':
       ensure      => present,

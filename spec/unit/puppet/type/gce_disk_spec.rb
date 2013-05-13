@@ -1,4 +1,5 @@
 require 'puppet'
+require 'spec_helper'
 
 gce_disk = Puppet::Type.type(:gce_disk)
 
