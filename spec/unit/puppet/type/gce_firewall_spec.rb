@@ -1,4 +1,5 @@
 require 'puppet'
+require 'spec_helper'
 
 gce_firewall = Puppet::Type.type(:gce_firewall)
 
@@ -11,7 +12,7 @@ describe gce_firewall do
      :network,
      :allowed,
      :allowed_ip_sources,
-     :allowd_tag_sources,
+     :allowed_tag_sources,
      :target_tags
     ]
   end
