@@ -32,7 +32,7 @@ You will also need to designate one machine to be your Puppet Device Agent.
 This machine will be responsible for provisioning objects into Google Compute using its API
 and will be used to store your credentials for Google Compute.
 
-On your Puppet Device Agent, [install and authenticate](https://developers.google.com/compute/docs/gcutil_setup) gcutil.  Note that this module was last updated to use gcutil-1.7.2.
+On your Puppet Device Agent, [install and authenticate](https://developers.google.com/compute/docs/gcutil_setup) gcutil.  Note that this module was last updated to use gcutil-1.8.3.
 
 The authentication process should generate this credential file: ~/.gcutil_auth.
 
@@ -80,22 +80,37 @@ resources that you wish to manage:
       gateway     => '10.1.0.1',
     }
     gce_disk { 'mydisk':
+      zone        => 'us-central1-b',
       ensure      => present,
       description => 'small test disk',
       size_gb     => '2',
     }
-    gce_firewall { 'mysshfirewall':
+    gce_firewall { 'allow-http':
       ensure      => present,
-      description => 'allows incoming ssh connections',
+      description => 'allows incoming HTTP connections',
       network     => 'mynetwork',
-      allowed     => 'tcp:22',
+      allowed     => 'tcp:80',
     }
-    gce_instance { 'instance1':
+    gce_instance { 'www1':
+      zone        => 'us-central1-b',
       ensure      => present,
       description => 'a test VM',
       disk        => 'mydisk',
       network     => 'mynetwork',
-      tags        => [test, 'one']
+      persistent_boot_disk => 'true',
+      image       => 'projects/debian-cloud/global/images/debian-7-wheezy-v20130723',
+      tags        => ['web']
+    }
+    gce_instance { 'www2':
+      zone        => 'us-central1-b',
+      ensure      => present,
+      description => 'a test VM',
+      network     => 'mynetwork',
+      persistent_boot_disk => 'true',
+      image       => 'projects/debian-cloud/global/images/debian-7-wheezy-v20130723',
+      tags        => ['web']
+    }
+    gce_httphealthcheck { 'basic-http':
     }
 
 Run puppet apply on this manifest
@@ -165,3 +180,12 @@ This value is retrieved from the bootstrap script.
 ### Example
 
 A full example can be located in the manifest: tests/example.pp
+
+### TODO
+
+Not all GCE features have been implemented.  Currently, the module is missing
+support for:
+
+* Routes
+* Snapshots
+

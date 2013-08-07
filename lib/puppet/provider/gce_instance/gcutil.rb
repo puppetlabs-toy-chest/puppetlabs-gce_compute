@@ -29,6 +29,8 @@ Puppet::Type.type(:gce_instance).provide(
       'service_account_scopes',
       'tags',
       'use_compute_key',
+      'persistent_boot_disk',
+      'can_ip_forward',
       'zone'
     ]
   end

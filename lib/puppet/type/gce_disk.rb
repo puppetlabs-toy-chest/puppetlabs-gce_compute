@@ -28,9 +28,13 @@ Puppet::Type.newtype(:gce_disk) do
     desc 'description of disk'
   end
 
-  # I need to better understand how these params are used before I add them
-  # newparam(:source_snapshot)
-  # newparam(:wait_until_complete)
+  newparam(:source_image) do
+    desc 'boot image to use when creating disk'
+  end
+
+  newparam(:wait_until_complete) do
+    desc 'wait until disk is complete'
+  end
 
   validate do
     raise(Puppet::Error, 'Must specify a zone for the disk') unless self[:zone]

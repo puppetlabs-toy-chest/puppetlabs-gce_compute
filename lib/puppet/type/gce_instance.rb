@@ -65,8 +65,13 @@ Puppet::Type.newtype(:gce_instance) do
     self[:network]
   end
 
+  newparam(:persistent_boot_disk) do
+    desc 'Automatically create a persistent boot disk with image'
+  end
+
   newparam(:service_account)
   newparam(:service_account_scopes)
+  newparam(:can_ip_forward)
 
   # needs to support arrays
   newparam(:tags) do

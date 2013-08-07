@@ -1,6 +1,6 @@
 require File.expand_path(File.join(File.dirname(__FILE__), '..', 'gce'))
 
-Puppet::Type.type(:gce_network).provide(
+Puppet::Type.type(:gce_forwardingrule).provide(
   :gcutil,
   :parent => Puppet::Provider::Gce
 ) do
@@ -8,7 +8,7 @@ Puppet::Type.type(:gce_network).provide(
   commands :gcutil => 'gcutil'
 
   def self.subcommand
-    'network'
+    'forwardingrule'
   end
 
   def subcommand
@@ -16,7 +16,7 @@ Puppet::Type.type(:gce_network).provide(
   end
 
   def parameter_list
-    ['gateway', 'description', 'range' ]
+    ['ip', 'description', 'port_range', 'protocol', 'region', 'target' ]
   end
 
 end

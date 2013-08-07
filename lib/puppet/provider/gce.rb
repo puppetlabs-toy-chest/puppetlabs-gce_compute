@@ -75,7 +75,7 @@ class Puppet::Provider::Gce < Puppet::Provider
   def self.all_compute_objects(device)
     @compute_object_hash ||= {}
     @compute_object_hash[device_string(device)] ||=
-      map_all_objects(gcutilcmd(device, "list#{subcommand}s"))
+      map_all_objects(gcutilcmd(device, "list#{subcommand}s", "--format=names"))
   end
 
   def self.device_string(device)

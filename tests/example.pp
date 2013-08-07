@@ -13,8 +13,8 @@ define media_wiki_stack($ensure) {
 
   Gce_instance {
     zone                     => 'us-central1-a',
-    machine                  => 'n1-standard-1',
-    image                    => 'projects/google/images/ubuntu-12-04-v20120621',
+    machine_type             => 'n1-standard-1',
+    image                    => 'projects/debian-cloud/global/images/debian-7-wheezy-v20130723',
     network                  => "${name}",
     block_for_startup_script => true,
     startup_script_timeout   => 300,
