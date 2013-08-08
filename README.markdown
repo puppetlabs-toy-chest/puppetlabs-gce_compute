@@ -67,57 +67,74 @@ The example below show how multiple certificate names can be used to represent m
       type gce
       url [~/.gcutil_auth]:group:my_project2
 
-### Specify Resources
+### Creating GCE Resources
 
-Now create a Puppet manifest that describes the google compute
-resources that you wish to manage:
+Now create a Puppet manifest that describes the google compute resources that
+you wish to manage.  The example below creates a 2GB persistent disk, two
+instances in different zones within the same region, a firewall rule on the
+`default` network, and sets up load-balancing between the two instances.
+Note the use of the Puppet `require` directive to ensure resource dependencies
+have been created in the proper order.
 
     # manifests/site.pp
-    gce_network { 'mynetwork':
-      ensure      => present,
-      description => 'new_network',
-      range       => '10.1.0.0/16',
-      gateway     => '10.1.0.1',
-    }
-    gce_disk { 'mydisk':
-      zone        => 'us-central1-b',
-      ensure      => present,
-      description => 'small test disk',
-      size_gb     => '2',
+    gce_disk { 'puppet-disk':
+        ensure      => present,
+        description => 'small data disk',
+        size_gb     => '2',
+        zone        => 'us-central1-a',
     }
     gce_firewall { 'allow-http':
-      ensure      => present,
-      description => 'allows incoming HTTP connections',
-      network     => 'mynetwork',
-      allowed     => 'tcp:80',
+        ensure      => present,
+        network     => 'default',
+        description => 'allows incoming HTTP connections',
+        allowed     => 'tcp:80',
     }
-    gce_instance { 'www1':
-      zone        => 'us-central1-b',
-      ensure      => present,
-      description => 'a test VM',
-      disk        => 'mydisk',
-      network     => 'mynetwork',
-      persistent_boot_disk => 'true',
-      image       => 'projects/debian-cloud/global/images/debian-7-wheezy-v20130723',
-      tags        => ['web']
+    gce_instance { 'www1-sd':
+        ensure       => present,
+        description  => 'web server',
+        disk         => 'puppet-disk',
+        machine_type => 'n1-standard-1',
+        zone         => 'us-central1-a',
+        network      => 'default',
+        image        => 'projects/debian-cloud/global/images/debian-7-wheezy-v20130723',
+        tags         => ['web']
     }
-    gce_instance { 'www2':
-      zone        => 'us-central1-b',
-      ensure      => present,
-      description => 'a test VM',
-      network     => 'mynetwork',
-      persistent_boot_disk => 'true',
-      image       => 'projects/debian-cloud/global/images/debian-7-wheezy-v20130723',
-      tags        => ['web']
+    gce_instance { 'www2-pd':
+        ensure       => present,
+        description  => 'web server',
+        machine_type => 'n1-standard-1',
+        zone         => 'us-central1-b',
+        network      => 'default',
+        image        => 'projects/debian-cloud/global/images/debian-7-wheezy-v20130723',
+        persistent_boot_disk => 'true',
+        tags         => ['web']
     }
     gce_httphealthcheck { 'basic-http':
+        ensure       => present,
+        require      => Gce_instance['www1-sd', 'www2-pd'],
+        description  => 'basic http health check',
+    }
+    gce_targetpool { 'www-pool':
+        ensure       => present,
+        require      => Gce_httphealthcheck['basic-http'],
+        health_checks => 'basic-http',
+        instances    => 'us-central1-a/www1-sd,us-central1-b/www2-pd',
+        region       => 'us-central1',
+    }
+    gce_forwardingrule { 'www-rule':
+        ensure       => present,
+        require      => Gce_targetpool['www-pool'],
+        description  => 'Forward HTTP to web instances',
+        port_range   => '80',
+        region       => 'us-central1',
+        target       => 'www-pool',
     }
 
 Run puppet apply on this manifest
 
     puppet apply --certname certname1 manifests/site.pp
 
-and wait for your instances to be provisioned using GCE.
+and wait for your GCE resources to be provisioned.
 
 ### Classifying resources
 
@@ -176,6 +193,54 @@ internal_ip_address from Gce_instance resources that are applied as part of the 
 
 It is also possible to lookup an instances of our own $internal_ip_address or $external_ip_address.
 This value is retrieved from the bootstrap script.
+
+### Destroy GCE Resources
+
+To use the example above, the following manifest could be used to teardown
+the environment.  Not all parameters need be supplied when removing
+resources.  Note that in the example, one of the instances, `www2-pd`,
+was created with a `persistent_boot_disk`.  In the example below, we
+ensure that this boot disk is also destroyed.
+
+    # manifests/destroy-site.pp
+    gce_network { 'alternate-network':
+        ensure      => absent,
+    }
+    gce_disk { 'puppet-disk':
+        ensure      => absent,
+        zone        => 'us-central1-a',
+    }
+    gce_disk { 'www2-pd':
+        ensure      => absent,
+        zone        => 'us-central1-b',
+    }
+    gce_firewall { 'allow-http':
+        ensure      => absent,
+    }
+    gce_instance { 'www1-sd':
+        ensure       => absent,
+        before       => Gce_disk['puppet-disk'],
+        zone         => 'us-central1-a',
+    }
+    gce_instance { 'www2-pd':
+        ensure       => absent,
+        before       => Gce_disk['www2-pd'],
+        zone         => 'us-central1-b',
+    }
+    gce_httphealthcheck { 'basic-http':
+        ensure       => absent,
+        before       => Gce_instance['www1-sd', 'www2-pd'],
+    }
+    gce_targetpool { 'www-pool':
+        ensure       => absent,
+        before       => Gce_httphealthcheck['basic-http'],
+        region       => 'us-central1',
+    }
+    gce_forwardingrule { 'www-rule':
+        ensure       => absent,
+        before       => Gce_targetpool['www-pool'],
+        region       => 'us-central1',
+    }
 
 ### Example
 

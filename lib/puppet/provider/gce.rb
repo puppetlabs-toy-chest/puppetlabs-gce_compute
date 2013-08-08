@@ -75,7 +75,7 @@ class Puppet::Provider::Gce < Puppet::Provider
   def self.all_compute_objects(device)
     @compute_object_hash ||= {}
     @compute_object_hash[device_string(device)] ||=
-      map_all_objects(gcutilcmd(device, "list#{subcommand}s", "--format=names"))
+      map_all_objects(gcutilcmd(device, "list#{subcommand}s"))
   end
 
   def self.device_string(device)
@@ -86,6 +86,8 @@ class Puppet::Provider::Gce < Puppet::Provider
   # return an array of hashes for each row that maps
   # the colume names to the values for each row
   def self.map_all_objects(output)
+    # TODO for 'list<resource>' gcutils requests, would likely
+    #      be better to pass --format=json and parse the json
     header   = nil
     ret_hash = {}
     (output.split(/\+\n|\|\n/) || []).each do |row|
@@ -93,6 +95,9 @@ class Puppet::Provider::Gce < Puppet::Provider
       if row.start_with?('|')
         cells = row.split('|').collect {|x| x.strip }
         cells.shift
+        if ["code", "NO_RESULTS_ON_PAGE"].include? cells[0] then
+          next
+        end
         if header
           row_hash = {}
           header.each_index do |i|
@@ -102,9 +107,6 @@ class Puppet::Provider::Gce < Puppet::Provider
         else
           header = cells
         end
-      elsif row.start_with?('+')
-      else
-        Puppet.warning("Unexpted line: #{row}")
       end
     end
     ret_hash
@@ -132,7 +134,15 @@ class Puppet::Provider::Gce < Puppet::Provider
   end
 
   def destroy
-    gcutilcmd("delete#{subcommand}", resource[:name], '-f')
+    args = destroy_parameter_list.collect do |attr|
+      resource[attr] && "--#{attr}=#{resource[attr]}"
+    end.compact
+    if ["targetpoolhealthcheck", "targetpoolinstance"].include? subcommand then
+      maincmd = "remove"
+    else
+      maincmd = "delete"
+    end
+    gcutilcmd("#{maincmd}#{subcommand}", resource[:name], '-f', args)
   end
 
   def exists?

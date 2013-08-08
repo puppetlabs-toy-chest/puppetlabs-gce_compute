@@ -19,4 +19,8 @@ Puppet::Type.type(:gce_targetpoolhealthcheck).provide(
     ['name', 'health_check', 'region' ]
   end
 
+  def destroy_parameter_list
+    ['region']
+  end
+
 end

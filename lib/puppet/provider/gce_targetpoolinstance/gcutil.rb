@@ -16,7 +16,11 @@ Puppet::Type.type(:gce_targetpoolinstance).provide(
   end
 
   def parameter_list
-    ['name', 'instance', 'region' ]
+    ['instance', 'region' ]
+  end
+
+  def destroy_parameter_list
+    ['instance', 'region' ]
   end
 
 end

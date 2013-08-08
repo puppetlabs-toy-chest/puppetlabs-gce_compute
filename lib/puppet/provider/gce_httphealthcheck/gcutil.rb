@@ -21,4 +21,8 @@ Puppet::Type.type(:gce_httphealthcheck).provide(
      'unhealthy_threshold']
   end
 
+  def destroy_parameter_list
+    []
+  end
+
 end

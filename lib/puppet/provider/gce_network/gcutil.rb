@@ -19,4 +19,8 @@ Puppet::Type.type(:gce_network).provide(
     ['gateway', 'description', 'range' ]
   end
 
+  def destroy_parameter_list
+    []
+  end
+
 end

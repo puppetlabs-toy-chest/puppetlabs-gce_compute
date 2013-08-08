@@ -19,4 +19,8 @@ Puppet::Type.type(:gce_forwardingrule).provide(
     ['ip', 'description', 'port_range', 'protocol', 'region', 'target' ]
   end
 
+  def destroy_parameter_list
+    ['region']
+  end
+
 end

@@ -35,10 +35,18 @@ Puppet::Type.type(:gce_instance).provide(
     ]
   end
 
+  def destroy_parameter_list
+    ['zone']
+  end
+
   def create
     # set up options
     args = parameter_list.collect do |attr|
-      resource[attr] && "--#{attr}=#{resource[attr]}"
+      if ["can_ip_forward", "persistent_boot_disk", "use_compute_key"].include? attr then
+        resource[attr] ? "--#{attr}" : "--no#{attr}"
+      else
+        resource[attr] && "--#{attr}=#{resource[attr]}"
+      end
     end.compact
     if resource[:classes]
       class_hash = { 'classes' => parse_refs_from_hash(resource[:classes]) }
@@ -56,7 +64,6 @@ Puppet::Type.type(:gce_instance).provide(
       args.push("--metadata_from_file=startup-script:#{script_file}")
     end
 
-    # create instance, wait until it is running
     gcutilcmd("add#{subcommand}", resource[:name], args, '--wait_until_running')
 
     # block for the startup script
