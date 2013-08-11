@@ -206,40 +206,23 @@ Classification is specified with the following gce_instance parameters:
 * modules - List of modules that should be installed from the
   [forge](http://forge.puppetlabs.com/).
 
-      modules => ['puppetlabs-mysql', 'puppetlabs-apache']
+  ```modules => ['puppetlabs-mysql', 'puppetlabs-apache']```
 
 * module_repos - Modules that should be installed from github. Accepts a hash
   where the keys point to github repos and the value indicates the directory
   in `/etc/puppet` where the module will be installed.
 
-      module_repos => {'git://github.com/puppetlabs/puppetlabs-mysql' => 'mysql'}
+ ``` module_repos => {'git://github.com/puppetlabs/puppetlabs-mysql' => 'mysql'}```
 
 * ecn_classes - Hash of classes from our downloaded content that should be
   applied. The key of this hash is the name of a class to apply and the value
   is a hash of parameters that should be set for that class.
 
-      ecn_classes => {'mysql' => {'config_hash' => {'bind_address' => '0.0.0.0' }}}
+  ```ecn_classes => {'mysql' => {'config_hash' => {'bind_address' => '0.0.0.0' }}}```
 
 * manifest - A string to pass in as a local manifest file and applied during
-  the bootstrap process.
-
-      manifest => 'class apache ($version = "latest") {
-        package {"apache2":
-          ensure => $version, # Using the class parameter from above
-        }
-        file {"/var/www/index.html":
-          ensure  => present,
-          content => "<html>\n<body>\n\t<h2>Hi, this is a test.</h2>\n</body>\n</html>\n",
-          require => Package["apache2"],
-        }
-        service {"apache2":
-          ensure => running,
-          enable => true,
-          require => File["/var/www/index.html"],
-        }
-      }
-      include apache'
-
+  the bootstrap process.  See the example manifest files in `tests/*.pp`
+  for examples on specifying full manifests.
 * block_for_startup_script - Whether the resource should block until its
   startup sctipt has completed.
 * startup_script_timeout - Amount of time to wait before timing out when
