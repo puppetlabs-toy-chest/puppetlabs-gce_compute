@@ -183,8 +183,9 @@ Run puppet apply on this manifest
 
     puppet apply --certname certname1 manifests/site.pp
 
-and wait for your GCE resources to be provisioned.  In the example above,
-
+and wait for your GCE resources to be provisioned.  The above example
+can be found in `tests/all-up.pp` along with the script to destroy the
+environment in `tests/all-down.pp`.
 
 ### Classifying resources
 
@@ -205,39 +206,39 @@ Classification is specified with the following gce_instance parameters:
 * modules - List of modules that should be installed from the
   [forge](http://forge.puppetlabs.com/).
 
-    modules => ['puppetlabs-mysql', 'puppetlabs-apache']
+      modules => ['puppetlabs-mysql', 'puppetlabs-apache']
 
 * module_repos - Modules that should be installed from github. Accepts a hash
   where the keys point to github repos and the value indicates the directory
   in `/etc/puppet` where the module will be installed.
 
-    module_repos => {'git://github.com/puppetlabs/puppetlabs-mysql' => 'mysql'}
+      module_repos => {'git://github.com/puppetlabs/puppetlabs-mysql' => 'mysql'}
 
 * ecn_classes - Hash of classes from our downloaded content that should be
   applied. The key of this hash is the name of a class to apply and the value
   is a hash of parameters that should be set for that class.
 
-    ecn_classes => {'mysql' => {'config_hash' => {'bind_address' => '0.0.0.0' }}}
+      ecn_classes => {'mysql' => {'config_hash' => {'bind_address' => '0.0.0.0' }}}
 
 * manifest - A string to pass in as a local manifest file and applied during
   the bootstrap process.
 
-    manifest => 'class apache ($version = "latest") {
-      package {"apache2":
-        ensure => $version, # Using the class parameter from above
+      manifest => 'class apache ($version = "latest") {
+        package {"apache2":
+          ensure => $version, # Using the class parameter from above
+        }
+        file {"/var/www/index.html":
+          ensure  => present,
+          content => "<html>\n<body>\n\t<h2>Hi, this is a test.</h2>\n</body>\n</html>\n",
+          require => Package["apache2"],
+        }
+        service {"apache2":
+          ensure => running,
+          enable => true,
+          require => File["/var/www/index.html"],
+        }
       }
-      file {"/var/www/index.html":
-        ensure  => present,
-        content => "<html>\n<body>\n\t<h2>Hi, this is a test.</h2>\n</body>\n</html>\n",
-        require => Package["apache2"],
-      }
-      service {"apache2":
-        ensure => running,
-        enable => true,
-        require => File["/var/www/index.html"],
-      }
-    }
-    include apache'
+      include apache'
 
 * block_for_startup_script - Whether the resource should block until its
   startup sctipt has completed.
@@ -291,10 +292,7 @@ resources.  Note that in the example, one of the instances, `www2-pd`,
 was created with a `persistent_boot_disk`.  In the example below, we
 ensure that this boot disk is also destroyed.
 
-    # manifests/destroy-site.pp
-    gce_network { 'alternate-network':
-        ensure      => absent,
-    }
+    # manifests/site.pp
     gce_disk { 'puppet-disk':
         ensure      => absent,
         zone        => 'us-central1-a',
@@ -308,32 +306,32 @@ ensure that this boot disk is also destroyed.
     }
     gce_instance { 'www1-sd':
         ensure       => absent,
-        before       => Gce_disk['puppet-disk'],
         zone         => 'us-central1-a',
     }
     gce_instance { 'www2-pd':
         ensure       => absent,
-        before       => Gce_disk['www2-pd'],
         zone         => 'us-central1-b',
     }
     gce_httphealthcheck { 'basic-http':
         ensure       => absent,
-        before       => Gce_instance['www1-sd', 'www2-pd'],
     }
     gce_targetpool { 'www-pool':
         ensure       => absent,
-        before       => Gce_httphealthcheck['basic-http'],
         region       => 'us-central1',
     }
     gce_forwardingrule { 'www-rule':
         ensure       => absent,
-        before       => Gce_targetpool['www-pool'],
         region       => 'us-central1',
     }
 
-### Example
+    # tear them down in the proper order
+    Gce_instance["www1-sd", "www2-pd"] -> Gce_disk["www2-pd", "puppet-disk"]
+    Gce_forwardingrule["www-rule"] -> Gce_targetpool["www-pool"]
+    Gce_targetpool["www-pool"] -> Gce_httphealthcheck["basic-http"]
 
-A full example can be located in the manifest: tests/example.pp
+### Examples
+
+The examples above and others can be found in `tests/*.pp`.
 
 ### TODO
 
