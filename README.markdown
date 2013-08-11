@@ -324,3 +324,38 @@ support for:
 * Routes
 * Snapshots
 
+### Development
+
+These are some condensed *raw* notes on how the module was developed and
+tested.  Mostly, it's the output of my `history` with a few annotations.  I
+spun up a GCE instance through the console, and the logged into it via `gcutil
+ssh`.  Commands below beginning with `$` are non-privileged user commands,
+while commands beginning with `#` indicate commands executed as `root`.  Lines
+with `#//` are comments and no leading characters are output from the previous
+command.
+
+#// This block was done with a fresh 'wheezy' and the puppet version included
+#// in the distro's repo (e.g. puppet 2.7.18)
+$ sudo -i
+# apt-get update && apt-get upgrade -y
+# apt-get install git puppet vim
+# exit
+$ git clone https://github.com/erjohnso/puppetlabs-gce_compute.git
+$ puppet apply --configprint deviceconfig
+$ mkdir -p ~/.puppet/modules
+$ vim .puppet/device.conf
+  [my_project]
+     type gce
+     url [/dev/null]:google.com:erjohnso
+$ cd ~/.puppet/modules
+$ ln -s ~/puppetlabs-gce_compute
+$ puppet module list
+$ puppet module list
+  /home/erjohnso/.puppet/modules
+  |___ puppetlabs-gce_compute (???)
+$ puppet apply --certname my_project puppetlabs-gce_compute/tests/up-pe3-wheezy.pp 
+  notice: /Stage[main]//Gce_instance[pe3-wheezy]/ensure: created
+  notice: Finished catalog run in 21.30 seconds
+#// verify that mysql and apache are running, and the node is using puppet3
+$ gcutil ssh pe3-wheezy ' ps ax; puppet --version'
+$ puppet apply --certname my_project tests/down-pe3-wheezy.pp 
