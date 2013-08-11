@@ -20,4 +20,8 @@ Puppet::Type.type(:gce_firewall).provide(
      'network', 'target_tags']
   end
 
+  def destroy_parameter_list
+    []
+  end
+
 end

@@ -1,6 +1,6 @@
 require File.expand_path(File.join(File.dirname(__FILE__), '..', 'gce'))
 
-Puppet::Type.type(:gce_disk).provide(
+Puppet::Type.type(:gce_targetpool).provide(
   :gcutil,
   :parent => Puppet::Provider::Gce
 ) do
@@ -8,7 +8,7 @@ Puppet::Type.type(:gce_disk).provide(
   commands :gcutil => 'gcutil'
 
   def self.subcommand
-    'disk'
+    'targetpool'
   end
 
   def subcommand
@@ -16,11 +16,11 @@ Puppet::Type.type(:gce_disk).provide(
   end
 
   def parameter_list
-    [ 'zone', 'size_gb', 'description', 'wait_until_complete', 'source_image' ]
+    ['description', 'health_checks', 'instances', 'region' ]
   end
 
   def destroy_parameter_list
-    [ 'zone' ]
+    ['region']
   end
 
 end

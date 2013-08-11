@@ -23,7 +23,7 @@ gce_instance { 'puppet-instance-01':
   disk         => 'puppet-disk-small',
   network      => 'puppet-network',
   machine_type => 'n1-standard-1',
-  image        => 'projects/google/global/images/centos-6-v20130325',
+  image        => 'projects/centos-cloud/global/images/centos-6-v20130731',
   zone         => 'us-central2-a',
   tags         => [test, 'one']
 }
