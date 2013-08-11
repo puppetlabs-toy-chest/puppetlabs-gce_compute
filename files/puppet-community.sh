@@ -126,7 +126,7 @@ function run_manifest_apply() {
   fi
 }
 
-function run_ecn_apply() {
+function run_enc_apply() {
   if [ -n "$1" ]; then
     mkdir -p /etc/puppet/manifests
     mkdir -p /etc/puppet/nodes
@@ -136,8 +136,8 @@ function run_ecn_apply() {
     chmod a+x /etc/puppet/nodes/enc.sh
     # TODO(erjohnso) fix this hack in the gce_compute module
     #
-    # The pupppet module is using a hash for the ECN values so each key
-    # needs to have value.  But the puppet yaml syntax for ECN
+    # The pupppet module is using a hash for the ENC values so each key
+    # needs to have value.  But the puppet yaml syntax for ENC
     # doesn't technically require values for some keys.  For example,
     #
     #     class {'apache:'}
@@ -150,7 +150,7 @@ function run_ecn_apply() {
     # to use the 'nil' object to indicate that there is no value for the
     # key.  So, the ruby manifest would contain...
     #
-    # ecn_classes => {'apache' => nil}
+    # enc_classes => {'apache' => nil}
     #
     # But when this hash is converted to_yaml and pumped into the metadata
     # server, the 'nil's are converted to ruby Strings during the method
@@ -225,7 +225,7 @@ function provision_puppet() {
   configure_puppet "$PUPPET_HOSTNAME"
   download_modules "$PUPPET_MODULES"
   clone_modules    "$PUPPET_REPOS"
-  run_ecn_apply "$PUPPET_CLASSES" "$PUPPET_HOSTNAME"
+  run_enc_apply "$PUPPET_CLASSES" "$PUPPET_HOSTNAME"
   run_manifest_apply "$PUPPET_MANIFEST" "$PUPPET_HOSTNAME"
   echo $? > $RESULTS_FILE
   echo "Puppet installation finished!"

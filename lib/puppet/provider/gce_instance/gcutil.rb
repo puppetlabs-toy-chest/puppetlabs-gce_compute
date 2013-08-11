@@ -48,8 +48,8 @@ Puppet::Type.type(:gce_instance).provide(
         resource[attr] && "--#{attr}=#{resource[attr]}"
       end
     end.compact
-    if resource[:ecn_classes]
-      class_hash = { 'classes' => parse_refs_from_hash(resource[:ecn_classes]) }
+    if resource[:enc_classes]
+      class_hash = { 'classes' => parse_refs_from_hash(resource[:enc_classes]) }
       args.push("--metadata=puppet_classes:#{class_hash.to_yaml}")
     end
     if resource[:manifest]
@@ -61,7 +61,7 @@ Puppet::Type.type(:gce_instance).provide(
     if resource[:module_repos]
       args.push("--metadata=puppet_repos:#{resource[:module_repos]}")
     end
-    if resource[:manifest] || resource[:modules] || resource[:ecn_classes] || resource[:module_repos]
+    if resource[:manifest] || resource[:modules] || resource[:enc_classes] || resource[:module_repos]
       # is we specified any classification info, we should call the bootstrap script
       script_file = File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..', '..', 'files', 'puppet-community.sh'))
       args.push("--metadata_from_file=startup-script:#{script_file}")

@@ -195,11 +195,11 @@ instances.
 
 The classification is currently only supported by running `puppet apply`
 during the bootstrapping process of the created instances and can be done
-with the `ecn_classes` parameter that utilizes
+with the `enc_classes` parameter that utilizes
 [External Node Classifiers](http://docs.puppetlabs.com/guides/external_nodes.html)
 or by passing in the contents of a manifest file with the `manifest` parameter.
 If *both* parameters are specified, both will be applied to the instance with
-ECN first followed by the manifest file.
+ENC first followed by the manifest file.
 
 Classification is specified with the following gce_instance parameters:
 
@@ -214,11 +214,12 @@ Classification is specified with the following gce_instance parameters:
 
  ``` module_repos => {'git://github.com/puppetlabs/puppetlabs-mysql' => 'mysql'}```
 
-* ecn_classes - Hash of classes from our downloaded content that should be
-  applied. The key of this hash is the name of a class to apply and the value
-  is a hash of parameters that should be set for that class.
+* enc_classes - Hash of classes from our downloaded content that should be
+  applied using External Node Classifers. The key of this hash is the name of
+  a class to apply and the value is a hash of parameters that should be set
+  for that class.
 
-  ```ecn_classes => {'mysql' => {'config_hash' => {'bind_address' => '0.0.0.0' }}}```
+  ```enc_classes => {'mysql' => {'config_hash' => {'bind_address' => '0.0.0.0' }}}```
 
 * manifest - A string to pass in as a local manifest file and applied during
   the bootstrap process.  See the example manifest files in `tests/*.pp`
@@ -244,7 +245,7 @@ if module, module_repos, or classes are set.
 The script downloads the following metadata from the instance in order to
 bootstrap it:
 * puppet_modules  - set when the modules attribute is specified.
-* puppet_classes  - set when the ECN classes attribute is specified.
+* puppet_classes  - set when the ENC classes attribute is specified.
 * puppet_manifest - set when the manifest attribute is specified.
 * puppet_repos    - set when the module_repos attribute is specified.
 

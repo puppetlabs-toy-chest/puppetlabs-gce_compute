@@ -127,10 +127,10 @@ Puppet::Type.newtype(:gce_instance) do
 #  end
 
   # classification specific parameters
-  newparam(:ecn_classes) do
-    desc 'A hash of ECN classes used to assign a Puppet class to this instance.'
+  newparam(:enc_classes) do
+    desc 'A hash of ENC classes used to assign a Puppet class to this instance.'
     validate do |v|
-      raise(Puppet::Error, "ECN classes expects a Hash.") unless v.is_a?(Hash)
+      raise(Puppet::Error, "ENC classes expects a Hash.") unless v.is_a?(Hash)
     end
   end
 
