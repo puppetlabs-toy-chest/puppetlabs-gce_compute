@@ -49,7 +49,7 @@ Puppet::Type.type(:gce_instance).provide(
       end
     end.compact
     if resource[:ecn_classes]
-      class_hash = { 'ecn_classes' => parse_refs_from_hash(resource[:ecn_classes]) }
+      class_hash = { 'classes' => parse_refs_from_hash(resource[:ecn_classes]) }
       args.push("--metadata=puppet_classes:#{class_hash.to_yaml}")
     end
     if resource[:manifest]

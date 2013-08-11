@@ -13,6 +13,7 @@ class Puppet::Provider::Gce < Puppet::Provider
   def gce_device
     # this is constantly reloading the device when using puppet apply..
     # needs to be refactored to be faster
+    require 'puppet/util/network_device'
     Puppet::Util::NetworkDevice.current || load_device
   end
 

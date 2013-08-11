@@ -158,8 +158,10 @@ Puppet::Type.newtype(:gce_instance) do
     end
     munge do |v|
       new_value = []
-      v.each do |k,v|
-        new_value << "#{k}##{v}"
+      if v.respond_to?('each')
+        v.each do |k,v|
+          new_value << "#{k}##{v}"
+        end
       end
       new_value.join(',')
     end

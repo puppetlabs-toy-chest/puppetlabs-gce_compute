@@ -52,28 +52,15 @@ function rpm_install() {
 }
 
 function apt_install() {
-  apt-get update && apt-get -y install puppet git
-}
-
-function apt_install_new_puppet() {
   # Download and install the puppetlabs apt public
   apt-key adv --recv-key --keyserver pool.sks-keyservers.net 4BD6EC30
 
-  # We need to grab the distro and release in order to populate
-  # the apt repo details. We are assuming that the lsb_release command
-  # will be available as even puppet evens has it (lsb_base) package as
-  # dependancy.
-
-  # Since puppet requires lsb-release I believe this is ok to use for
-  # the purpose of distro and release discovery.
-  apt-get update
-  apt-get -y install lsb-release
-  distro=$(lsb_release -i | cut -f 2 | tr "[:upper:]" "[:lower:]")
-  release=$(lsb_release -c | cut -f 2)
+  distro=$(lsb_release -si | tr "[:upper:]" "[:lower:]")
+  release=$(lsb_release -sc)
 
   # Setup the apt Puppet repository
   cat > /etc/apt/sources.list.d/puppetlabs.list <<EOFAPTREPO
-deb http://apt.puppetlabs.com/ ${release} main
+deb http://apt.puppetlabs.com/ ${release} main dependencies
 EOFAPTREPO
   apt-get update
   # Install Puppet from Debian repositories
@@ -138,7 +125,7 @@ function run_manifest_apply() {
   if [ -n "$1" ]; then
     mkdir -p /etc/puppet/manifests
     echo "$1" > /etc/puppet/manifests/"$2".pp
-    puppet apply /etc/puppet/manifests/"$2".pp
+    puppet apply --trace --debug /etc/puppet/manifests/"$2".pp
   fi
 }
 
@@ -150,10 +137,55 @@ function run_ecn_apply() {
     echo '#!/bin/bash
       cat /etc/puppet/nodes/$1.yaml' > /etc/puppet/nodes/enc.sh
     chmod a+x /etc/puppet/nodes/enc.sh
-    echo "$1" > /etc/puppet/nodes/"$2".yaml
+    # TODO(erjohnso) fix this hack in the gce_compute module
+    #
+    # The pupppet module is using a hash for the ECN values so each key
+    # needs to have value.  But the puppet yaml syntax for ECN
+    # doesn't technically require values for some keys.  For example,
+    #
+    #     class {'apache:'}
+    #
+    # versus something like,
+    #
+    #     class {'mysql::server' => {'config_hash' => {....
+    #
+    # It seems a good ruby way to handle this would be to allow the user
+    # to use the 'nil' object to indicate that there is no value for the
+    # key.  So, the ruby manifest would contain...
+    #
+    # ecn_classes => {'apache' => nil}
+    #
+    # But when this hash is converted to_yaml and pumped into the metadata
+    # server, the 'nil's are converted to ruby Strings during the method
+    # lib/puppet/provider/gce_instance/gcutil.rb:parse_methods_from_hash()
+    # to do some param substitutions.  Ideally, this method would ignore
+    # ruby nil objects...
+    #
+    # The ****HACK**** below uses sed to strip out 'nil$' before writing
+    # the YAML from the metadata server to disk.
+    #
+    # e.g. convert this string...
+    # ---
+    #   classes:
+    #     "mysql::server":
+    #       config_hash:
+    #         bind_address: "127.0.0.1"
+    #     apache: nil
+    #     "mysql::python": nil
+    #
+    ## to this yaml
+    #
+    # ---
+    #   classes:
+    #     "mysql::server":
+    #       config_hash:
+    #         bind_address: "127.0.0.1"
+    #     apache:
+    #     "mysql::python":
+    echo "$1" | sed -e "s|nil$||" > /etc/puppet/nodes/"$2".yaml
     # yaml terminus does not merge facts, so it failed with puppet
     # apply
-    puppet apply --node_terminus=exec --external_nodes=/etc/puppet/nodes/enc.sh /etc/puppet/manifests/empty.pp
+    puppet apply --trace --debug --node_terminus=exec --external_nodes=/etc/puppet/nodes/enc.sh /etc/puppet/manifests/empty.pp
   fi
 }
 
