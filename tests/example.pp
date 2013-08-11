@@ -80,7 +80,7 @@ define media_wiki_stack($ensure) {
     module_repos => {
       'git://github.com/bodepd/puppet-mediawiki'      => 'mediawiki',
     },
-    classes     => {
+    ecn_classes     => {
       'mysql::server' => {
         'config_hash' => { 'bind_address' => '0.0.0.0', 'root_password' => 'root_password' }
       },
@@ -101,7 +101,7 @@ define media_wiki_stack($ensure) {
     module_repos => {
       'git://github.com/bodepd/puppet-mediawiki'        => 'mediawiki',
     },
-    classes      => {
+    ecn_classes      => {
       'mediawiki' => {
         # we are passing in this value to tell the classification bash script to replace this with the real value
         'server_name'      => '$gce_external_ip',

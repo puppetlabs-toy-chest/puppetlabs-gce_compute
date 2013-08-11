@@ -127,10 +127,18 @@ Puppet::Type.newtype(:gce_instance) do
 #  end
 
   # classification specific parameters
-  newparam(:classes) do
-    desc 'A hash of classes used to assign a Puppet class to this instance.'
+  newparam(:ecn_classes) do
+    desc 'A hash of ECN classes used to assign a Puppet class to this instance.'
     validate do |v|
-      raise(Puppet::Error, "Classes expects a Hash.") unless v.is_a?(Hash)
+      raise(Puppet::Error, "ECN classes expects a Hash.") unless v.is_a?(Hash)
+    end
+  end
+
+  # manifest specific parameters
+  newparam(:manifest) do
+    desc 'A local manifest file specific to this instance.'
+    validate do |v|
+      raise(Puppet::Error, "Manifest expects to be a String.") unless v.is_a?(String)
     end
   end
 
@@ -146,7 +154,7 @@ Puppet::Type.newtype(:gce_instance) do
     desc 'Hash of module repos (repo -> localdir) to be downloaded from github.'
     defaultto ''
     validate do |v|
-      raise(Puppet::Error, "Classes expects a Hash.") unless(v.is_a?(Hash) || v.empty?)
+      raise(Puppet::Error, "module_repos expects a Hash.") unless(v.is_a?(Hash) || v.empty?)
     end
     munge do |v|
       new_value = []
