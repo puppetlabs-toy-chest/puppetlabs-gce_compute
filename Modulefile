@@ -1,5 +1,5 @@
 name    'puppetlabs-gce_compute'
-version '0.0.3'
+version '0.1.0'
 source  'https://github.com/puppetlabs/puppetlabs-gce_compute'
 author  'Puppet Labs'
 license 'Apache License 2.0'
