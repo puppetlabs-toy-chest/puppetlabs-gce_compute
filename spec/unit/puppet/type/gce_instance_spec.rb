@@ -18,9 +18,8 @@ describe gce_instance do
      :network,
      :image,
      :machine_type,
-     #property :metadata,
-     #property :wait_until_running,
-     #property :external_ip_address,
+     :persistent_boot_disk,
+     :can_ip_forward,
     ]
   end
 

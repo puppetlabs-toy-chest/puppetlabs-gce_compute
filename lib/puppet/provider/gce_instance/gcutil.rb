@@ -29,18 +29,31 @@ Puppet::Type.type(:gce_instance).provide(
       'service_account_scopes',
       'tags',
       'use_compute_key',
+      'persistent_boot_disk',
+      'can_ip_forward',
       'zone'
     ]
+  end
+
+  def destroy_parameter_list
+    ['zone']
   end
 
   def create
     # set up options
     args = parameter_list.collect do |attr|
-      resource[attr] && "--#{attr}=#{resource[attr]}"
+      if ["can_ip_forward", "persistent_boot_disk", "use_compute_key"].include? attr then
+        resource[attr] ? "--#{attr}" : "--no#{attr}"
+      else
+        resource[attr] && "--#{attr}=#{resource[attr]}"
+      end
     end.compact
-    if resource[:classes]
-      class_hash = { 'classes' => parse_refs_from_hash(resource[:classes]) }
+    if resource[:enc_classes]
+      class_hash = { 'classes' => parse_refs_from_hash(resource[:enc_classes]) }
       args.push("--metadata=puppet_classes:#{class_hash.to_yaml}")
+    end
+    if resource[:manifest]
+      args.push("--metadata=puppet_manifest:#{resource[:manifest]}")
     end
     if resource[:modules]
       args.push("--metadata=puppet_modules:#{resource[:modules]}")
@@ -48,16 +61,16 @@ Puppet::Type.type(:gce_instance).provide(
     if resource[:module_repos]
       args.push("--metadata=puppet_repos:#{resource[:module_repos]}")
     end
-    if resource[:modules] || resource[:classes] || resource[:module_repos]
+    if resource[:manifest] || resource[:modules] || resource[:enc_classes] || resource[:module_repos]
       # is we specified any classification info, we should call the bootstrap script
       script_file = File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..', '..', 'files', 'puppet-community.sh'))
       args.push("--metadata_from_file=startup-script:#{script_file}")
     end
 
-    # create instance, wait until it is running
     gcutilcmd("add#{subcommand}", resource[:name], args, '--wait_until_running')
 
     # block for the startup script
+    # TODO(erjohnso) can instead use gcutil to check RUNNING state of instance
     result = nil
     if resource[:block_for_startup_script]
       begin

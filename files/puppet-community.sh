@@ -1,10 +1,6 @@
 #!/bin/bash
-# this script can be used in combination
-# with the gce types to install puppet and
-# classify the provisioned instances
-
-set -u
-set -e
+# this script can be used in combination with the gce types to install
+# puppet and classify the provisioned instances
 
 RESULTS_FILE='/tmp/puppet_bootstrap_output'
 
@@ -56,21 +52,12 @@ function apt_install() {
   # Download and install the puppetlabs apt public
   apt-key adv --recv-key --keyserver pool.sks-keyservers.net 4BD6EC30
 
-  # We need to grab the distro and release in order to populate
-  # the apt repo details. We are assuming that the lsb_release command
-  # will be available as even puppet evens has it (lsb_base) package as
-  # dependancy.
-
-  # Since puppet requires lsb-release I believe this is ok to use for
-  # the purpose of distro and release discovery.
-  apt-get update
-  apt-get -y install lsb-release
-  distro=$(lsb_release -i | cut -f 2 | tr "[:upper:]" "[:lower:]")
-  release=$(lsb_release -c | cut -f 2)
+  distro=$(lsb_release -si | tr "[:upper:]" "[:lower:]")
+  release=$(lsb_release -sc)
 
   # Setup the apt Puppet repository
   cat > /etc/apt/sources.list.d/puppetlabs.list <<EOFAPTREPO
-deb http://apt.puppetlabs.com/ ${release} main
+deb http://apt.puppetlabs.com/ ${release} main dependencies
 EOFAPTREPO
   apt-get update
   # Install Puppet from Debian repositories
@@ -131,8 +118,15 @@ function clone_modules() {
   fi
 }
 
+function run_manifest_apply() {
+  if [ -n "$1" ]; then
+    mkdir -p /etc/puppet/manifests
+    echo "$1" > /etc/puppet/manifests/"$2".pp
+    puppet apply --trace --debug /etc/puppet/manifests/"$2".pp
+  fi
+}
 
-function run_puppet_apply() {
+function run_enc_apply() {
   if [ -n "$1" ]; then
     mkdir -p /etc/puppet/manifests
     mkdir -p /etc/puppet/nodes
@@ -140,7 +134,52 @@ function run_puppet_apply() {
     echo '#!/bin/bash
       cat /etc/puppet/nodes/$1.yaml' > /etc/puppet/nodes/enc.sh
     chmod a+x /etc/puppet/nodes/enc.sh
-    echo "$1" > /etc/puppet/nodes/"$2".yaml
+    # TODO(erjohnso) fix this hack in the gce_compute module
+    #
+    # The pupppet module is using a hash for the ENC values so each key
+    # needs to have value.  But the puppet yaml syntax for ENC
+    # doesn't technically require values for some keys.  For example,
+    #
+    #     class {'apache:'}
+    #
+    # versus something like,
+    #
+    #     class {'mysql::server' => {'config_hash' => {....
+    #
+    # It seems a good ruby way to handle this would be to allow the user
+    # to use the 'nil' object to indicate that there is no value for the
+    # key.  So, the ruby manifest would contain...
+    #
+    # enc_classes => {'apache' => nil}
+    #
+    # But when this hash is converted to_yaml and pumped into the metadata
+    # server, the 'nil's are converted to ruby Strings during the method
+    # lib/puppet/provider/gce_instance/gcutil.rb:parse_methods_from_hash()
+    # to do some param substitutions.  Ideally, this method would ignore
+    # ruby nil objects...
+    #
+    # The ****HACK**** below uses sed to strip out 'nil$' before writing
+    # the YAML from the metadata server to disk.
+    #
+    # e.g. convert this string...
+    # ---
+    #   classes:
+    #     "mysql::server":
+    #       config_hash:
+    #         bind_address: "127.0.0.1"
+    #     apache: nil
+    #     "mysql::python": nil
+    #
+    ## to this yaml
+    #
+    # ---
+    #   classes:
+    #     "mysql::server":
+    #       config_hash:
+    #         bind_address: "127.0.0.1"
+    #     apache:
+    #     "mysql::python":
+    echo "$1" | sed -e "s|nil$||" > /etc/puppet/nodes/"$2".yaml
     # yaml terminus does not merge facts, so it failed with puppet
     # apply
     puppet apply --trace --debug --node_terminus=exec --external_nodes=/etc/puppet/nodes/enc.sh /etc/puppet/manifests/empty.pp
@@ -157,8 +196,15 @@ function provision_puppet() {
     echo "This OS is not supported by Puppet Cloud Provisioner"
     exit 1
   fi
+  
+  # For more on metadata, see https://developers.google.com/compute/docs/metadata
+  MD="http://metadata/computeMetadata/v1beta1/instance"
+  PUPPET_CLASSES=$(curl -fs $MD/attributes/puppet_classes)
+  PUPPET_MANIFEST=$(curl -fs $MD/attributes/puppet_manifest)
+  PUPPET_MODULES=$(curl -fs $MD/attributes/puppet_modules)
+  PUPPET_REPOS=$(curl -fs $MD/attributes/puppet_repos)
+  PUPPET_HOSTNAME=$(curl -fs $MD/hostname)
 
-  PUPPET_CLASSES=$(curl http://metadata.google.internal/0.1/meta-data/attributes/puppet_classes)
   # BEGIN HACK
   #
   # This is a pretty awful hack, but I did not really understand a better way to do it.
@@ -167,19 +213,20 @@ function provision_puppet() {
   # and external ip addresses.
   # I am going to just pass in these specific things as variables in the puppetcode and parse them out here.
   # Eventually, I may want to do some kind of a fact lookup
-  GCE_EXTERNAL_IP=$(curl http://metadata.google.internal/0.1/meta-data/network | tr ":" "\n" | grep -A 1 externalIp | tail -1 | cut -f 2 -d '"')
-  GCE_INTERNAL_IP=$(curl http://metadata.google.internal/0.1/meta-data/network | tr ":" "\n" | grep -A 1 ip | tail -1 | cut -f 2 -d '"')
+  GCE_EXTERNAL_IP=$(curl -fs $MD/network-interfaces/0/access-configs/0/external-ip)
+  #GCE_EXTERNAL_IP=$(curl -fs http://bot.whatismyipaddress.com)
+  GCE_INTERNAL_IP=$(curl -fs $MD/network-interfaces/0/ip)
+  #GCE_INTERNAL_IP=$(ifconfig eth0 |grep "inet addr:" | cut -c21-34)
   PUPPET_CLASSES=$(echo "$PUPPET_CLASSES" | sed -e "s/\$gce_external_ip/$GCE_EXTERNAL_IP/" -e "s/\$gce_internal_ip/$GCE_INTERNAL_IP/")
+  PUPPET_MANIFEST=$(echo "$PUPPET_MANIFEST" | sed -e "s/\$gce_external_ip/$GCE_EXTERNAL_IP/" -e "s/\$gce_internal_ip/$GCE_INTERNAL_IP/")
   # END HACK
-  PUPPET_MODULES=$(curl http://metadata.google.internal/0.1/meta-data/attributes/puppet_modules)
-  PUPPET_REPOS=$(curl http://metadata.google.internal/0.1/meta-data/attributes/puppet_repos)
-  PUPPET_HOSTNAME=$(curl http://metadata.google.internal/0.1/meta-data/hostname)
 
   install_puppet
   configure_puppet "$PUPPET_HOSTNAME"
   download_modules "$PUPPET_MODULES"
   clone_modules    "$PUPPET_REPOS"
-  run_puppet_apply "$PUPPET_CLASSES" "$PUPPET_HOSTNAME"
+  run_enc_apply "$PUPPET_CLASSES" "$PUPPET_HOSTNAME"
+  run_manifest_apply "$PUPPET_MANIFEST" "$PUPPET_HOSTNAME"
   echo $? > $RESULTS_FILE
   echo "Puppet installation finished!"
   exit 0

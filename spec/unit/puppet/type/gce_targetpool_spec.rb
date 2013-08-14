@@ -1,22 +1,23 @@
 require 'puppet'
 require 'spec_helper'
 
-gce_network = Puppet::Type.type(:gce_network)
+gce_targetpool = Puppet::Type.type(:gce_targetpool)
 
-describe gce_network do
+describe gce_targetpool do
 
   let :params do
     [
      :name,
      :description,
-     :gateway,
-     :range,
+     :health_checks,
+     :instances,
+     :region,
     ]
   end
 
   it "should have expected parameters" do
     params.each do |param|
-      gce_network.parameters.should be_include(param)
+      gce_targetpool.parameters.should be_include(param)
     end
   end
 end

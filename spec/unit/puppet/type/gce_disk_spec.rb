@@ -10,6 +10,8 @@ describe gce_disk do
      :name,
      :zone,
      :size_gb,
+     :source_image,
+     :wait_until_complete,
      :description
     ]
   end
