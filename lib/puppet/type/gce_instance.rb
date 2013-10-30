@@ -70,7 +70,17 @@ Puppet::Type.newtype(:gce_instance) do
   end
 
   newparam(:service_account)
-  newparam(:service_account_scopes)
+
+  newparam(:service_account_scopes) do
+    desc 'Service account scopes indicate the level of access the instance has'
+    validate do |v|
+      raise(Puppet::Error, 'Scopes can only be arrays or strings') unless v.is_a?(Array) || v.is_a?(String)
+    end
+    munge do |v|
+      v.is_a?(Array) ? v.join(',') : v
+    end
+  end
+
   newparam(:can_ip_forward)
 
   # needs to support arrays

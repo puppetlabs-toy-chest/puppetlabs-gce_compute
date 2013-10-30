@@ -47,7 +47,8 @@ credentials for Google Compute Engine.
 
 On your Puppet Device Agent, [install and
 authenticate gcutil](https://developers.google.com/compute/docs/gcutil_setup).
-Note that this module was last updated to use gcutil-1.8.3.
+Note that this module was last updated to use gcutil-1.10.0 which uses the
+v1beta16 version of GCE's public API.
 
 The authentication process should generate this credential file:
 `~/.gcutil_auth`.
@@ -187,9 +188,17 @@ and wait for your GCE resources to be provisioned.  The above example
 can be found in `tests/all-up.pp` along with the script to destroy the
 environment in `tests/all-down.pp`.
 
+Note that if your GCE instances will need access to other Google Cloud
+services (e.g.
+[Google Cloud Storage](https://cloud.google.com/products/cloud-storage),
+[Google BigQuery](https://cloud.google.com/products/big-query), etc.) then you
+can specify access with the `--service_account_scopes`.  For more information
+about Service Account scopes, see
+[this page](https://developers.google.com/compute/docs/authentication).
+
 ### Classifying resources
 
-These resources support not only the ability to create virual machine
+These resources support not only the ability to create virtual machine
 instances as resources, but also the ability to use Puppet to classify those
 instances.
 
@@ -330,27 +339,21 @@ support for:
 These are some condensed *raw* notes on how the module was developed and
 tested.  Mostly, it's the output of my `history` with a few annotations.  I
 spun up a GCE instance through the console, and the logged into it via `gcutil
-ssh`.  Commands below beginning with `$` are non-privileged user commands,
-while commands beginning with `#` indicate commands executed as `root`.  Lines
-with `#//` are comments and no leading characters are output from the previous
-command.
+ssh`.
 
     #// This block was done with a fresh 'wheezy' and the puppet version included
     #// in the distro's repo (e.g. puppet 2.7.18)
-    $ sudo -i
-    # apt-get update && apt-get upgrade -y
-    # apt-get install git puppet vim
-    # exit
-    $ git clone https://github.com/erjohnso/puppetlabs-gce_compute.git
+    $ sudo apt-get update && sudo apt-get upgrade -y
+    $ sudo apt-get install git puppet -y
+    $ git clone https://github.com/puppetlabs/puppetlabs-gce_compute.git
     $ puppet apply --configprint deviceconfig
     $ mkdir -p ~/.puppet/modules
-    $ vim .puppet/device.conf
+    $ cat <<eof > ~/.puppet/device.conf
       [my_project]
          type gce
          url [/dev/null]:google.com:erjohnso
-    $ cd ~/.puppet/modules
-    $ ln -s ~/puppetlabs-gce_compute
-    $ puppet module list
+      eof
+    $ ln -s ~/puppetlabs-gce_compute ~/.puppet/modules/
     $ puppet module list
       /home/erjohnso/.puppet/modules
       |___ puppetlabs-gce_compute (???)
@@ -360,3 +363,18 @@ command.
     #// verify that mysql and apache are running, and the node is using puppet3
     $ gcutil ssh pe3-wheezy ' ps ax; puppet --version'
     $ puppet apply --certname my_project tests/down-pe3-wheezy.pp 
+
+## Testing
+
+The following platforms and software versions were tested.  In all cases,
+the sample manifests in the `tests` directory were used to verify full
+functionality.
+
+Note that when testing with various versions of `gcutil`, you simply need
+to make sure the version you want to use resolves in your PATH over other
+installed versions.
+
+ * Debian-7 (wheezy) puppet package (v2.7.23 that uses ruby1.8.7)
+   * gcutil 1.8.4 (v1beta15)
+   * gcutil 1.10.0 (v1beta16)
+

@@ -39,6 +39,15 @@ Puppet::Type.type(:gce_instance).provide(
     ['zone']
   end
 
+  def destroy
+    args = parameter_list.collect do |attr|
+      resource[attr] && "--#{attr}=#{resource[attr]}"
+    end.compact
+    args.push("--force")
+    args.push("--nodelete_boot_pd")
+    gcutilcmd("delete#{subcommand}", resource[:name], args)
+  end
+
   def create
     # set up options
     args = parameter_list.collect do |attr|

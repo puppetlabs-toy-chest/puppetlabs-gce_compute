@@ -6,7 +6,8 @@ class Puppet::Provider::Gce < Puppet::Provider
   def conn_opts
     [
       "--credentials_file=#{gce_device.auth_file}",
-      "--project=#{gce_device.project_id}"
+      "--project=#{gce_device.project_id}",
+      "--nocheck_for_new_version"
     ]
   end
 
@@ -49,7 +50,11 @@ class Puppet::Provider::Gce < Puppet::Provider
   end
 
   def self.gcutilcmd(device, *args)
-    gcutil(["--credentials_file=#{device.auth_file}", "--project=#{device.project_id}"], args)
+    # toggle the comment on these two gcutil commands to verify you're using
+    # the gcutil version you think you are
+    #p gcutil("version")
+    gcutil(["--credentials_file=#{device.auth_file}",
+      "--project=#{device.project_id}", "--nocheck_for_new_version"], args)
   end
 
   def gcutilcmd(*args)
