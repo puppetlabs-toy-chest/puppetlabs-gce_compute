@@ -114,7 +114,7 @@ have been created in the proper order.
         machine_type => 'n1-standard-1',
         zone         => 'us-central1-a',
         network      => 'default',
-        image        => 'projects/debian-cloud/global/images/debian-7-wheezy-v20130723',
+        image        => 'projects/debian-cloud/global/images/debian-7-wheezy-v20130926',
         tags         => ['web']
         manifest      => 'class apache ($version = "latest") {
           package {"apache2":
@@ -139,7 +139,7 @@ have been created in the proper order.
         machine_type => 'n1-standard-1',
         zone         => 'us-central1-b',
         network      => 'default',
-        image        => 'projects/debian-cloud/global/images/debian-7-wheezy-v20130723',
+        image        => 'projects/debian-cloud/global/images/debian-7-wheezy-v20130926',
         persistent_boot_disk => 'true',
         tags         => ['web']
         manifest      => 'class apache ($version = "latest") {
@@ -188,6 +188,8 @@ and wait for your GCE resources to be provisioned.  The above example
 can be found in `tests/all-up.pp` along with the script to destroy the
 environment in `tests/all-down.pp`.
 
+#### Service Account Scopes
+
 Note that if your GCE instances will need access to other Google Cloud
 services (e.g.
 [Google Cloud Storage](https://cloud.google.com/products/cloud-storage),
@@ -195,6 +197,14 @@ services (e.g.
 can specify access with the `--service_account_scopes`.  For more information
 about Service Account scopes, see
 [this page](https://developers.google.com/compute/docs/authentication).
+
+#### Persistent Disks and Instances
+
+By default, if you delete an instance that has a persistent boot disk, the
+disk will *not* be deleted unless you explicitly delete it.  When you
+create an instance, the module will first check to see if there is a
+pre-existing persistent disk with the same name as the instance and attempt
+to use that as the instances boot disk.
 
 ### Classifying resources
 

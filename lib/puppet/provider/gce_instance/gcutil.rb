@@ -75,7 +75,23 @@ Puppet::Type.type(:gce_instance).provide(
       script_file = File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..', '..', 'files', 'puppet-community.sh'))
       args.push("--metadata_from_file=startup-script:#{script_file}")
     end
-
+    # Here's an ugly hack.  Check to see if a PD exists with the instance
+    # name in the specified zone.
+    begin
+      gcutilcmd("getdisk", resource[:name], "--zone=#{resource[:zone]}")
+      has_boot_pd = true
+    rescue
+      has_boot_pd = false
+    end
+    # If there is an existing PD, alter the gcutil command-line args
+    # to add appropriate parameters to use the PD and remove unecessary
+    # command-line args.
+    if has_boot_pd
+      args.push("--disk=#{resource[:name]},mode=rw,boot")
+      args.push("--kernel=projects/google/global/kernels/gce-no-conn-track-v20130813")
+      args.delete_if {|x| x.start_with?("--image")}
+      args.delete_if {|x| x.start_with?("--persistent_boot")}
+    end
     gcutilcmd("add#{subcommand}", resource[:name], args, '--wait_until_running')
 
     # block for the startup script
