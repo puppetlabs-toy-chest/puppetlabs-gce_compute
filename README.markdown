@@ -384,7 +384,14 @@ Note that when testing with various versions of `gcutil`, you simply need
 to make sure the version you want to use resolves in your PATH over other
 installed versions.
 
- * Debian-7 (wheezy) puppet package (v2.7.23 that uses ruby1.8.7)
+Puppet Enterprise ships with `facter` and when run will attempt to read the
+value of `/sys/firmware/dmi/entries/1-0/raw` which is read-only by `root`.
+If you run `puppet apply` as an unprivileged user, you will see permission
+denie errors.
+
+ * Debian-7 (wheezy) puppet debian package (v2.7.23 that uses ruby1.8.7)
    * gcutil 1.8.4 (v1beta15)
    * gcutil 1.10.0 (v1beta16)
-
+ * Debian-7 (wheezy) Puppet Enterprise (v3.1.0 that uses ruby1.9.3p448)
+   * gcutil 1.8.4 (v1beta15)
+   * gcutil 1.10.0 (v1beta16)
