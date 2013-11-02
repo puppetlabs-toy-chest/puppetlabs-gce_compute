@@ -6,7 +6,7 @@ gce_instance { 'pe3-wheezy':
     network      => 'default',
     image        => 'projects/debian-cloud/global/images/debian-7-wheezy-v20130723',
     tags         => ['web'],
-    modules      => ['puppetlabs-mysql', 'puppetlabs-apache', 'puppetlabs-stdlib', 'ripienaar-concat'],
+    modules      => ['puppetlabs-mysql', 'puppetlabs-apache', 'puppetlabs-stdlib', 'puppetlabs-concat'],
     enc_classes  => {'mysql::server' => { 'config_hash' => { 'bind_address' => '127.0.0.1' }},
                      'apache' => nil,
                      'mysql::python' => nil
