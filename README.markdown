@@ -200,11 +200,24 @@ about Service Account scopes, see
 
 #### Persistent Disks and Instances
 
-By default, if you delete an instance that has a persistent boot disk, the
-disk will *not* be deleted unless you explicitly delete it.  When you
-create an instance, the module will first check to see if there is a
-pre-existing persistent disk with the same name as the instance and attempt
-to use that as the instances boot disk.
+When an instance is created without explicitly defining `persistent_boot_disk`
+to `true`, the module will first check to see if there is a pre-existing
+persistent disk with the same name as the instance and attempt to use that as
+the instance's boot disk.  The pre-existing PD with matching name must have
+been created with the `source_image` parameter *or* have been created from a
+previous instance so that there is a valid image/operating-system suitable for
+booting the instance.
+
+A scratch (ephemeral) disk will be used at instance create time if there is
+no explicit `persistent_boot_disk = 'true'` and there is no pre-existing PD
+with matching name.  Any data on a scratch disk will be lost if the instance
+is terminated.
+
+When you delete an instance that has a persistent boot disk, the disk will
+*not* be deleted.  This provides the default behavior of persisting your data
+between instance termination and re-creation.  If you truly want to delete a
+persistent disk, you must do so explicitly with it's own type-block and
+ensure=absent attribute.
 
 ### Classifying resources
 
