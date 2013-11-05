@@ -13,9 +13,6 @@ Puppet::Type.newtype(:gce_disk) do
     end
   end
 
-  # NOTE this could be a property eventually b/c
-  # it is possible to migrate disks between zones
-  #
   newparam(:zone) do
     desc 'zone where this disk lives'
   end
@@ -37,7 +34,9 @@ Puppet::Type.newtype(:gce_disk) do
   end
 
   validate do
-    raise(Puppet::Error, 'Must specify a zone for the disk') unless self[:zone]
+    if self[:ensure] == :present
+        raise(Puppet::Error, 'Must specify a zone for the disk') unless self[:zone]
+    end
   end
 
 end

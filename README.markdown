@@ -47,7 +47,8 @@ credentials for Google Compute Engine.
 
 On your Puppet Device Agent, [install and
 authenticate gcutil](https://developers.google.com/compute/docs/gcutil_setup).
-Note that this module was last updated to use gcutil-1.8.3.
+Note that this module was last updated to use gcutil-1.10.0 which uses the
+v1beta16 version of GCE's public API.
 
 The authentication process should generate this credential file:
 `~/.gcutil_auth`.
@@ -113,7 +114,7 @@ have been created in the proper order.
         machine_type => 'n1-standard-1',
         zone         => 'us-central1-a',
         network      => 'default',
-        image        => 'projects/debian-cloud/global/images/debian-7-wheezy-v20130723',
+        image        => 'projects/debian-cloud/global/images/debian-7-wheezy-v20130926',
         tags         => ['web']
         manifest      => 'class apache ($version = "latest") {
           package {"apache2":
@@ -138,7 +139,7 @@ have been created in the proper order.
         machine_type => 'n1-standard-1',
         zone         => 'us-central1-b',
         network      => 'default',
-        image        => 'projects/debian-cloud/global/images/debian-7-wheezy-v20130723',
+        image        => 'projects/debian-cloud/global/images/debian-7-wheezy-v20130926',
         persistent_boot_disk => 'true',
         tags         => ['web']
         manifest      => 'class apache ($version = "latest") {
@@ -187,9 +188,40 @@ and wait for your GCE resources to be provisioned.  The above example
 can be found in `tests/all-up.pp` along with the script to destroy the
 environment in `tests/all-down.pp`.
 
+#### Service Account Scopes
+
+Note that if your GCE instances will need access to other Google Cloud
+services (e.g.
+[Google Cloud Storage](https://cloud.google.com/products/cloud-storage),
+[Google BigQuery](https://cloud.google.com/products/big-query), etc.) then you
+can specify access with the `--service_account_scopes`.  For more information
+about Service Account scopes, see
+[this page](https://developers.google.com/compute/docs/authentication).
+
+#### Persistent Disks and Instances
+
+When an instance is created without explicitly defining `persistent_boot_disk`
+to `true`, the module will first check to see if there is a pre-existing
+persistent disk with the same name as the instance and attempt to use that as
+the instance's boot disk.  The pre-existing PD with matching name must have
+been created with the `source_image` parameter *or* have been created from a
+previous instance so that there is a valid image/operating-system suitable for
+booting the instance.
+
+A scratch (ephemeral) disk will be used at instance create time if there is
+no explicit `persistent_boot_disk = 'true'` and there is no pre-existing PD
+with matching name.  Any data on a scratch disk will be lost if the instance
+is terminated.
+
+When you delete an instance that has a persistent boot disk, the disk will
+*not* be deleted.  This provides the default behavior of persisting your data
+between instance termination and re-creation.  If you truly want to delete a
+persistent disk, you must do so explicitly with it's own type-block and
+ensure=absent attribute.
+
 ### Classifying resources
 
-These resources support not only the ability to create virual machine
+These resources support not only the ability to create virtual machine
 instances as resources, but also the ability to use Puppet to classify those
 instances.
 
@@ -330,27 +362,21 @@ support for:
 These are some condensed *raw* notes on how the module was developed and
 tested.  Mostly, it's the output of my `history` with a few annotations.  I
 spun up a GCE instance through the console, and the logged into it via `gcutil
-ssh`.  Commands below beginning with `$` are non-privileged user commands,
-while commands beginning with `#` indicate commands executed as `root`.  Lines
-with `#//` are comments and no leading characters are output from the previous
-command.
+ssh`.
 
     #// This block was done with a fresh 'wheezy' and the puppet version included
     #// in the distro's repo (e.g. puppet 2.7.18)
-    $ sudo -i
-    # apt-get update && apt-get upgrade -y
-    # apt-get install git puppet vim
-    # exit
-    $ git clone https://github.com/erjohnso/puppetlabs-gce_compute.git
+    $ sudo apt-get update && sudo apt-get upgrade -y
+    $ sudo apt-get install git puppet -y
+    $ git clone https://github.com/puppetlabs/puppetlabs-gce_compute.git
     $ puppet apply --configprint deviceconfig
     $ mkdir -p ~/.puppet/modules
-    $ vim .puppet/device.conf
+    $ cat <<eof > ~/.puppet/device.conf
       [my_project]
          type gce
          url [/dev/null]:google.com:erjohnso
-    $ cd ~/.puppet/modules
-    $ ln -s ~/puppetlabs-gce_compute
-    $ puppet module list
+      eof
+    $ ln -s ~/puppetlabs-gce_compute ~/.puppet/modules/
     $ puppet module list
       /home/erjohnso/.puppet/modules
       |___ puppetlabs-gce_compute (???)
@@ -360,3 +386,25 @@ command.
     #// verify that mysql and apache are running, and the node is using puppet3
     $ gcutil ssh pe3-wheezy ' ps ax; puppet --version'
     $ puppet apply --certname my_project tests/down-pe3-wheezy.pp 
+
+## Testing
+
+The following platforms and software versions were tested.  In all cases,
+the sample manifests in the `tests` directory were used to verify full
+functionality.
+
+Note that when testing with various versions of `gcutil`, you simply need
+to make sure the version you want to use resolves in your PATH over other
+installed versions.
+
+Puppet Enterprise ships with `facter` and when run will attempt to read the
+value of `/sys/firmware/dmi/entries/1-0/raw` which is read-only by `root`.
+If you run `puppet apply` as an unprivileged user, you will see permission
+denie errors.
+
+ * Debian-7 (wheezy) puppet debian package (v2.7.23 that uses ruby1.8.7)
+   * gcutil 1.8.4 (v1beta15)
+   * gcutil 1.10.0 (v1beta16)
+ * Debian-7 (wheezy) Puppet Enterprise (v3.1.0 that uses ruby1.9.3p448)
+   * gcutil 1.8.4 (v1beta15)
+   * gcutil 1.10.0 (v1beta16)
