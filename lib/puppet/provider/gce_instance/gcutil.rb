@@ -70,9 +70,19 @@ Puppet::Type.type(:gce_instance).provide(
     if resource[:module_repos]
       args.push("--metadata=puppet_repos:#{resource[:module_repos]}")
     end
-    if resource[:manifest] || resource[:modules] || resource[:enc_classes] || resource[:module_repos]
+    # turn hash into k/v pairs
+    if resource[:metadata]
+      resource[:metadata].each do |key, value|
+        args.push("--metadata=#{key}:#{value}")
+      end
+    end
+    if resource[:manifest] || resource[:modules] || resource[:enc_classes] || resource[:module_repos] || resource[:startupscript]
       # is we specified any classification info, we should call the bootstrap script
-      script_file = File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..', '..', 'files', 'puppet-community.sh'))
+      if resource[:startupscript]
+        script_file = File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..', '..', 'files', "#{resource[:startupscript]}"))
+      else
+        script_file = File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..', '..', 'files', 'puppet-community.sh'))
+      end
       args.push("--metadata_from_file=startup-script:#{script_file}")
     end
     # Here's an ugly hack.  Check to see if a PD exists with the instance
