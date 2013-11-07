@@ -178,7 +178,7 @@ function provision_puppet() {
     install_puppetagent
   fi
 
-  /opt/puppet/bin/puppet agent -t
+  /opt/puppet/bin/puppet agent --onetime --ignorecache --no-daemonize --no-usecacheonfailure --no-splay
   echo $? > $RESULTS_FILE
   echo "Puppet installation finished!"
   exit 0
