@@ -74,22 +74,31 @@ function install_puppet() {
 }
 
 function configure_puppet() {
+  local certname="$1"
+  local master="$2"
+  local service="$3"
+
   cat >/etc/puppet/puppet.conf <<EOFPUPPETCONF
 [main]
+  server     = "${master}"
   logdir     = /var/log/puppet
   rundir     = /var/run/puppet
   vardir     = /var/lib/puppet
   ssldir     = /var/lib/puppet/ssl
   modulepath = /etc/puppet/modules
-  certname   = "$1"
+  certname   = "${certname}"
 EOFPUPPETCONF
 
+  local start="no"
+  if [[ $service == 'present' ]]; then
+    start="yes"
+  fi
   if [ -f /etc/default/puppet ]; then
     cat > /etc/default/puppet <<EOFPUPPETDEFAULT
 # Defaults for puppet - sourced by /etc/init.d/puppet
 
 # Start puppet on boot?
-START=yes
+START=${start}
 
 # Startup options
 DAEMON_OPTS=""
@@ -199,6 +208,8 @@ function provision_puppet() {
   
   # For more on metadata, see https://developers.google.com/compute/docs/metadata
   MD="http://metadata/computeMetadata/v1beta1/instance"
+  PUPPET_MASTER=$(curl -fs $MD/attributes/puppet_master)
+  PUPPET_SERVICE=$(curl -fs $MD/attributes/puppet_service)
   PUPPET_CLASSES=$(curl -fs $MD/attributes/puppet_classes)
   PUPPET_MANIFEST=$(curl -fs $MD/attributes/puppet_manifest)
   PUPPET_MODULES=$(curl -fs $MD/attributes/puppet_modules)
@@ -222,11 +233,16 @@ function provision_puppet() {
   # END HACK
 
   install_puppet
-  configure_puppet "$PUPPET_HOSTNAME"
+  configure_puppet "$PUPPET_HOSTNAME" "$PUPPET_MASTER" "$PUPPET_SERVICE"
   download_modules "$PUPPET_MODULES"
   clone_modules    "$PUPPET_REPOS"
   run_enc_apply "$PUPPET_CLASSES" "$PUPPET_HOSTNAME"
   run_manifest_apply "$PUPPET_MANIFEST" "$PUPPET_HOSTNAME"
+
+  if [[ ${PUPPET_SERVICE} == 'present' ]]; then
+    puppet resource service puppet ensure=running enable=true
+  fi
+
   echo $? > $RESULTS_FILE
   echo "Puppet installation finished!"
   exit 0

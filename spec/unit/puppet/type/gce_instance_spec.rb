@@ -14,11 +14,12 @@ describe gce_instance do
      :zone,
      :tags,
      :use_compute_key,
-     :tags,
      :network,
      :image,
      :machine_type,
-     :persistent_boot_disk,
+     :on_host_maintenance,
+     :puppet_master,
+     :puppet_service,
      :can_ip_forward,
     ]
   end

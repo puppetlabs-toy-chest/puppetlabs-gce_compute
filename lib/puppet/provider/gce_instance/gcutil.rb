@@ -25,11 +25,11 @@ Puppet::Type.type(:gce_instance).provide(
       'image',
       'machine_type',
       'network',
+      'on_host_maintenance',
       'service_account',
       'service_account_scopes',
       'tags',
       'use_compute_key',
-      'persistent_boot_disk',
       'can_ip_forward',
       'zone'
     ]
@@ -51,12 +51,20 @@ Puppet::Type.type(:gce_instance).provide(
   def create
     # set up options
     args = parameter_list.collect do |attr|
-      if ["can_ip_forward", "persistent_boot_disk", "use_compute_key"].include? attr then
+      if ["can_ip_forward", "use_compute_key"].include? attr then
         resource[attr] ? "--#{attr}" : "--no#{attr}"
       else
         resource[attr] && "--#{attr}=#{resource[attr]}"
       end
     end.compact
+    if resource[:puppet_master]
+      args.push("--metadata=puppet_master:#{resource[:puppet_master]}")
+    else
+      args.push("--metadata=puppet_master:puppet")
+    end
+    if resource[:puppet_service]
+      args.push("--metadata=puppet_service:#{resource[:puppet_service]}")
+    end
     if resource[:enc_classes]
       class_hash = { 'classes' => parse_refs_from_hash(resource[:enc_classes]) }
       args.push("--metadata=puppet_classes:#{class_hash.to_yaml}")
@@ -76,8 +84,14 @@ Puppet::Type.type(:gce_instance).provide(
         args.push("--metadata=#{key}:#{value}")
       end
     end
-    if resource[:manifest] || resource[:modules] || resource[:enc_classes] || resource[:module_repos] || resource[:startupscript]
-      # is we specified any classification info, we should call the bootstrap script
+    if resource[:puppet_master] ||
+       resource[:puppet_service] ||
+       resource[:manifest] ||
+       resource[:modules] ||
+       resource[:enc_classes] ||
+       resource[:module_repos] ||
+       resource[:startupscript]
+      # if we specified any classification info, we should call the bootstrap script
       if resource[:startupscript]
         script_file = File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..', '..', 'files', "#{resource[:startupscript]}"))
       else
@@ -100,8 +114,22 @@ Puppet::Type.type(:gce_instance).provide(
       args.push("--disk=#{resource[:name]},mode=rw,boot")
       args.push("--kernel=projects/google/global/kernels/gce-no-conn-track-v20130813")
       args.delete_if {|x| x.start_with?("--image")}
-      args.delete_if {|x| x.start_with?("--persistent_boot")}
     end
+
+    # Special handling if root is the current user.
+    # By default, GCE instances are set up *without* a public key
+    # installed for root (in ~root/.ssh/authorized_keys).
+    # When calling "addinstance" a user must be set up to be able
+    # to SSH into that new instance.  If puppet is being run by a sudoer,
+    # then we use that ID.  Otherwise, we explicitly permit root login.
+    if ENV['USER'] == 'root'
+      if ENV['SUDO_USER'].empty?
+        args.push("--permit_root_ssh")
+      else
+        args.push("--ssh_user=#ENV['SUDO_USER']")
+      end
+    end
+
     gcutilcmd("add#{subcommand}", resource[:name], args, '--wait_until_running')
 
     # block for the startup script
