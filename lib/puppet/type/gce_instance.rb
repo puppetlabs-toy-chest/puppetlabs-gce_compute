@@ -161,7 +161,7 @@ Puppet::Type.newtype(:gce_instance) do
   end
 
   newparam(:module_repos) do
-    desc 'Hash of module repos (repo -> localdir) to be downloaded from github.'
+    desc 'Hash of module repos (localdir => repo) to be downloaded from github. Ex. apache => git@github.com:puppetlabs/puppetlabs-apache.git'
     defaultto ''
     validate do |v|
       raise(Puppet::Error, "module_repos expects a Hash.") unless(v.is_a?(Hash) || v.empty?)
