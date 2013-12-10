@@ -39,22 +39,16 @@ Engine using Puppet's DSL. This provides the following benefits:
 
 In order to use these resources, you will need to
 [signup](https://developers.google.com/compute/docs/signup)
- for a Google Compute account.
+ for a Google Cloud Platform account and enable Google Compute Engine.
 
 You will also need to designate one machine to be your Puppet Device Agent.
 This machine will be responsible for provisioning objects into Google Compute
-using its `gcutil` command-line utility and will be used to store your
-credentials for Google Compute Engine.
+using the `gcutil` command-line utility that is now bundled as part of Cloud
+SDK. Follow the setup instructions for the
+[Google Cloud SDK](https://developers.google.com/cloud/sdk/) and make sure
+to authenticate as instructed.
 
-On your Puppet Device Agent, [install and
-authenticate gcutil](https://developers.google.com/compute/docs/gcutil/#install).
-Note that this module was last updated to use gcutil-1.10.0 which uses the
-v1beta16 version of GCE's public API.
-
-The authentication process should generate this credential file:
-`~/.gcutil_auth`.
-
-Next, create your `device.conf` file on the Agent.  The default location for
+Next, create your `device.conf` file on the Agent. The default location for
 this file can be discovered by running the command (typically
 `/etc/puppet/device.conf`):
 
@@ -67,7 +61,7 @@ Each section header in this file is the name of the certificate that is
 associated with a specified set of credentials and project identifier.
 The element type should be set to 'gce' and the url should contain both the
 path to the credentials file appended to the name of the project in the format
-below.  If your Agent is itself running on a Google Compute Engine instance,
+below. If your Agent is itself running on a Google Compute Engine instance,
 you can specify `/dev/null` as your credential_file.
 
     #/etc/puppet/device.conf
@@ -89,7 +83,7 @@ multiple projects in GCE.
 ### Creating GCE Resources
 
 Now create a Puppet manifest that describes the google compute resources that
-you wish to manage.  The example below creates a 2GB persistent disk, two
+you wish to manage. The example below creates a 2GB persistent disk, two
 instances in different zones within the same region, a firewall rule on the
 `default` network, and sets up load-balancing between the two instances.
 Note the use of the Puppet `require` directive to ensure resource dependencies
@@ -108,25 +102,24 @@ have been created in the proper order.
         description => 'allows incoming HTTP connections',
         allowed     => 'tcp:80',
     }
-    gce_instance { 'www1-sd':
+    gce_instance { 'www1':
         ensure       => present,
         description  => 'web server',
         disk         => 'puppet-disk',
         machine_type => 'n1-standard-1',
         zone         => 'us-central1-a',
+        puppet_master => 'master-blaster',
+        puppet_service => present,
         network      => 'default',
         image        => 'projects/debian-cloud/global/images/debian-7-wheezy-v20131120',
-        tags         => ['web']
-        puppet_master  => "",
-        puppet_service => absent,
-        on_host_maintenance => 'terminate',
-        manifest      => 'class apache ($version = "latest") {
+        tags         => ['web'],
+        manifest     => 'class apache ($version = "latest") {
           package {"apache2":
             ensure => $version, # Using the class parameter from above
           }
           file {"/var/www/index.html":
             ensure  => present,
-            content => "<html>\n<body>\n\t<h2>Hi, this is $hostname ($gce_external_ip).</h2>\n</body>\n</html>\n",
+            content => "<html>\n<body>\n\t<h2>Hi, this is $gce_external_ip.</h2>\n</body>\n</html>\n",
             require => Package["apache2"],
           }
           service {"apache2":
@@ -135,27 +128,25 @@ have been created in the proper order.
             require => File["/var/www/index.html"],
           }
         }
-        include apache'
+        include apache',
     }
-    gce_instance { 'www2-pd':
+    gce_instance { 'www2':
         ensure       => present,
         description  => 'web server',
         machine_type => 'n1-standard-1',
         zone         => 'us-central1-b',
+        puppet_master => 'master-blaster',
+        puppet_service => present,
         network      => 'default',
         image        => 'projects/debian-cloud/global/images/debian-7-wheezy-v20131120',
-        tags         => ['web']
-        puppet_master  => "",
-        puppet_service => absent,
-        persistent_boot_disk => 'true',
-        on_host_maintenance  => 'terminate',
-        manifest      => 'class apache ($version = "latest") {
+        tags         => ['web'],
+        manifest     => 'class apache ($version = "latest") {
           package {"apache2":
             ensure => $version, # Using the class parameter from above
           }
           file {"/var/www/index.html":
             ensure  => present,
-            content => "<html>\n<body>\n\t<h2>Hi, this is $hostname ($gce_external_ip).</h2>\n</body>\n</html>\n",
+            content => "<html>\n<body>\n\t<h2>Hi, this is $gce_external_ip.</h2>\n</body>\n</html>\n",
             require => Package["apache2"],
           }
           service {"apache2":
@@ -164,18 +155,18 @@ have been created in the proper order.
             require => File["/var/www/index.html"],
           }
         }
-        include apache'
+        include apache',
     }
     gce_httphealthcheck { 'basic-http':
         ensure       => present,
-        require      => Gce_instance['www1-sd', 'www2-pd'],
+        require      => Gce_instance['www1', 'www2'],
         description  => 'basic http health check',
     }
     gce_targetpool { 'www-pool':
         ensure       => present,
         require      => Gce_httphealthcheck['basic-http'],
         health_checks => 'basic-http',
-        instances    => 'us-central1-a/www1-sd,us-central1-b/www2-pd',
+        instances    => 'us-central1-a/www1,us-central1-b/www2',
         region       => 'us-central1',
     }
     gce_forwardingrule { 'www-rule':
@@ -191,7 +182,7 @@ Run `puppet apply` on this manifest
 
     puppet apply --certname certname1 manifests/site.pp
 
-and wait for your GCE resources to be provisioned.  The above example
+and wait for your GCE resources to be provisioned. The above example
 can be found in `tests/all-up.pp` along with the script to destroy the
 environment in `tests/all-down.pp`.
 
@@ -201,30 +192,21 @@ Note that if your GCE instances will need access to other Google Cloud
 services (e.g.
 [Google Cloud Storage](https://cloud.google.com/products/cloud-storage),
 [Google BigQuery](https://cloud.google.com/products/big-query), etc.) then you
-can specify access with the `--service_account_scopes`.  For more information
+can specify access with the `--service_account_scopes`. For more information
 about Service Account scopes, see
 [this page](https://developers.google.com/compute/docs/authentication).
 
 #### Persistent Disks and Instances
 
-When an instance is created without explicitly defining `persistent_boot_disk`
-to `true`, the module will first check to see if there is a pre-existing
-persistent disk with the same name as the instance and attempt to use that as
-the instance's boot disk.  The pre-existing PD with matching name must have
-been created with the `source_image` parameter *or* have been created from a
-previous instance so that there is a valid image/operating-system suitable for
-booting the instance.
+When an instance is created, the module will first check to see if there is a
+pre-existing persistent disk with the same name as the instance and attempt to
+use that as the instance's boot disk. If no such disk exists, a new persistent
+disk will be created.
 
-A scratch (ephemeral) disk will be used at instance create time if there is
-no explicit `persistent_boot_disk = 'true'` and there is no pre-existing PD
-with matching name.  Any data on a scratch disk will be lost if the instance
-is terminated.
-
-When you delete an instance that has a persistent boot disk, the disk will
-*not* be deleted.  This provides the default behavior of persisting your data
-between instance termination and re-creation.  If you truly want to delete a
-persistent disk, you must do so explicitly with it's own type-block and
-ensure=absent attribute.
+When you delete an instance, the persistent disk will *not* be deleted. This
+provides the default behavior of persisting your data between instance
+termination and re-creation. If you truly want to delete a persistent disk,
+you must do so explicitly with it's own type-block and ensure=absent attribute.
 
 ### Classifying resources
 
@@ -261,7 +243,7 @@ Classification is specified with the following gce_instance parameters:
   ```enc_classes => {'mysql' => {'config_hash' => {'bind_address' => '0.0.0.0' }}}```
 
 * manifest - A string to pass in as a local manifest file and applied during
-  the bootstrap process.  See the example manifest files in `tests/*.pp`
+  the bootstrap process. See the example manifest files in `tests/*.pp`
   for examples on specifying full manifests.
 * block_for_startup_script - Whether the resource should block until its
   startup sctipt has completed.
@@ -279,7 +261,7 @@ gce_instance parameter:
   ```puppet_master => 'puppet'```
 
 If this parameter is specified, then it is used as the `server` parameter in
-`puppet.conf`.  If unspecified, the default of `puppet` is used.
+`puppet.conf`. If unspecified, the default of `puppet` is used.
 This parameter may be explicitly set to an empty string for a masterless instance.
 
 The solution allows specification of whether to start the puppet agent service
@@ -327,38 +309,41 @@ instance, the following syntax can be used from the classes parameter:
 
 This is interpreted by the resource to mean it should retrieve the value of
 the `internal_ip_address` property from the database resource of
-`Gce_instance`.  This syntax only supports retrieving `external_ip_address`
+`Gce_instance`. This syntax only supports retrieving `external_ip_address`
 and `internal_ip_address` from `Gce_instance` resources that are applied as
 part of the same catalog.
 
 It is also possible to lookup an instances of our own `$internal_ip_address`
-or `$external_ip_address`.  This value is retrieved from the bootstrap script.
+or `$external_ip_address`. This value is retrieved from the bootstrap script.
 
 ### Destroy GCE Resources
 
 To use the example above, the following manifest could be used to teardown
-the environment.  Not all parameters need be supplied when removing
-resources.  Note that in the example, one of the instances, `www2-pd`,
-was created with a `persistent_boot_disk`.  In the example below, we
-ensure that this boot disk is also destroyed.
+the environment. Not all parameters need be supplied when removing
+resources. Recall that persistent disks are not destroyed when an instance
+is destroyed but must be done so explicitly as in the following example:
 
     # manifests/site.pp
     gce_disk { 'puppet-disk':
         ensure      => absent,
         zone        => 'us-central1-a',
     }
-    gce_disk { 'www2-pd':
+    gce_disk { 'www1':
+        ensure      => absent,
+        zone        => 'us-central1-a',
+    }
+    gce_disk { 'www2':
         ensure      => absent,
         zone        => 'us-central1-b',
     }
     gce_firewall { 'allow-http':
         ensure      => absent,
     }
-    gce_instance { 'www1-sd':
+    gce_instance { 'www1':
         ensure       => absent,
         zone         => 'us-central1-a',
     }
-    gce_instance { 'www2-pd':
+    gce_instance { 'www2':
         ensure       => absent,
         zone         => 'us-central1-b',
     }
@@ -374,8 +359,7 @@ ensure that this boot disk is also destroyed.
         region       => 'us-central1',
     }
 
-    # tear them down in the proper order
-    Gce_instance["www1-sd", "www2-pd"] -> Gce_disk["www2-pd", "puppet-disk"]
+    Gce_instance["www1", "www2"] -> Gce_disk["www1", "www2", "puppet-disk"]
     Gce_forwardingrule["www-rule"] -> Gce_targetpool["www-pool"]
     Gce_targetpool["www-pool"] -> Gce_httphealthcheck["basic-http"]
 
@@ -385,7 +369,7 @@ The examples above and others can be found in `tests/*.pp`.
 
 ### TODO
 
-Not all GCE features have been implemented.  Currently, the module is missing
+Not all GCE features have been implemented. Currently, the module is missing
 support for:
 
 * Routes
@@ -394,7 +378,7 @@ support for:
 ### Development
 
 These are some condensed *raw* notes on how the module was developed and
-tested.  Mostly, it's the output of my `history` with a few annotations.  I
+tested. Mostly, it's the output of my `history` with a few annotations. I
 spun up a GCE instance through the console, and the logged into it via `gcutil
 ssh`.
 
@@ -423,22 +407,14 @@ ssh`.
 
 ## Testing
 
-The following platforms and software versions were tested.  In all cases,
-the sample manifests in the `tests` directory were used to verify full
-functionality.
-
-Note that when testing with various versions of `gcutil`, you simply need
-to make sure the version you want to use resolves in your PATH over other
-installed versions.
+ * Debian-7 (wheezy) puppet debian package (v2.7.23 using ruby1.8.7)
+   * Cloud SDK's gcutil version 1.12.0
+ * Debian-7 (wheezy) puppet open-source (v3.3.2 using ruby1.9.3p194)
+   * Cloud SDK's gcutil version 1.12.0
+ * Debian-7 (wheezy) Puppet Enterprise v3.1.0 (v3.3.1 using ruby1.9.3p448)
+   * Cloud SDK's gcutil version 1.12.0
 
 Puppet Enterprise ships with `facter` and when run will attempt to read the
-value of `/sys/firmware/dmi/entries/1-0/raw` which is read-only by `root`.
+value from executing `dmidecode` which can only by done by `root` (or sudo).
 If you run `puppet apply` as an unprivileged user, you will see permission
-denie errors.
-
- * Debian-7 (wheezy) puppet debian package (v2.7.23 that uses ruby1.8.7)
-   * gcutil 1.8.4 (v1beta15)
-   * gcutil 1.10.0 (v1beta16)
- * Debian-7 (wheezy) Puppet Enterprise (v3.1.0 that uses ruby1.9.3p448)
-   * gcutil 1.8.4 (v1beta15)
-   * gcutil 1.10.0 (v1beta16)
+denied errors.
