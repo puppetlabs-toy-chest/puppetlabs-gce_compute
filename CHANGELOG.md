@@ -1,3 +1,8 @@
+### 20131210 v0.3.0
+ * Updated for GCE v1 (General Availability) and Cloud SDK
+ * Remove tested support for older gcutil versions running against beta APIs
+ * Matt Bookman contributions for puppet_master, puppet_service, on_host_maintenance
+
 ### 20131105 v0.2.0
  * Updated for gcutil-1.10.0 (v1beta16)
  * Fixes #18 submited by @jhoblitt
