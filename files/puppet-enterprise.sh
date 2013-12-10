@@ -51,6 +51,27 @@ q_vendor_packages_install=y
 ANSWERS
 }
 
+function write_agentanswers() {
+  cat > /opt/agentanswers.txt << ANSWERS
+q_fail_on_unsuccessful_master_lookup=y
+q_install=y
+q_puppet_cloud_install=n
+q_puppet_enterpriseconsole_install=n
+q_puppet_symlinks_install=y
+q_puppetagent_certname=$(hostname -f)
+q_puppetagent_install=y
+q_puppetagent_server=$PUPPET_PE_MASTER
+q_puppetca_install=n
+q_puppetdb_hostname=
+q_puppetdb_install=n
+q_puppetdb_port=
+q_puppetmaster_install=n
+q_vendor_packages_install=y
+q_continue_or_reenter_master_hostname=c
+q_verify_packages=y
+ANSWERS
+}
+
 function install_puppetmaster() {
   if [ ! -d /opt/puppet-enterprise ]; then
     mkdir -p /opt/puppet-enterprise
@@ -78,13 +99,22 @@ function download_modules() {
 }
 
 function install_puppetagent () {
-  case ${breed} in
-    "redhat")
-      ntpdate -u metadata.google.internal
-      curl -s http://$PUPPET_PE_MASTER/el.bash | /bin/bash ;;
-    "debian")
-      curl -s http://$PUPPET_PE_MASTER/deb.bash | /bin/bash ;;
-  esac
+  if [ ! -d /opt/puppet-enterprise ]; then
+    mkdir -p /opt/puppet-enterprise
+  fi
+  if [ ! -f /opt/puppet-enterprise/puppet-enterprise-installer ]; then
+    case ${breed} in
+      "redhat")
+        ntpdate -u metadata.google.internal
+        curl -s -o /opt/pe-installer.tar.gz "https://s3.amazonaws.com/pe-builds/released/$PUPPET_PE_VERSION/puppet-enterprise-$PUPPET_PE_VERSION-el-6-x86_64.tar.gz" ;;
+      "debian")
+        curl -s -o /opt/pe-installer.tar.gz "https://s3.amazonaws.com/pe-builds/released/$PUPPET_PE_VERSION/puppet-enterprise-$PUPPET_PE_VERSION-debian-7-amd64.tar.gz" ;;
+    esac
+    #Drop installer in predictable location
+    tar --extract --file=/opt/pe-installer.tar.gz --strip-components=1 --directory=/opt/puppet-enterprise
+  fi
+  write_agentanswers
+  /opt/puppet-enterprise/puppet-enterprise-installer -a /opt/agentanswers.txt
 }
 
 function clone_modules() {
@@ -178,7 +208,8 @@ function provision_puppet() {
     install_puppetagent
   fi
 
-  /opt/puppet/bin/puppet agent --onetime --ignorecache --no-daemonize --no-usecacheonfailure --no-splay
+  #/opt/puppet/bin/puppet agent --onetime --no-daemonize --color=false --verbose --splay --splaylimit 30 --waitforcert
+  /opt/puppet/bin/puppet agent --onetime --no-daemonize --color=false --verbose --waitforcert
   echo $? > $RESULTS_FILE
   echo "Puppet installation finished!"
   exit 0
