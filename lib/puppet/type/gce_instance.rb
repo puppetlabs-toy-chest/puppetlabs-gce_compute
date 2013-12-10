@@ -65,8 +65,9 @@ Puppet::Type.newtype(:gce_instance) do
     self[:network]
   end
 
-  newparam(:persistent_boot_disk) do
-    desc 'Automatically create a persistent boot disk with image'
+  # Live Migrate ("migrate") or kill the instance ("terminate") during maintenance
+  newparam :on_host_maintenance do
+    desc 'How instance should behave when the host machine undergoes maintenance'
   end
 
   newparam(:service_account)
@@ -135,6 +136,17 @@ Puppet::Type.newtype(:gce_instance) do
 #  newparam(:project_id) do
 #    desc 'id of the project. In the general case, this is retrieved from device.conf.'
 #  end
+
+  newparam(:puppet_master) do
+    desc 'Hostname of the puppet master instance to connect to'
+  end
+
+  newparam(:puppet_service) do
+    desc 'Whether to start the puppet service or not'
+    validate do |v|
+      raise(Puppet::Error, "puppet_service must be 'absent' or 'present'.") unless v.is_a?(String) and (v == 'absent' or v == 'present')
+    end
+  end
 
   # classification specific parameters
   newparam(:enc_classes) do

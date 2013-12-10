@@ -8,6 +8,7 @@ and destruction of objects in Google Compute Engine
 Resources.
 
 It provides the following resource types:
+
 * gce_instance - Virtual machine instances that can be assigned roles.
 * gce_disk     - Persistent disks that can be attached to instances.
 * gce_firewall - Firewall rules that specify the traffic to your instances.
@@ -46,7 +47,7 @@ using its `gcutil` command-line utility and will be used to store your
 credentials for Google Compute Engine.
 
 On your Puppet Device Agent, [install and
-authenticate gcutil](https://developers.google.com/compute/docs/gcutil_setup).
+authenticate gcutil](https://developers.google.com/compute/docs/gcutil/#install).
 Note that this module was last updated to use gcutil-1.10.0 which uses the
 v1beta16 version of GCE's public API.
 
@@ -114,15 +115,18 @@ have been created in the proper order.
         machine_type => 'n1-standard-1',
         zone         => 'us-central1-a',
         network      => 'default',
-        image        => 'projects/debian-cloud/global/images/debian-7-wheezy-v20130926',
+        image        => 'projects/debian-cloud/global/images/debian-7-wheezy-v20131120',
         tags         => ['web']
+        puppet_master  => "",
+        puppet_service => absent,
+        on_host_maintenance => 'terminate',
         manifest      => 'class apache ($version = "latest") {
           package {"apache2":
             ensure => $version, # Using the class parameter from above
           }
           file {"/var/www/index.html":
             ensure  => present,
-            content => "<html>\n<body>\n\t<h2>Hi, this is $gce_external_ip.</h2>\n</body>\n</html>\n",
+            content => "<html>\n<body>\n\t<h2>Hi, this is $hostname ($gce_external_ip).</h2>\n</body>\n</html>\n",
             require => Package["apache2"],
           }
           service {"apache2":
@@ -139,16 +143,19 @@ have been created in the proper order.
         machine_type => 'n1-standard-1',
         zone         => 'us-central1-b',
         network      => 'default',
-        image        => 'projects/debian-cloud/global/images/debian-7-wheezy-v20130926',
-        persistent_boot_disk => 'true',
+        image        => 'projects/debian-cloud/global/images/debian-7-wheezy-v20131120',
         tags         => ['web']
+        puppet_master  => "",
+        puppet_service => absent,
+        persistent_boot_disk => 'true',
+        on_host_maintenance  => 'terminate',
         manifest      => 'class apache ($version = "latest") {
           package {"apache2":
             ensure => $version, # Using the class parameter from above
           }
           file {"/var/www/index.html":
             ensure  => present,
-            content => "<html>\n<body>\n\t<h2>Hi, this is $gce_external_ip.</h2>\n</body>\n</html>\n",
+            content => "<html>\n<body>\n\t<h2>Hi, this is $hostname ($gce_external_ip).</h2>\n</body>\n</html>\n",
             require => Package["apache2"],
           }
           service {"apache2":
@@ -180,7 +187,7 @@ have been created in the proper order.
         target       => 'www-pool',
     }
 
-Run puppet apply on this manifest
+Run `puppet apply` on this manifest
 
     puppet apply --certname certname1 manifests/site.pp
 
@@ -261,6 +268,30 @@ Classification is specified with the following gce_instance parameters:
 * startup_script_timeout - Amount of time to wait before timing out when
   blocking for a startup script.
 
+### Puppet Master and Service specification
+
+The solution allows specification of a puppet master instance with the
+gce_instance parameter:
+
+* puppet_master - Hostname of the puppet master instance that the
+  agent instance must be able to resolve.
+
+  ```puppet_master => 'puppet'```
+
+If this parameter is specified, then it is used as the `server` parameter in
+`puppet.conf`.  If unspecified, the default of `puppet` is used.
+This parameter may be explicitly set to an empty string for a masterless instance.
+
+The solution allows specification of whether to start the puppet agent service
+with the gce_instance parameter:
+
+* puppet_service - `absent` or `present` (default `absent`)
+
+  ```puppet_service => present```
+
+If this parameter is specified, then the puppet service is automatically started
+on the managed instance and set to restart on boot (in `/etc/default/puppet`).
+
 ### Implementation of classification
 
 Classification is implemented by using metaparameters to pass information to
@@ -276,10 +307,13 @@ if module, module_repos, or classes are set.
 
 The script downloads the following metadata from the instance in order to
 bootstrap it:
-* puppet_modules  - set when the modules attribute is specified.
-* puppet_classes  - set when the ENC classes attribute is specified.
-* puppet_manifest - set when the manifest attribute is specified.
-* puppet_repos    - set when the module_repos attribute is specified.
+
+* puppet\_modules  - set when the modules attribute is specified.
+* puppet\_classes  - set when the ENC classes attribute is specified.
+* puppet\_manifest - set when the manifest attribute is specified.
+* puppet\_repos    - set when the module\_repos attribute is specified.
+* puppet\_master   - set when the puppet\_master attribute is specified.
+* puppet\_service  - set when the puppet\_service attribute is specified.
 
 ### Data Lookups
 
