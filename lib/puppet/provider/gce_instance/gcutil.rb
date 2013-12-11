@@ -99,20 +99,22 @@ Puppet::Type.type(:gce_instance).provide(
       end
       args.push("--metadata_from_file=startup-script:#{script_file}")
     end
-    # Here's an ugly hack.  Check to see if a PD exists with the instance
-    # name in the specified zone.
-    begin
-      gcutilcmd("getdisk", resource[:name], "--zone=#{resource[:zone]}")
-      has_boot_pd = true
-    rescue
-      has_boot_pd = false
-    end
-    # If there is an existing PD, alter the gcutil command-line args
-    # to add appropriate parameters to use the PD and remove unecessary
-    # command-line args.
-    if has_boot_pd
-      args.push("--disk=#{resource[:name]},mode=rw,boot")
-      args.delete_if {|x| x.start_with?("--image")}
+    # If the user hasn't specified a disk, check to see if one exists
+    # and alter args to use it as the boot disk
+    if not resource[:disk]
+        begin
+          gcutilcmd("getdisk", resource[:name], "--zone=#{resource[:zone]}")
+          has_boot_pd = true
+        rescue
+          has_boot_pd = false
+        end
+        # If there is an existing PD, alter the gcutil command-line args
+        # to add appropriate parameters to use the PD and remove unecessary
+        # command-line args.
+        if has_boot_pd
+          args.push("--disk=#{resource[:name]},mode=rw,boot")
+          args.delete_if {|x| x.start_with?("--image")}
+        end
     end
 
     # Special handling if root is the current user.
