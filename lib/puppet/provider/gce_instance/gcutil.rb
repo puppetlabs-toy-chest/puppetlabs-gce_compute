@@ -112,7 +112,6 @@ Puppet::Type.type(:gce_instance).provide(
     # command-line args.
     if has_boot_pd
       args.push("--disk=#{resource[:name]},mode=rw,boot")
-      args.push("--kernel=projects/google/global/kernels/gce-no-conn-track-v20130813")
       args.delete_if {|x| x.start_with?("--image")}
     end
 
