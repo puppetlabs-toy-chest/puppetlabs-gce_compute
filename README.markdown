@@ -58,16 +58,34 @@ The `device.conf` file is used to map multiple certificate names to Google
 Compute projects.
 
 Each section header in this file is the name of the certificate that is
-associated with a specified set of credentials and project identifier.
-The element type should be set to 'gce' and the url should contain both the
-path to the credentials file appended to the name of the project in the format
-below. If your Agent is itself running on a Google Compute Engine instance,
-you can specify `/dev/null` as your credential_file.
+associated with a specified set of credential placeholder path and project
+identifier.  The element type should be set to 'gce' and the url should
+contain both a file path and the name of the project in the format below:
 
     #/etc/puppet/device.conf
     [my_project1]
       type gce
-      url [credential_file]:project_id
+      url [/dev/null]:project_id
+
+Note that this version of the gce_compute module sets the file path to
+`/dev/null`.  This is a placeholder value that will be used to reference
+a credentials file in a newer release of this module.  For now, setting
+the value to `/dev/null` is a working solution as long as you have previously
+set up Cloud SDK with the `gcloud auth login` command.
+
+### Multiple Projects
+
+You can use multiple cloud projects by making the appropriate entries in your
+`device.conf` file and adjusting the Cloud SDK settings.  For each project,
+you'll first need to create authorize each project with:
+
+    gcloud auth set account ANOTHER_ACCOUNT_NAME
+    gcloud auth login
+
+Once all of your projects have been authorized, you can toggle which project
+will be used prior to invoking `puppet apply` by using:
+
+    gcloud config set project PROJECT
 
 The example below show how multiple certificate names can be used to represent
 multiple projects in GCE.
@@ -75,10 +93,10 @@ multiple projects in GCE.
     #/etc/puppet/device.conf
     [certname1]
       type gce
-      url [~/.gcutil_auth]:group:my_project1
+      url [/dev/null]:group:my_project1
     [certname2]
       type gce
-      url [~/.gcutil_auth]:group:my_project2
+      url [/dev/null]:group:my_project2
 
 ### Creating GCE Resources
 
