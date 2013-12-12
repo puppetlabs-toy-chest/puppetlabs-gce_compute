@@ -104,6 +104,11 @@ Puppet::Type.newtype(:gce_instance) do
 #    end
 #  end
 
+  newparam(:add_compute_key_to_project) do
+    desc 'Try to add the user\'s Google compute key to the project'
+    newvalues(true, false)
+  end
+
   newparam(:use_compute_key) do
     desc 'If the default google compute key should be added to the instance'
     newvalues(true, false)

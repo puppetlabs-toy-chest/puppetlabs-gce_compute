@@ -29,6 +29,7 @@ Puppet::Type.type(:gce_instance).provide(
       'service_account',
       'service_account_scopes',
       'tags',
+      'add_compute_key_to_project',
       'use_compute_key',
       'can_ip_forward',
       'zone'
@@ -51,7 +52,9 @@ Puppet::Type.type(:gce_instance).provide(
   def create
     # set up options
     args = parameter_list.collect do |attr|
-      if ["can_ip_forward", "use_compute_key"].include? attr then
+      if ["can_ip_forward",
+          "use_compute_key",
+          "add_compute_key_to_project"].include? attr then
         resource[attr] ? "--#{attr}" : "--no#{attr}"
       else
         resource[attr] && "--#{attr}=#{resource[attr]}"
@@ -102,19 +105,19 @@ Puppet::Type.type(:gce_instance).provide(
     # If the user hasn't specified a disk, check to see if one exists
     # and alter args to use it as the boot disk
     if not resource[:disk]
-        begin
-          gcutilcmd("getdisk", resource[:name], "--zone=#{resource[:zone]}")
-          has_boot_pd = true
-        rescue
-          has_boot_pd = false
-        end
-        # If there is an existing PD, alter the gcutil command-line args
-        # to add appropriate parameters to use the PD and remove unecessary
-        # command-line args.
-        if has_boot_pd
-          args.push("--disk=#{resource[:name]},mode=rw,boot")
-          args.delete_if {|x| x.start_with?("--image")}
-        end
+      begin
+        gcutilcmd("getdisk", resource[:name], "--zone=#{resource[:zone]}")
+        has_boot_pd = true
+      rescue
+        has_boot_pd = false
+      end
+      # If there is an existing PD, alter the gcutil command-line args
+      # to add appropriate parameters to use the PD and remove unecessary
+      # command-line args.
+      if has_boot_pd
+        args.push("--disk=#{resource[:name]},mode=rw,boot")
+        args.delete_if {|x| x.start_with?("--image")}
+      end
     end
 
     # Special handling if root is the current user.
@@ -127,7 +130,7 @@ Puppet::Type.type(:gce_instance).provide(
       if ENV['SUDO_USER'].empty?
         args.push("--permit_root_ssh")
       else
-        args.push("--ssh_user=#ENV['SUDO_USER']")
+        args.push("--ssh_user=#{ENV['SUDO_USER']}")
       end
     end
 
