@@ -21,6 +21,7 @@ describe gce_instance do
      :puppet_master,
      :puppet_service,
      :can_ip_forward,
+     :add_compute_key_to_project,
     ]
   end
 
