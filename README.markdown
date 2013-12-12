@@ -128,6 +128,7 @@ have been created in the proper order.
         zone         => 'us-central1-a',
         puppet_master => 'master-blaster',
         puppet_service => present,
+        on_host_maintenance => 'migrate',
         network      => 'default',
         image        => 'projects/debian-cloud/global/images/debian-7-wheezy-v20131120',
         tags         => ['web'],
@@ -155,6 +156,7 @@ have been created in the proper order.
         zone         => 'us-central1-b',
         puppet_master => 'master-blaster',
         puppet_service => present,
+        on_host_maintenance => 'migrate',
         network      => 'default',
         image        => 'projects/debian-cloud/global/images/debian-7-wheezy-v20131120',
         tags         => ['web'],
@@ -225,6 +227,13 @@ When you delete an instance, the persistent disk will *not* be deleted. This
 provides the default behavior of persisting your data between instance
 termination and re-creation. If you truly want to delete a persistent disk,
 you must do so explicitly with it's own type-block and ensure=absent attribute.
+
+### Enable/Disable Live Instance Migration
+
+Your Compute Engine instances, by default, will enable live migration.  In
+the event that Google needs to perform a datacenter maintenance, your instance
+will be automatically migrated to a new location without visible impact.
+This feature can be disabled by setting `on_host_migration` to `false`.
 
 ### Classifying resources
 
