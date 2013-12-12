@@ -12,14 +12,14 @@ gce_firewall { 'allow-http':
     description => 'allows incoming HTTP connections',
     allowed     => 'tcp:80',
 }
-gce_instance { 'www1-sd':
+gce_instance { 'www1':
     ensure       => present,
     description  => 'web server',
     disk         => 'puppet-disk',
     machine_type => 'n1-standard-1',
     zone         => 'us-central1-a',
     network      => 'default',
-    image        => 'projects/debian-cloud/global/images/debian-7-wheezy-v20130723',
+    image        => 'projects/debian-cloud/global/images/debian-7-wheezy-v20131120',
     tags         => ['web'],
     manifest     => 'class apache ($version = "latest") {
       package {"apache2":
@@ -38,14 +38,13 @@ gce_instance { 'www1-sd':
     }
     include apache',
 }
-gce_instance { 'www2-pd':
+gce_instance { 'www2':
     ensure       => present,
     description  => 'web server',
     machine_type => 'n1-standard-1',
     zone         => 'us-central1-b',
     network      => 'default',
-    image        => 'projects/debian-cloud/global/images/debian-7-wheezy-v20130723',
-    persistent_boot_disk => 'true',
+    image        => 'projects/debian-cloud/global/images/debian-7-wheezy-v20131120',
     tags         => ['web'],
     manifest     => 'class apache ($version = "latest") {
       package {"apache2":
@@ -66,14 +65,14 @@ gce_instance { 'www2-pd':
 }
 gce_httphealthcheck { 'basic-http':
     ensure       => present,
-    require      => Gce_instance['www1-sd', 'www2-pd'],
+    require      => Gce_instance['www1', 'www2'],
     description  => 'basic http health check',
 }
 gce_targetpool { 'www-pool':
     ensure       => present,
     require      => Gce_httphealthcheck['basic-http'],
     health_checks => 'basic-http',
-    instances    => 'us-central1-a/www1-sd,us-central1-b/www2-pd',
+    instances    => 'us-central1-a/www1,us-central1-b/www2',
     region       => 'us-central1',
 }
 gce_forwardingrule { 'www-rule':
