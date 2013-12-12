@@ -120,20 +120,6 @@ Puppet::Type.type(:gce_instance).provide(
       end
     end
 
-    # Special handling if root is the current user.
-    # By default, GCE instances are set up *without* a public key
-    # installed for root (in ~root/.ssh/authorized_keys).
-    # When calling "addinstance" a user must be set up to be able
-    # to SSH into that new instance.  If puppet is being run by a sudoer,
-    # then we use that ID.  Otherwise, we explicitly permit root login.
-    if ENV['USER'] == 'root'
-      if ENV['SUDO_USER'].empty?
-        args.push("--permit_root_ssh")
-      else
-        args.push("--ssh_user=#{ENV['SUDO_USER']}")
-      end
-    end
-
     gcutilcmd("add#{subcommand}", resource[:name], args, '--wait_until_running')
 
     # block for the startup script

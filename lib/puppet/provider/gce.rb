@@ -56,6 +56,7 @@ class Puppet::Provider::Gce < Puppet::Provider
   end
 
   def gcutilcmd(*args)
+    #p args
     self.class.gcutilcmd(gce_device, args)
   end
 
