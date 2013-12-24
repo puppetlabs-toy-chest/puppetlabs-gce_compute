@@ -161,7 +161,7 @@ Puppet::Type.newtype(:gce_instance) do
   end
 
   newparam(:module_repos) do
-    desc 'Hash of module repos (repo -> localdir) to be downloaded from github.'
+    desc 'Hash of module repos (localdir => repo) to be downloaded from github. Ex. apache => git@github.com:puppetlabs/puppetlabs-apache.git'
     defaultto ''
     validate do |v|
       raise(Puppet::Error, "module_repos expects a Hash.") unless(v.is_a?(Hash) || v.empty?)
@@ -169,12 +169,26 @@ Puppet::Type.newtype(:gce_instance) do
     munge do |v|
       new_value = []
       if v.respond_to?('each')
-        v.each do |k,v|
+        v.each do |v,k|
           new_value << "#{k}##{v}"
         end
       end
       new_value.join(',')
     end
+  end
+
+# Adds generic metadata, keys k/v hash into metadata k/v
+#
+  newparam(:metadata) do
+    desc 'Creates vm metadata out of k => v hashes'
+    defaultto ''
+    validate do |v|
+      raise(Puppet::Error, "metadata expects a Hash.") unless(v.is_a?(Hash) || v.empty?)
+    end
+  end
+
+  newparam(:startupscript) do
+    desc 'Sets startupscript name to load from files/ directory'
   end
 
 # TODO add support for setting top scope parameters
