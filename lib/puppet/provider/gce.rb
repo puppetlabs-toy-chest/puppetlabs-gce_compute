@@ -3,14 +3,6 @@
 #
 class Puppet::Provider::Gce < Puppet::Provider
 
-  def conn_opts
-    [
-      "--credentials_file=#{gce_device.auth_file}",
-      "--project=#{gce_device.project_id}",
-      "--nocheck_for_new_version"
-    ]
-  end
-
   def gce_device
     # this is constantly reloading the device when using puppet apply..
     # needs to be refactored to be faster
@@ -53,12 +45,19 @@ class Puppet::Provider::Gce < Puppet::Provider
     # toggle the comment on these two gcutil commands to verify you're using
     # the gcutil version you think you are
     #p gcutil("version")
-    gcutil(["--credentials_file=#{device.auth_file}",
-      "--project=#{device.project_id}", "--nocheck_for_new_version"], args)
+    conn_opts = []
+    conn_opts << "--nocheck_for_new_version"
+    conn_opts << "--service_version=v1"
+    conn_opts << "--project=#{device.project_id}" \
+      unless device.project_id.empty?
+    conn_opts << "--credentials_file=#{device.auth_file}" \
+      unless device.auth_file.empty? or (device.auth_file == "/dev/null")
+    gcutil(conn_opts, args)
   end
 
   def gcutilcmd(*args)
-    gcutil(conn_opts, args)
+    #p args
+    self.class.gcutilcmd(gce_device, args)
   end
 
   def self.prefetch(r)

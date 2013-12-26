@@ -65,8 +65,9 @@ Puppet::Type.newtype(:gce_instance) do
     self[:network]
   end
 
-  newparam(:persistent_boot_disk) do
-    desc 'Automatically create a persistent boot disk with image'
+  # Live Migrate ("migrate") or kill the instance ("terminate") during maintenance
+  newparam :on_host_maintenance do
+    desc 'How instance should behave when the host machine undergoes maintenance'
   end
 
   newparam(:service_account)
@@ -103,6 +104,11 @@ Puppet::Type.newtype(:gce_instance) do
 #    end
 #  end
 
+  newparam(:add_compute_key_to_project) do
+    desc 'Try to add the user\'s Google compute key to the project'
+    newvalues(true, false)
+  end
+
   newparam(:use_compute_key) do
     desc 'If the default google compute key should be added to the instance'
     newvalues(true, false)
@@ -136,6 +142,17 @@ Puppet::Type.newtype(:gce_instance) do
 #    desc 'id of the project. In the general case, this is retrieved from device.conf.'
 #  end
 
+  newparam(:puppet_master) do
+    desc 'Hostname of the puppet master instance to connect to'
+  end
+
+  newparam(:puppet_service) do
+    desc 'Whether to start the puppet service or not'
+    validate do |v|
+      raise(Puppet::Error, "puppet_service must be 'absent' or 'present'.") unless v.is_a?(String) and (v == 'absent' or v == 'present')
+    end
+  end
+
   # classification specific parameters
   newparam(:enc_classes) do
     desc 'A hash of ENC classes used to assign a Puppet class to this instance.'
@@ -161,7 +178,7 @@ Puppet::Type.newtype(:gce_instance) do
   end
 
   newparam(:module_repos) do
-    desc 'Hash of module repos (repo -> localdir) to be downloaded from github.'
+    desc 'Hash of module repos (localdir => repo) to be downloaded from github. Ex. apache => git@github.com:puppetlabs/puppetlabs-apache.git'
     defaultto ''
     validate do |v|
       raise(Puppet::Error, "module_repos expects a Hash.") unless(v.is_a?(Hash) || v.empty?)
@@ -169,12 +186,26 @@ Puppet::Type.newtype(:gce_instance) do
     munge do |v|
       new_value = []
       if v.respond_to?('each')
-        v.each do |k,v|
+        v.each do |v,k|
           new_value << "#{k}##{v}"
         end
       end
       new_value.join(',')
     end
+  end
+
+# Adds generic metadata, keys k/v hash into metadata k/v
+#
+  newparam(:metadata) do
+    desc 'Creates vm metadata out of k => v hashes'
+    defaultto ''
+    validate do |v|
+      raise(Puppet::Error, "metadata expects a Hash.") unless(v.is_a?(Hash) || v.empty?)
+    end
+  end
+
+  newparam(:startupscript) do
+    desc 'Sets startupscript name to load from files/ directory'
   end
 
 # TODO add support for setting top scope parameters
@@ -199,7 +230,7 @@ Puppet::Type.newtype(:gce_instance) do
     if self[:ensure] == :present
       raise(Puppet::Error, "Did not specify required param machine_type") unless self[:machine_type]
       raise(Puppet::Error, "Did not specify required param zone") unless self[:zone]
-      raise(Puppet::Error, "Did not specify required param image") unless self[:image]
+      raise(Puppet::Error, "Did not specify required param image or disk") unless self[:image] or self[:disk]
     end
   end
 

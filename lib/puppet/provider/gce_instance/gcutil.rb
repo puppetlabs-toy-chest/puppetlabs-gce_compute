@@ -25,11 +25,12 @@ Puppet::Type.type(:gce_instance).provide(
       'image',
       'machine_type',
       'network',
+      'on_host_maintenance',
       'service_account',
       'service_account_scopes',
       'tags',
+      'add_compute_key_to_project',
       'use_compute_key',
-      'persistent_boot_disk',
       'can_ip_forward',
       'zone'
     ]
@@ -51,12 +52,22 @@ Puppet::Type.type(:gce_instance).provide(
   def create
     # set up options
     args = parameter_list.collect do |attr|
-      if ["can_ip_forward", "persistent_boot_disk", "use_compute_key"].include? attr then
+      if ["can_ip_forward",
+          "use_compute_key",
+          "add_compute_key_to_project"].include? attr then
         resource[attr] ? "--#{attr}" : "--no#{attr}"
       else
         resource[attr] && "--#{attr}=#{resource[attr]}"
       end
     end.compact
+    if resource[:puppet_master]
+      args.push("--metadata=puppet_master:#{resource[:puppet_master]}")
+    else
+      args.push("--metadata=puppet_master:puppet")
+    end
+    if resource[:puppet_service]
+      args.push("--metadata=puppet_service:#{resource[:puppet_service]}")
+    end
     if resource[:enc_classes]
       class_hash = { 'classes' => parse_refs_from_hash(resource[:enc_classes]) }
       args.push("--metadata=puppet_classes:#{class_hash.to_yaml}")
@@ -70,28 +81,46 @@ Puppet::Type.type(:gce_instance).provide(
     if resource[:module_repos]
       args.push("--metadata=puppet_repos:#{resource[:module_repos]}")
     end
-    if resource[:manifest] || resource[:modules] || resource[:enc_classes] || resource[:module_repos]
-      # is we specified any classification info, we should call the bootstrap script
-      script_file = File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..', '..', 'files', 'puppet-community.sh'))
+    # turn hash into k/v pairs
+    # != "" is a hack around receiving an empty string instead of null when param absent
+    if resource[:metadata] != ""
+      resource[:metadata].each do |key, value|
+        args.push("--metadata=#{key}:#{value}")
+      end
+    end
+    if resource[:puppet_master] ||
+       resource[:puppet_service] ||
+       resource[:manifest] ||
+       resource[:modules] ||
+       resource[:enc_classes] ||
+       resource[:module_repos] ||
+       resource[:startupscript]
+      # if we specified any classification info, we should call the bootstrap script
+      if resource[:startupscript]
+        script_file = File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..', '..', 'files', "#{resource[:startupscript]}"))
+      else
+        script_file = File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..', '..', 'files', 'puppet-community.sh'))
+      end
       args.push("--metadata_from_file=startup-script:#{script_file}")
     end
-    # Here's an ugly hack.  Check to see if a PD exists with the instance
-    # name in the specified zone.
-    begin
-      gcutilcmd("getdisk", resource[:name], "--zone=#{resource[:zone]}")
-      has_boot_pd = true
-    rescue
-      has_boot_pd = false
+    # If the user hasn't specified a disk, check to see if one exists
+    # and alter args to use it as the boot disk
+    if not resource[:disk]
+      begin
+        gcutilcmd("getdisk", resource[:name], "--zone=#{resource[:zone]}")
+        has_boot_pd = true
+      rescue
+        has_boot_pd = false
+      end
+      # If there is an existing PD, alter the gcutil command-line args
+      # to add appropriate parameters to use the PD and remove unecessary
+      # command-line args.
+      if has_boot_pd
+        args.push("--disk=#{resource[:name]},mode=rw,boot")
+        args.delete_if {|x| x.start_with?("--image")}
+      end
     end
-    # If there is an existing PD, alter the gcutil command-line args
-    # to add appropriate parameters to use the PD and remove unecessary
-    # command-line args.
-    if has_boot_pd
-      args.push("--disk=#{resource[:name]},mode=rw,boot")
-      args.push("--kernel=projects/google/global/kernels/gce-no-conn-track-v20130813")
-      args.delete_if {|x| x.start_with?("--image")}
-      args.delete_if {|x| x.start_with?("--persistent_boot")}
-    end
+
     gcutilcmd("add#{subcommand}", resource[:name], args, '--wait_until_running')
 
     # block for the startup script
