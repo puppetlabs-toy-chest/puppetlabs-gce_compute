@@ -82,7 +82,8 @@ Puppet::Type.type(:gce_instance).provide(
       args.push("--metadata=puppet_repos:#{resource[:module_repos]}")
     end
     # turn hash into k/v pairs
-    if resource[:metadata]
+    # != "" is a hack around receiving an empty string instead of null when param absent
+    if resource[:metadata] != ""
       resource[:metadata].each do |key, value|
         args.push("--metadata=#{key}:#{value}")
       end
