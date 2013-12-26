@@ -133,23 +133,6 @@ function clone_modules() {
   fi
 }
 
-#delete me, testing provisioing
-function prep_master () {
-  # speed up agent checkin, autosign our domain, include pe_mcollective
-  echo "*.$(facter -p domain)" > /etc/puppetlabs/puppet/autosign.conf
-  curl -s https://gist.github.com/mrzarquon/7330341/raw/fcacaef442845cfd6fe4eba20c925d013eac8e7c/gistfile1.txt > /etc/puppetlabs/puppet/manifests/site.pp
-
-  #get git, regardless of platform
-  #apt-get install -y git-core 2>/dev/null || yum install -y git 2>/dev/null
-
-  # install pe_repo for fast agent installs
-  git clone https://github.com/mrzarquon/mrzarquon-pe_repo /etc/puppetlabs/puppet/modules/pe_repo
-  /opt/puppet/bin/puppet module install nanliu-staging
-  /opt/puppet/bin/rake -f /opt/puppet/share/puppet-dashboard/Rakefile RAILS_ENV=production nodeclass:add['pe_repo','skip']
-  /opt/puppet/bin/rake -f /opt/puppet/share/puppet-dashboard/Rakefile RAILS_ENV=production node:addclass[`hostname -f`,'pe_repo']
-  /opt/puppet/bin/puppet agent -t
-}
-
 function classify_master () {
   declare -a class_array=($PUPPET_PE_CLASSES)
   for class in ${class_array[@]}; do
