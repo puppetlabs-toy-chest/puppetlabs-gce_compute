@@ -124,7 +124,7 @@ Puppet::Type.newtype(:gce_instance) do
   end
   newparam(:startup_script_timeout) do
     desc 'timeout for bootstrap script. If this time is passed before the bootstrap script has finished, the resource will fail'
-    defaultto '300'
+    defaultto '420'
     munge do |value|
       Integer(value)
     end
