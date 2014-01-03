@@ -191,8 +191,12 @@ function provision_puppet() {
     install_puppetagent
   fi
 
-  #/opt/puppet/bin/puppet agent --onetime --no-daemonize --color=false --verbose --splay --splaylimit 30 --waitforcert
-  /opt/puppet/bin/puppet agent --onetime --no-daemonize --color=false --verbose --waitforcert
+  if [ $PUPPET_PE_ROLE = 'master' ]; then
+    /opt/puppet/bin/puppet agent --onetime --no-daemonize --color=false --verbose
+  else
+    /opt/puppet/bin/puppet agent --onetime --no-daemonize --color=false --verbose --splay --splaylimit 30 --waitforcert 120
+  fi
+
   echo $? > $RESULTS_FILE
   echo "Puppet installation finished!"
   exit 0
