@@ -92,7 +92,7 @@ You can use multiple cloud projects by making the appropriate entries in your
 `device.conf` file and adjusting the Cloud SDK settings.  For each project,
 you'll first need to create authorize each project with:
 
-    gcloud auth set account ANOTHER_ACCOUNT_NAME
+    gcloud config set account ANOTHER_ACCOUNT_NAME
     gcloud auth login
 
 Once all of your projects have been authorized, you can toggle which project
