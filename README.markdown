@@ -23,16 +23,16 @@ It should work on any system that supports Google's [Cloud SDK](https://develope
 
 The gce_compute module provides the following resource types:
 
-* gce_instance - Virtual machine instances that can be assigned roles.
-* gce_disk     - Persistent disks that can be attached to instances.
-* gce_firewall - Firewall rules that specify the traffic to your instances.
-* gce_network  - Networks that routes internal traffic between virtual machine
+* `gce_instance` - Virtual machine instances that can be assigned roles.
+* `gce_disk`     - Persistent disks that can be attached to instances.
+* `gce_firewall` - Firewall rules that specify the traffic to your instances.
+* `gce_network`  - Networks that routes internal traffic between virtual machine
   instances. Firewalls and instances are associated with networks.
-* gce_forwardingrule  - Load balancer forwarding rules.
-* gce_httphealthcheck  - Load balancer HTTP health checking.
-* gce_targetpool  - Load balancer collection of instances.
-* gce_targetpoolhealthcheck  - Assignment of a health-check to a targetpool.
-* gce_targetpoolinstance  - Assignment of an instance to a targetpool.
+* `gce_forwardingrule`  - Load balancer forwarding rules.
+* `gce_httphealthcheck`  - Load balancer HTTP health checking.
+* `gce_targetpool` - Load balancer collection of instances.
+* `gce_targetpoolhealthcheck`  - Assignment of a health-check to a targetpool.
+* `gce_targetpoolinstance`  - Assignment of an instance to a targetpool.
 
 These types allow users to describe application stacks in Google Compute
 Engine using Puppet's DSL. This provides the following benefits:
@@ -114,7 +114,7 @@ multiple projects in GCE.
 	
 ###Beginning with gce_compute	
 
-One of the easiest ways to take advantage of this module is to build a single instance in Google Compute Engine to serve as your Puppet Enterprise master and console. After going through the [setup](#setup), save the following resource to a file (like gce.pp) and run `puppet apply gce.pp`. 
+One of the easiest ways to take advantage of this module is to build a single instance in Google Compute Engine to serve as your Puppet Enterprise master and console. After going through the [setup](#setup), save the following resource to a file (like `gce.pp`) and run `puppet apply gce.pp`. 
 
 ```puppet
 gce_instance { 'pe-master':
@@ -135,9 +135,6 @@ gce_instance { 'pe-master':
 }
 ```
 
-
-
-
 ##Usage
 
 Now create a Puppet manifest that describes the google compute resources that
@@ -147,6 +144,7 @@ instances in different zones within the same region, a firewall rule on the
 Note the use of the Puppet `require` directive to ensure resource dependencies
 have been created in the proper order.
 
+```puppet
     # manifests/site.pp
     gce_disk { 'puppet-disk':
         ensure      => present,
@@ -237,6 +235,7 @@ have been created in the proper order.
         region       => 'us-central1',
         target       => 'www-pool',
     }
+```
 
 Run `puppet apply` on this manifest
 
@@ -268,7 +267,7 @@ disk will be created.
 When you delete an instance, the persistent disk will *not* be deleted. This
 provides the default behavior of persisting your data between instance
 termination and re-creation. If you truly want to delete a persistent disk,
-you must do so explicitly with it's own type-block and ensure=absent attribute.
+you must do so explicitly with it's own type-block and `ensure => absent` attribute.
 
 ### Enable/Disable Live Instance Migration
 
@@ -289,53 +288,63 @@ or by passing in the contents of a manifest file with the `manifest` parameter.
 If *both* parameters are specified, both will be applied to the instance with
 ENC first followed by the manifest file.
 
-Classification is specified with the following gce_instance parameters:
+Classification is specified with the following `gce_instance` parameters:
 
-* modules - List of modules that should be installed from the
+* `modules` - List of modules that should be installed from the
   [forge](http://forge.puppetlabs.com/).
 
-  ```modules => ['puppetlabs-mysql', 'puppetlabs-apache']```
+  ```puppet
+    modules => ['puppetlabs-mysql', 'puppetlabs-apache']
+  ```
 
-* module_repos - Modules that should be installed from github. Accepts a hash
+* `module_repos` - Modules that should be installed from github. Accepts a hash
   where the keys indicates the directory where the module should be installed and the value points to the GitHub repo.
 
- ``` module_repos => { 'mysql' => 'git://github.com/puppetlabs/puppetlabs-mysql' }```
+  ```puppet
+  module_repos => { 'mysql' => 'git://github.com/puppetlabs/puppetlabs-mysql' }
+  ```
 
-* enc_classes - Hash of classes from our downloaded content that should be
+* `enc_classes` - Hash of classes from our downloaded content that should be
   applied using External Node Classifers. The key of this hash is the name of
   a class to apply and the value is a hash of parameters that should be set
   for that class.
 
-  ```enc_classes => {'mysql' => {'config_hash' => {'bind_address' => '0.0.0.0' }}}```
+  ```puppet
+  enc_classes => {'mysql' => {'config_hash' => {'bind_address' => '0.0.0.0' }}}
+  ```
 
-* manifest - A string to pass in as a local manifest file and applied during
+* `manifest` - A string to pass in as a local manifest file and applied during
   the bootstrap process. See the example manifest files in `tests/*.pp`
   for examples on specifying full manifests.
-* block_for_startup_script - Whether the resource should block until its
+* `block_for_startup_script` - Whether the resource should block until its
   startup sctipt has completed.
-* startup_script_timeout - Amount of time to wait before timing out when
+* `startup_script_timeout` - Amount of time to wait before timing out when
   blocking for a startup script.
 
 ### Puppet Master and Service specification
 
 The solution allows specification of a puppet master instance with the
-gce_instance parameter:
+`gce_instance` parameter:
 
-* puppet_master - Hostname of the puppet master instance that the
+* `puppet_master` - Hostname of the puppet master instance that the
   agent instance must be able to resolve.
 
-  ```puppet_master => 'puppet'```
+  ```puppet
+  puppet_master => 'puppet'
+  ```
 
 If this parameter is specified, then it is used as the `server` parameter in
 `puppet.conf`. If unspecified, the default of `puppet` is used.
 This parameter may be explicitly set to an empty string for a masterless instance.
 
 The solution allows specification of whether to start the puppet agent service
-with the gce_instance parameter:
+with the `gce_instance` parameter:
 
-* puppet_service - `absent` or `present` (default `absent`)
+* `puppet_service` - `absent` or `present` (default `absent`)
 
-  ```puppet_service => present```
+  ```puppet
+  puppet_service => present
+  ```
 
 If this parameter is specified, then the puppet service is automatically started
 on the managed instance and set to restart on boot (in `/etc/default/puppet`).
@@ -345,41 +354,45 @@ on the managed instance and set to restart on boot (in `/etc/default/puppet`).
 If you choose `startupscript => 'puppet-enterprise.sh'`, you can provide data needed for the [PE installer answer file](http://docs.puppetlabs.com/pe/latest/install_answer_file_reference.html) in the `metadata` parameter. 
 The following example specifies the PE version and PE Console login details.
 
+```puppet
    metadata             => {
 	   'pe_role'          => 'master',
 	   'pe_version'       => '3.1.0',
 	   'pe_consoleadmin'  => 'admin@example.com',
 	   'pe_consolepwd'    => 'puppetize',
    },
-   
-   This example will provision a PE Agent and will point it to your PE master.
-   
+```
+This example will provision a PE Agent and will point it to your PE master.
+```puppet
    metadata             => {
       'pe_role'          => 'agent',
       'pe_master'        => "[gce_instance_namevar].c.[gce_projectid].internal",
       'pe_version'       => '3.1.0',
    },
+```
 
 ### Implementation of classification
 
 In addition to creating instances with `gce_instance`, you may pass additional parameters to configure and classify the instance. The work is done during instance creation by a bootstrap script. The module includes a script to configure open source Puppet and another script for Puppet Enterprise.
 
-In the gce_instance resource, you may provide the following parameter to choose a startup script. You can use any executable script that's located in the gce_compute modules files directory and can be interpreted by the OS GCE provisisions. 
+In the `gce_instance` resource, you may provide the following parameter to choose a startup script. You can use any executable script that's located in the gce_compute modules files directory and can be interpreted by the OS GCE provisisions. 
 
+```puppet
    startupscript => 'script_to_use.sh'
    startupscript => 'puppet-community.sh'
    startupscript => 'puppet-enterprise.sh'
+```
    
 You can pass additional parameters to `gce_instance` resources to influence the behavior of these startup scripts. Both included scripts are capable of installing Puppet, classifying into a Dashboard/Console ENC, and installing modules. See the `gce_instance` reference (above) for more details.
 
 Common Parameters.
 
-* puppet\_modules  - set when the modules attribute is specified.
-* puppet\_classes  - set when the ENC classes attribute is specified.
-* puppet\_manifest - set when the manifest attribute is specified.
-* puppet\_repos    - set when the module\_repos attribute is specified.
-* puppet\_master   - set when the puppet\_master attribute is specified.
-* puppet\_service  - set when the puppet\_service attribute is specified.
+* `puppet_modules`  - set when the `modules` attribute is specified.
+* `puppet_classes`  - set when the ENC classes attribute is specified.
+* `puppet_manifest` - set when the `manifest` attribute is specified.
+* `puppet_repos`    - set when the `module_repos` attribute is specified.
+* `puppet_master`   - set when the `puppet_master` attribute is specified.
+* `puppet_service`  - set when the `puppet_service` attribute is specified.
 
 ### Data Lookups
 
@@ -389,7 +402,9 @@ addresses for the classification of instances.
 In order to retrieve the external or internal IP address of a different
 instance, the following syntax can be used from the classes parameter:
 
+```puppet
     Gce_instance[database][internal_ip_address]
+```
 
 This is interpreted by the resource to mean it should retrieve the value of
 the `internal_ip_address` property from the database resource of
@@ -407,6 +422,7 @@ the environment. Not all parameters need be supplied when removing
 resources. Recall that persistent disks are not destroyed when an instance
 is destroyed but must be done so explicitly as in the following example:
 
+```puppet
     # manifests/site.pp
     gce_disk { 'puppet-disk':
         ensure      => absent,
@@ -446,6 +462,7 @@ is destroyed but must be done so explicitly as in the following example:
     Gce_instance["www1", "www2"] -> Gce_disk["www1", "www2", "puppet-disk"]
     Gce_forwardingrule["www-rule"] -> Gce_targetpool["www-pool"]
     Gce_targetpool["www-pool"] -> Gce_httphealthcheck["basic-http"]
+```
 
 ##Limitations
 
@@ -458,6 +475,7 @@ tested. Mostly, it's the output of my `history` with a few annotations. I
 spun up a GCE instance through the console, and the logged into it via `gcutil
 ssh`.
 
+```bash
     #// This block was done with a fresh 'wheezy' and the puppet version included
     #// in the distro's repo (e.g. puppet 2.7.18)
     $ sudo apt-get update && sudo apt-get upgrade -y
@@ -480,8 +498,9 @@ ssh`.
     #// verify that mysql and apache are running, and the node is using puppet3
     $ gcutil ssh pe3-wheezy ' ps ax; puppet --version'
     $ puppet apply --certname my_project tests/down-pe3-wheezy.pp 
+```
  
-    Testing   
+###Testing   
  * Debian-7 (wheezy) puppet debian package (v2.7.23 using ruby1.8.7)
    * Cloud SDK's gcutil version 1.12.0
  * Debian-7 (wheezy) puppet open-source (v3.3.2 using ruby1.9.3p194)
