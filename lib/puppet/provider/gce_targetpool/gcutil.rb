@@ -16,7 +16,7 @@ Puppet::Type.type(:gce_targetpool).provide(
   end
 
   def parameter_list
-    ['description', 'health_checks', 'instances', 'region' ]
+    ['description','region','health_checks','instances','session_affinity','backup_pool','failover_ratio' ]
   end
 
   def destroy_parameter_list

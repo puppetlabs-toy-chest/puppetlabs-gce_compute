@@ -12,7 +12,11 @@ Puppet::Type.newtype(:gce_targetpool) do
   end
 
   newparam(:description) do
-    desc 'targetpool description'
+    desc 'A user-defined description of this target pool.'
+  end
+
+  newparam(:region) do
+    desc 'The region for this request'
   end
 
   newparam(:health_checks) do
@@ -23,8 +27,16 @@ Puppet::Type.newtype(:gce_targetpool) do
     desc 'Comma separated list of "zone/instance" pairs that will be in this pool'
   end
 
-  newparam(:region) do
-    desc 'The region for this request'
+  newparam(:session_affinity) do
+    desc 'Describes the method used to select a backend virtual machine instance.'
+  end
+
+  newparam(:backup_pool) do
+    desc 'backup targetpool'
+  end
+
+  newparam(:failover_ratio) do
+    desc 'failover ratio between 0.0 and 1.0'
   end
 
 end
