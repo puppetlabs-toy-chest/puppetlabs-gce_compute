@@ -1,3 +1,23 @@
+##2014-05-27 - Release 0.4.0
+
+This release adds new targetpool functionality, makes it easier to manage the project key, fixes a number of small bugs, and improves the documentation.
+
+####Features
+- Prefer user-specified boot disk if present.
+- Add `add_compute_key_to_project` to manage SSH key.
+- Add `region`, `session_affinity`, `backup_pool`, and `failover_ratio` for targetpool resources.
+
+####Bugfixes
+- Remove prep_master function from puppet-enterprise.sh.
+- Fix instance blocking on startup script.
+- Further fixes for GCE v1.
+- Rewrite the README.
+- Adds on_host_maintenance instructions.
+- Hack around failure when metadata param absent.
+
+####Known Bugs
+* No known bugs
+
 ### 20131210 v0.3.0
  * Updated for GCE v1 (General Availability) and Cloud SDK
  * Remove tested support for older gcutil versions running against beta APIs
