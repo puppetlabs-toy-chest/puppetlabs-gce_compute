@@ -1,8 +1,8 @@
-require File.expand_path(File.join(File.dirname(__FILE__), '..', 'gce'))
+require File.expand_path(File.join(File.dirname(__FILE__), '..', 'gcutil'))
 
 Puppet::Type.type(:gce_targetpoolhealthcheck).provide(
   :gcutil,
-  :parent => Puppet::Provider::Gce
+  :parent => Puppet::Provider::Gcutil
 ) do
 
   commands :gcutil => 'gcutil'
