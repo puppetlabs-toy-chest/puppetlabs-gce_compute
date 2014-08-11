@@ -1,12 +1,14 @@
+require 'puppet/parameter/boolean'
+
 Puppet::Type.newtype(:gce_forwardingrule) do
-  desc 'forwardingrule'
+desc 'forwardingrule'
 
   ensurable
 
   newparam(:name, :namevar => true) do
     validate do |value|
-      unless value =~ /[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?/
-        raise(Puppet::Error, "Invalid forwardingrule name: #{v}")
+      unless value =~ /^[a-z][-a-z0-9]{0,61}[a-z0-9]\Z/
+        raise(Puppet::Error, "Invalid forwardingrule name: #{value}")
       end
     end
   end
@@ -43,6 +45,28 @@ Puppet::Type.newtype(:gce_forwardingrule) do
 
   newparam(:target) do
     desc 'The name of the target pool for the forwarding rule'
+  end
+
+  autorequire :gce_targetpool do
+    [self[:target]].compact
+  end
+  
+  newparam(:async_create, :boolean => true, :parent => Puppet::Parameter::Boolean) do
+    desc 'wait until forwarding rule is ready when creating'
+    defaultto :false
+  end
+
+  newparam(:async_destroy, :boolean => true, :parent => Puppet::Parameter::Boolean) do
+    desc 'wait until forwarding rule is deleted'
+    defaultto :false
+  end
+
+  autorequire(:gce_auth) do
+    requires = []
+    catalog.resources.each {|rsrc|
+      requires << rsrc.name if rsrc.class.to_s == 'Puppet::Type::Gce_auth'
+    }
+    requires
   end
 
 end

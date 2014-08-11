@@ -1,13 +1,13 @@
 {
-  "operatingsystem_support": [],
-  "requirements": [],
   "name": "puppetlabs-gce_compute",
-  "version": "0.4.0",
-  "source": "git://github.com/puppetlabs/puppetlabs-gce_compute.git",
-  "author": "Puppet Labs",
+  "version": "0.1.0",
+  "author": "google",
+  "summary": "Manage Google Compute Resources with Puppet",
   "license": "Apache 2.0",
-  "summary": "Puppet Labs GCE Module",
-  "description": "GCE Module for Puppet using gcloud SDK",
-  "project_page": "http://github.com/puppetlabs/puppetlabs-gce_compute",
-  "dependencies": []
+  "source": "",
+  "project_page": null,
+  "issues_url": null,
+  "dependencies": [
+  ]
 }
+

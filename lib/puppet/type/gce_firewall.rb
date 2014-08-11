@@ -1,3 +1,5 @@
+require 'puppet/parameter/boolean'
+
 Puppet::Type.newtype(:gce_firewall) do
 
   ensurable
@@ -7,7 +9,7 @@ Puppet::Type.newtype(:gce_firewall) do
   newparam(:name, :namevar => true) do
     desc 'name of firewall'
     validate do |v|
-      unless v =~ /^[a-z]([-a-z0-9]*[a-z0-9])?$/
+      unless v =~ /^[a-z][-a-z0-9]{0,61}[a-z0-9]\Z/
         raise(Puppet::Error, "Invalid firewall name: #{v}")
       end
     end
@@ -28,7 +30,6 @@ Puppet::Type.newtype(:gce_firewall) do
 
   newparam(:allowed_ip_sources) do
     desc 'List of sources allowed to comminucate to allowed destinations'
-
   end
 
   newparam(:allowed_tag_sources) do
@@ -37,6 +38,7 @@ Puppet::Type.newtype(:gce_firewall) do
 
   newparam(:network) do
     desc 'Network on which the firewall resides.'
+    defaultto 'default'
   end
 
   newparam(:target_tags) do
@@ -45,6 +47,19 @@ Puppet::Type.newtype(:gce_firewall) do
 
   autorequire(:gce_network) do
     self[:network]
+  end
+
+  newparam(:async_destroy, :boolean => true, :parent => Puppet::Parameter::Boolean) do
+    desc 'wait until firewall is deleted'
+    defaultto :false
+  end
+
+  autorequire(:gce_auth) do
+    requires = []
+    catalog.resources.each {|rsrc|
+      requires << rsrc.name if rsrc.class.to_s == 'Puppet::Type::Gce_auth'
+    }
+    requires
   end
 
 end

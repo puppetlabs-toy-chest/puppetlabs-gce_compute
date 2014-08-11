@@ -1,3 +1,5 @@
+require 'puppet/parameter/boolean'
+
 Puppet::Type.newtype(:gce_httphealthcheck) do
   desc 'httphealthcheck'
 
@@ -5,8 +7,8 @@ Puppet::Type.newtype(:gce_httphealthcheck) do
 
   newparam(:name, :namevar => true) do
     validate do |value|
-      unless value =~ /[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?/
-        raise(Puppet::Error, "Invalid httphealthcheck name: #{v}")
+      unless value =~ /^[a-z][-a-z0-9]{0,61}[a-z0-9]\Z/
+        raise(Puppet::Error, "Invalid httphealthcheck name: #{value}")
       end
     end
   end
@@ -50,7 +52,7 @@ Puppet::Type.newtype(:gce_httphealthcheck) do
     desc 'The port to use for HTTP health check requests'
     validate do |value|
       unless value.is_a? Integer and value > 0
-        raise "The port must an integer greather than zero #{value}"
+        raise "The port must be an integer greater than zero #{value}"
       end
     end
   end
@@ -71,6 +73,24 @@ Puppet::Type.newtype(:gce_httphealthcheck) do
         raise "Unhealthy threshold must an integer greather than zero #{value}"
       end
     end
+  end
+
+  newparam(:async_create, :boolean => true, :parent => Puppet::Parameter::Boolean) do
+    desc 'wait until health check is ready when creating'
+    defaultto :false
+  end
+
+  newparam(:async_destroy, :boolean => true, :parent => Puppet::Parameter::Boolean) do
+    desc 'wait until health check is deleted'
+    defaultto :false
+  end
+
+  autorequire(:gce_auth) do
+    requires = []
+    catalog.resources.each {|rsrc|
+      requires << rsrc.name if rsrc.class.to_s == 'Puppet::Type::Gce_auth'
+    }
+    requires
   end
 
 end
