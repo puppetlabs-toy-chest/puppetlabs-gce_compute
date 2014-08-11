@@ -27,13 +27,13 @@ extension_requests:
   pp_uuid: $(curl -fs -H "Metadata-Flavor: Google" $MD/id)
 END
 
+chmod 600 $PUPPET_DIR/csr_attributes.yaml
+chown pe-puppet.pe-puppet $PUPPET_DIR/csr_attributes.yaml
+
 # Install the PE Agent via the PE Master's package-based installer
 PUPPET_PE_MASTER=$(curl -fs -H "Metadata-Flavor: Google" $MD/attributes/pe_master)
 curl -k https://$PUPPET_PE_MASTER:8140/packages/current/install.bash | bash
 echo $? > $RESULTS_FILE
-
-#cleanup csr attributes file
-rm -f $PUPPET_DIR/csr_attributes.yaml
 
 echo "Puppet installation finished!"
 exit 0
