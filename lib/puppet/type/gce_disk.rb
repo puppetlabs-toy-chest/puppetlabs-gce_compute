@@ -33,6 +33,8 @@ Puppet::Type.newtype(:gce_disk) do
     desc 'wait until disk is complete'
   end
 
+  newparam(:disk_type)
+
   validate do
     if self[:ensure] == :present
         raise(Puppet::Error, 'Must specify a zone for the disk') unless self[:zone]

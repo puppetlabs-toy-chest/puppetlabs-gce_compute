@@ -32,7 +32,9 @@ Puppet::Type.type(:gce_instance).provide(
       'add_compute_key_to_project',
       'use_compute_key',
       'can_ip_forward',
-      'zone'
+      'zone',
+      'boot_disk_type',
+      'auto_delete_boot_disk'
     ]
   end
 
@@ -54,8 +56,11 @@ Puppet::Type.type(:gce_instance).provide(
     args = parameter_list.collect do |attr|
       if ["can_ip_forward",
           "use_compute_key",
-          "add_compute_key_to_project"].include? attr then
+          "add_compute_key_to_project",
+          "auto_delete_boot_disk"].include? attr then
         resource[attr] ? "--#{attr}" : "--no#{attr}"
+      elsif attr == "disk" and resource[attr].kind_of?(Array)
+        resource[attr].collect { |subresource| "--#{attr}=#{subresource}" } 
       else
         resource[attr] && "--#{attr}=#{resource[attr]}"
       end
