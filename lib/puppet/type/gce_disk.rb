@@ -33,7 +33,7 @@ Puppet::Type.newtype(:gce_disk) do
     desc 'boot image to use when creating disk'
   end
 
-  # TODO: (ashmrtnz) deprecate this in later versions. Instead use async_create
+  # TODO: deprecate this in later versions. Instead use async_create
   # and async_destroy
   newparam(:wait_until_complete) do
     desc 'wait until disk is complete'

@@ -2,7 +2,7 @@ require 'fog'
 require 'google/api_client'
 require 'google/api_client/auth/compute_service_account'
 
-#TODO: (ashmrtnz) Implement flush. This can then be used to get around the whole
+#TODO: Implement flush. This can then be used to get around the whole
 # 'extra_args' issue seen in create by having each object keep track of the
 # 'should' values in its own personal data structure. This will also allow
 # resources to be updated with new settings where possible.
@@ -39,12 +39,11 @@ class Puppet::Provider::Gce < Puppet::Provider
     end
     raise(Puppet::Error, 'No project found. Did you add gce_auth to your ' \
       'manifest?') unless Puppet::Provider::Gce.project
-    # TODO: (ashmrtnz) move the api client and oauth client creation into fog
-    # create API client
-	  client = ::Google::APIClient.new(
+    # TODO: move the api / oauth client creation into fog create API client
+    client = ::Google::APIClient.new(
       :application_name => 'suppress warning',
       :user_agent => 'gce_compute/'
-	  )
+    )
     # create oauth 2 client, fetch token and assign it to API client
     oauthClient = ::Google::APIClient::ComputeServiceAccount.new()
     client.authorization = oauthClient
@@ -102,8 +101,7 @@ class Puppet::Provider::Gce < Puppet::Provider
 
     # Update property_hash for puppet and clean our personal fog item cache
     self.class.get_cache.delete(resource[:name])
-#    @propertuy_hash.clear
- @property_hash[:ensure] = :absent
+    @property_hash[:ensure] = :absent
   end
 
   def exists?
@@ -120,8 +118,8 @@ class Puppet::Provider::Gce < Puppet::Provider
   # used by the self.instances method
   def self.get_property_hash_content(rsrc)
     temp = {}
-	  params = parameter_list
-	  params << :name
+    params = parameter_list
+    params << :name
     attribs = rsrc.attributes
     # This is really hacky, but we either have a class or an instance of a
     # class and the only place it matters is the temp[param] line below
@@ -131,20 +129,19 @@ class Puppet::Provider::Gce < Puppet::Provider
         curClass.method_defined?(:puppet_fog_mappings) ? \
         attribs[puppet_fog_mappings(param)] : nil
     }
-	  temp[:ensure] = :present
+    temp[:ensure] = :present
     temp
   end
 
-  # TODO: (snyquist) possible: do lazy eval
-  # called by puppet once for each resource type.
+  # TODO: possible: do lazy eval called by puppet once for each resource type.
   # allows puppet to create the @property_hash.
   # class variable resource_cache hash is created mapping fog resource types
   # to hashes of resource names mapped to their fog objects.
   def self.instances
-	  queryResults = fog_call(:all)
-	  result = []
+    queryResults = fog_call(:all)
+    result = []
     @@resource_cache[self.resource_type.name] = {}
-	  queryResults.each {| rsrc |
+    queryResults.each {| rsrc |
       temp = get_property_hash_content(rsrc)
       result << new(temp)
       @@resource_cache[self.resource_type.name][rsrc.name] = rsrc

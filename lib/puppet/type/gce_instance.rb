@@ -138,7 +138,7 @@ Puppet::Type.newtype(:gce_instance) do
     defaultto :true
   end
 
-  # TODO: (ashmrtnz) deprecate this and use authorized_ssh_key instead.
+  # TODO: deprecate this and use authorized_ssh_key instead.
   # authorized_ssh_key requires the key value pair, but it is more general than
   # this
   newparam(:use_compute_key, :boolean => true,

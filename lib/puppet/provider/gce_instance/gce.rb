@@ -1,9 +1,9 @@
 require File.expand_path(File.join(File.dirname(__FILE__), '..', 'gce'))
 
-# TODO: (ashmrtnz) add support for wait_for_startup_script
-# TODO: (ashmrtnz) add support for generic metadata_from_file. Right now it only
+# TODO:  add support for wait_for_startup_script
+# TODO:  add support for generic metadata_from_file. Right now it only
 # supports it for startup-script
-# TODO: (ashmrtnz) add support for creating a disk and an instance at the same
+# TODO:  add support for creating a disk and an instance at the same
 # time. Users are currently allowed to specify an image for an instance
 Puppet::Type.type(:gce_instance).provide(
   :fog,
@@ -89,7 +89,7 @@ Puppet::Type.type(:gce_instance).provide(
       File.chown(uid, uid, File.join(ssh_dir, private_key))
       File.chown(uid, uid, File.join(ssh_dir, public_key))
     end
-    # TODO: (ashmrtnz) Check if key should be validated
+    # TODO:  Check if key should be validated
     pub_key = File.open(File.join(ssh_dir, public_key), 'r') {|f|
       f.read.strip
     }
@@ -97,7 +97,7 @@ Puppet::Type.type(:gce_instance).provide(
     pub_key
   end
 
-  # TODO: (ashmrtnz) deprecate disk and move to disks to support newer API and
+  # TODO:  deprecate disk and move to disks to support newer API and
   # the fact that multiple disks can be attached to a VM.
   def init_create
     # temp_disks merges disk and disks into a single array for fog
@@ -127,7 +127,7 @@ Puppet::Type.type(:gce_instance).provide(
       resource[:metadata][:puppet_service] = resource[:puppet_service]
     end
 
-    #TODO: (snyquist) figure out what enc_classes does
+    #TODO: figure out what enc_classes does
     if resource[:enc_classes]
       class_hash = { 'classes' => parse_refs_from_hash(resource[:enc_classes]) }
       resource[:metadata][:puppet_classes] = class_hash.to_yaml
@@ -202,7 +202,7 @@ Puppet::Type.type(:gce_instance).provide(
      PSON.parse(new_string)
    end
 
-  # TODO: (snyquist) go through and figure out which of these we need
+  # TODO: go through and figure out which of these we need
 =begin
   def external_ip_address
     # rebuild the cache if we do not find the property that we are looking for

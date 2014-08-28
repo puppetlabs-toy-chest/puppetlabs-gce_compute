@@ -1,5 +1,5 @@
 require File.expand_path(File.join(File.dirname(__FILE__), '..', 'gce'))
-# TODO: (ashmrtnz) add support for disk images as source
+# TODO: add support for disk images as source
 Puppet::Type.type(:gce_disk).provide(
   :fog,
   :parent => Puppet::Provider::Gce
@@ -36,8 +36,7 @@ Puppet::Type.type(:gce_disk).provide(
     }
   end
 
-  # TODO (snyquist): Check the project for images before checking the image
-  # array
+  # TODO Check the project for images before checking the image array
   def init_create
     # Find the fully qualified image name if a partial name was given
     if resource[:source_image]

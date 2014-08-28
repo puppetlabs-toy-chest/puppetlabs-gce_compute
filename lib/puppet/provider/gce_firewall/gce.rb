@@ -80,7 +80,7 @@ Puppet::Type.type(:gce_firewall).provide(
       rules
     }
 
-    # TODO: (ashmrtnz) depracate comma separated lists in puppet and use array
+    # TODO: depracate comma separated lists in puppet and use array
     # syntax instead.
     # Remap puppet variables to fog variables
     extra_args = {}
