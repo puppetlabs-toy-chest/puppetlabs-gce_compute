@@ -1,3 +1,5 @@
+require 'puppet/parameter/boolean'
+
 Puppet::Type.newtype(:gce_instance) do
 
   desc <<-EOT
@@ -13,14 +15,15 @@ Puppet::Type.newtype(:gce_instance) do
   newparam(:name, :namevar => true) do
     desc 'name used to identify the instance'
     validate do |v|
-      unless v =~ /[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?/
+      unless v =~ /^[a-z][-a-z0-9]{0,61}[a-z0-9]\Z/
         raise(Puppet::Error, "Invalid instance name: #{v}")
       end
     end
   end
 
   newparam(:authorized_ssh_keys) do
-    desc 'key value pairs of user:keypair_name'
+    desc 'key value pairs of user:keypair_name. Disables project wide key ' \
+      'management if set.'
     validate do |v|
       raise(Puppet::Error, 'Value should be a hash') unless v.is_a? Hash
     end
@@ -34,11 +37,33 @@ Puppet::Type.newtype(:gce_instance) do
   # can multiple disks be attached?
   newparam(:disk) do
     desc 'Disk that should be attached to an instance'
+    # So that it doesn't always give a deprecation warning, even if no disk was
+    # specified
+    validate do |v|
+      Puppet::Util::Warnings.warnonce('disk is deprecated. Please use disks instead') if v
+    end
+  end
+
+  # Added for fog compatability 
+  newparam(:disks) do
+    desc 'Array of disks that should be attached to an instance'
+    defaultto [] 
+
+    # For some reason a single item array in puppet manifests is returned as a
+    # string. This ensures that we always have an arry.
+    munge do |v|
+      v = [v].flatten
+    end
   end
 
   # this assumes that disk is just the disk name
   autorequire :gce_disk do
-    self[:disk]
+    requires = []
+    requires << self[:disk].split(',')[0] if self[:disk]
+    self[:disks].each {|d|
+      requires << d.split(',')[0]
+    }
+    requires
   end
 
   newproperty(:external_ip_address) do
@@ -91,7 +116,10 @@ Puppet::Type.newtype(:gce_instance) do
       raise(Puppet::Error, 'Tags can only be arrays or strings') unless v.is_a?(Array) || v.is_a?(String)
     end
     munge do |v|
-      v.is_a?(Array) ? v.join(',') : v
+      v = v.split(',') if v.is_a?(String)
+      v.collect! {|x|
+        x.strip
+      }
     end
   end
 # TODO I am going to use metadata for my own custom purposes.
@@ -104,24 +132,29 @@ Puppet::Type.newtype(:gce_instance) do
 #    end
 #  end
 
-  newparam(:add_compute_key_to_project) do
+  newparam(:add_compute_key_to_project, :boolean => true,
+           :parent => Puppet::Parameter::Boolean) do
     desc 'Try to add the user\'s Google compute key to the project'
-    newvalues(true, false)
+    defaultto :true
   end
 
-  newparam(:use_compute_key) do
+  # TODO: deprecate this and use authorized_ssh_key instead.
+  # authorized_ssh_key requires the key value pair, but it is more general than
+  # this
+  newparam(:use_compute_key, :boolean => true,
+           :parent => Puppet::Parameter::Boolean) do
     desc 'If the default google compute key should be added to the instance'
-    newvalues(true, false)
   end
 
 #  NOTE this should always be set to true
 #  newparam(:wait_until_running) do
 #    desc 'rather the program should wait until the instance is in a running state'
 #  end
-  newparam(:block_for_startup_script) do
+  newparam(:block_for_startup_script, :boolean => true,
+           :parent => Puppet::Parameter::Boolean) do
     desc 'whether the resource should block until after the startup script executes'
-    newvalues(:true, :false)
   end
+
   newparam(:startup_script_timeout) do
     desc 'timeout for bootstrap script. If this time is passed before the bootstrap script has finished, the resource will fail'
     defaultto '420'
@@ -148,9 +181,7 @@ Puppet::Type.newtype(:gce_instance) do
 
   newparam(:puppet_service) do
     desc 'Whether to start the puppet service or not'
-    validate do |v|
-      raise(Puppet::Error, "puppet_service must be 'absent' or 'present'.") unless v.is_a?(String) and (v == 'absent' or v == 'present')
-    end
+    newvalues(:absent, :present)
   end
 
   # classification specific parameters
@@ -198,7 +229,15 @@ Puppet::Type.newtype(:gce_instance) do
 #
   newparam(:metadata) do
     desc 'Creates vm metadata out of k => v hashes'
-    defaultto ''
+    validate do |v|
+      raise(Puppet::Error, "metadata expects a Hash.") unless(v.is_a?(Hash) || v.empty?)
+    end
+  end
+
+# Adds generic metadata from files, keys k/v hash into metadata k/v
+#
+  newparam(:metadata_from_file) do
+    desc 'Creates vm metadata out of k => v hashes where v is a filepath'
     validate do |v|
       raise(Puppet::Error, "metadata expects a Hash.") unless(v.is_a?(Hash) || v.empty?)
     end
@@ -206,6 +245,16 @@ Puppet::Type.newtype(:gce_instance) do
 
   newparam(:startupscript) do
     desc 'Sets startupscript name to load from files/ directory'
+  end
+
+  newparam(:async_create, :boolean => true, :parent => Puppet::Parameter::Boolean) do
+    desc 'wait until instance is ready when creating'
+    defaultto :false
+  end
+
+  newparam(:async_destroy, :boolean => true, :parent => Puppet::Parameter::Boolean) do
+    desc 'wait until instance is deleted'
+    defaultto :false
   end
 
 # TODO add support for setting top scope parameters
@@ -230,8 +279,16 @@ Puppet::Type.newtype(:gce_instance) do
     if self[:ensure] == :present
       raise(Puppet::Error, "Did not specify required param machine_type") unless self[:machine_type]
       raise(Puppet::Error, "Did not specify required param zone") unless self[:zone]
-      raise(Puppet::Error, "Did not specify required param image or disk") unless self[:image] or self[:disk]
+      raise(Puppet::Error, "Did not specify required param image or disk") unless self[:image] or self[:disk] or not self[:disks].empty?
     end
+  end
+
+  autorequire(:gce_auth) do
+    requires = []
+    catalog.resources.each {|rsrc|
+      requires << rsrc.name if rsrc.class.to_s == 'Puppet::Type::Gce_auth'
+    }
+    requires
   end
 
 end

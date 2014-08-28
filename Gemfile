@@ -1,18 +1,10 @@
-source "http://rubygems.org"
+# A sample Gemfile
+source "https://rubygems.org"
 
-if ENV.key?('PUPPET_VERSION')
-  puppetversion = "= #{ENV['PUPPET_VERSION']}"
-else
-  puppetversion = ['~> 2.7']
-end
-
-gem "rake"
-gem "puppet", puppetversion
-gem "puppet-lint"
-gem "rspec-puppet"
-gem "rspec-system-puppet"
-gem "puppetlabs_spec_helper"
-gem "puppet-syntax"
-gem "diff-lcs"
-gem "metaclass"
-gem "rspec"
+gem 'rake'
+gem 'google-api-client'
+gem 'fog'
+gem 'rspec-puppet'
+gem 'puppet-lint'
+gem 'pry-nav'
+gem 'simplecov', '~> 0.7.1'
