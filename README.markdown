@@ -5,9 +5,7 @@
 1. [Overview](#overview)
 2. [Module Description - What the module does and why it is useful](#module-description)
 3. [Setup - The basics of getting started with gce_compute](#setup)
-    * [What [gce_compute] affects](#what-gce_compute-affects)
-    * [Setup requirements](#setup-requirements)
-    * [Beginning with gce_compute](#beginning-with-gce_compute)
+4. [Quick Start - Get going quickly with Puppet Enterprise trial](#quick-start-with-puppet-enterprise)
 4. [Usage - Configuration options and additional functionality](#usage)
 5. [Reference - An under-the-hood peek at what the module is doing and how](#reference)
 5. [Limitations - OS compatibility, etc.](#limitations)
@@ -18,35 +16,6 @@
 The gce_compute module provides everything you need to manage compute instances, disk storage and network interfaces in Google Compute Engine in Puppet's declarative DSL. It will even provision and configure Puppet Enterprise or Puppet Open Source during instance creation.
 
 It should work on any system that supports Google's [Cloud SDK](https://developers.google.com/cloud/sdk/#System_Requirements) but it has not been tested on Windows.
-
-##Module Description
-
-The gce_compute module provides the following resource types:
-
-* `gce_instance` - Virtual machine instances that can be assigned roles.
-* `gce_disk`     - Persistent disks that can be attached to instances.
-* `gce_firewall` - Firewall rules that specify the traffic to your instances.
-* `gce_network`  - Networks that routes internal traffic between virtual machine
-  instances. Firewalls and instances are associated with networks.
-* `gce_forwardingrule`  - Load balancer forwarding rules.
-* `gce_httphealthcheck`  - Load balancer HTTP health checking.
-* `gce_targetpool` - Load balancer collection of instances.
-* `gce_targetpoolhealthcheck`  - Assignment of a health-check to a targetpool.
-* `gce_targetpoolinstance`  - Assignment of an instance to a targetpool.
-
-These types allow users to describe application stacks in Google Compute
-Engine using Puppet's DSL. This provides the following benefits:
-
-* Users can express application deployments as text that can be version
-  controlled.
-* Teams can share and collaborate on application deployments described using
-  Puppet's DSL.
-* Users can take advantage of the composition aspects of the Puppet DSL to
-  create reusable and extendable abstraction layers on top of multi-node
-  deployment descriptions.
-* Allows Puppet to support ongoing management of application stacks created in
-  GCE.
-
 
 ##Setup
 
@@ -111,141 +80,146 @@ multiple projects in GCE.
       type gce
       url [/dev/null]:group:my_project2
 
-	
-###Beginning with gce_compute	
+## Quick Start with Puppet Enterprise
 
-One of the easiest ways to take advantage of this module is to build a single instance in Google Compute Engine to serve as your Puppet Enterprise master and console. After going through the [setup](#setup), save the following resource to a file (like `gce.pp`) and run `puppet apply gce.pp`. 
+These instructions assume you have installed and configured the Google Cloud
+SDK from the previous step. They also assume you have installed
+a [Puppet](http://docs.puppetlabs.com/guides/install_puppet/pre_install.html) or
+[Puppet Enterprise](http://docs.puppetlabs.com/pe/latest/install_agents.html)
+Agent.
 
-```puppet
-gce_instance { 'pe-master':
-    ensure       => present,
-    description  => 'A Puppet Enterprise Master and Console',
-    machine_type => 'n1-standard-1',
-    zone         => 'us-central1-a',
-    network      => 'default',
-    image        => 'projects/centos-cloud/global/images/centos-6-v20131120',
-    tags         => ['puppet', 'master'],
-    startupscript        => 'puppet-enterprise.sh',
-	  metadata             => {
-	    'pe_role'          => 'master',
-	    'pe_version'       => '3.1.0',
-	    'pe_consoleadmin'  => 'admin@example.com',
-	    'pe_consolepwd'    => 'puppetize',
-	  },
-}
-```
+[Puppet Enterprise](http://puppetlabs.com/download-puppet-enterprise) is free to evaluate on up to 10 nodes and is installed for you as part of these examples.
 
-##Usage
+1. Install the Google Compute Engine Puppet module  
 
-Now create a Puppet manifest that describes the google compute resources that
-you wish to manage. The example below creates a 2GB persistent disk, two
-instances in different zones within the same region, a firewall rule on the
-`default` network, and sets up load-balancing between the two instances.
-Note the use of the Puppet `require` directive to ensure resource dependencies
-have been created in the proper order.
+    `puppet module install puppetlabs-gce_compute`
 
-```puppet
-    # manifests/site.pp
-    gce_disk { 'puppet-disk':
-        ensure      => present,
-        description => 'small data disk',
-        size_gb     => '2',
-        zone        => 'us-central1-a',
-    }
-    gce_firewall { 'allow-http':
-        ensure      => present,
-        network     => 'default',
-        description => 'allows incoming HTTP connections',
-        allowed     => 'tcp:80',
-    }
-    gce_instance { 'www1':
+
+2. Bring up a GCE instance that will auto-install the PE Master
+
+One of the easiest ways to take advantage of this module is to build a single instance in Google Compute Engine to serve as your Puppet Enterprise master and console. After going through the [setup](#setup), save the following resource to a file (like `gce.pp`) and run `puppet apply gce.pp`.
+
+  ```puppet
+    gce_instance { 'puppet-enterprise-master':
         ensure       => present,
-        description  => 'web server',
-        disk         => 'puppet-disk',
+        description  => 'A Puppet Enterprise Master and Console',
         machine_type => 'n1-standard-1',
         zone         => 'us-central1-a',
-        puppet_master => 'master-blaster',
-        puppet_service => present,
-        on_host_maintenance => 'migrate',
         network      => 'default',
-        image        => 'projects/debian-cloud/global/images/debian-7-wheezy-v20131120',
-        tags         => ['web'],
-        manifest     => 'class apache ($version = "latest") {
-          package {"apache2":
-            ensure => $version, # Using the class parameter from above
-          }
-          file {"/var/www/index.html":
-            ensure  => present,
-            content => "<html>\n<body>\n\t<h2>Hi, this is $gce_external_ip.</h2>\n</body>\n</html>\n",
-            require => Package["apache2"],
-          }
-          service {"apache2":
-            ensure => running,
-            enable => true,
-            require => File["/var/www/index.html"],
-          }
-        }
-        include apache',
+        image        => 'projects/centos-cloud/global/images/centos-6-v20131120',
+        tags         => ['puppet', 'pe-master'],
+        startupscript        => 'puppet-enterprise.sh',
+        metadata             => {
+          'pe_role'          => 'master',
+          'pe_version'       => '3.3.1',
+          'pe_consoleadmin'  => 'admin@example.com',
+          'pe_consolepwd'    => 'puppetize',
+        },
+        service_account_scopes => ['compute-ro'],
     }
-    gce_instance { 'www2':
-        ensure       => present,
-        description  => 'web server',
-        machine_type => 'n1-standard-1',
-        zone         => 'us-central1-b',
-        puppet_master => 'master-blaster',
-        puppet_service => present,
-        on_host_maintenance => 'migrate',
-        network      => 'default',
-        image        => 'projects/debian-cloud/global/images/debian-7-wheezy-v20131120',
-        tags         => ['web'],
-        manifest     => 'class apache ($version = "latest") {
-          package {"apache2":
-            ensure => $version, # Using the class parameter from above
-          }
-          file {"/var/www/index.html":
-            ensure  => present,
-            content => "<html>\n<body>\n\t<h2>Hi, this is $gce_external_ip.</h2>\n</body>\n</html>\n",
-            require => Package["apache2"],
-          }
-          service {"apache2":
-            ensure => running,
-            enable => true,
-            require => File["/var/www/index.html"],
-          }
-        }
-        include apache',
-    }
-    gce_httphealthcheck { 'basic-http':
-        ensure       => present,
-        require      => Gce_instance['www1', 'www2'],
-        description  => 'basic http health check',
-    }
-    gce_targetpool { 'www-pool':
-        ensure       => present,
-        require      => Gce_httphealthcheck['basic-http'],
-        health_checks => 'basic-http',
-        instances    => 'us-central1-a/www1,us-central1-b/www2',
-        region       => 'us-central1',
-    }
-    gce_forwardingrule { 'www-rule':
-        ensure       => present,
-        require      => Gce_targetpool['www-pool'],
-        description  => 'Forward HTTP to web instances',
-        port_range   => '80',
-        region       => 'us-central1',
-        target       => 'www-pool',
-    }
-```
+   ```
 
-Run `puppet apply` on this manifest
+   The install may take up to ten minutes but the instance should be up within a
+   minute or two. You can SSH into it...
 
-    puppet apply --certname certname1 manifests/site.pp
+   ```
+   gcutil ssh puppet-enterprise-master
+   ```
 
-and wait for your GCE resources to be provisioned. The above example
-can be found in `tests/all-up.pp` along with the script to destroy the
-environment in `tests/all-down.pp`.
+   and tail the log until it's finished.
 
-##Reference
+   ```
+   sudo tail -f /var/log/messages
+   ```
+
+   When finished, you'll see a line like this in your log.
+
+   ```
+   puppet-enterprise-master startupscript: Puppet installation finished!
+   ```
+
+3. Use Puppet to build an additional instance, automatically connected to your PE Master.
+
+  ```puppet
+    gce_instance { 'sample-agent':
+      ensure         => present,
+      zone           => 'us-central1-a',
+      machine_type   => 'g1-small',
+      network        => 'default',
+      image          => 'projects/centos-cloud/global/images/centos-6-v20131120',
+      startupscript  => 'pe-simplified-agent.sh',
+      metadata       => {
+        'pe_role'    => 'agent',
+        'pe_master'  => 'puppet-enterprise-master',
+        'pe_version' => '3.3.1',
+      },
+      tags           => ['puppet', 'pe-agent'],
+    }
+    ```
+
+    ```
+    puppet apply agent.pp
+    ```
+
+4. (Optionally) Use the future parser to build many more instances.
+
+    ```puppet
+    $a = ['1','2','3','4','5','6','7','8']
+    each( $a ) |$value|{
+
+      gce_instance { "sample-agent-${value}":
+        ensure         => present,
+        zone           => 'us-central1-a',
+        machine_type   => 'g1-small',
+        network        => 'default',
+        image          => 'projects/centos-cloud/global/images/centos-6-v20131120',
+        startupscript  => 'pe-simplified-agent.sh',
+        metadata       => {
+          'pe_role'    => 'agent',
+          'pe_master'  => 'puppet-enterprise-master',
+          'pe_version' => '3.3.1',
+        },
+        tags           => ['puppet', 'pe-agent'],
+      }
+
+    }
+    ```
+
+    ```
+    puppet apply agent.pp --parser future
+    ```
+
+## A Complete Demo Stack
+
+Google Cloud Platform hosts [a complete demo stack on GitHub](https://github.com/GoogleCloudPlatform/compute-video-demo-puppet). It includes more GCE resources like load balancers and firewall rules.
+
+## Reference
+
+The gce_compute module provides the following resource types:
+
+* `gce_instance` - Virtual machine instances that can be assigned roles.
+* `gce_disk`     - Persistent disks that can be attached to instances.
+* `gce_firewall` - Firewall rules that specify the traffic to your instances.
+* `gce_network`  - Networks that routes internal traffic between virtual machine
+  instances. Firewalls and instances are associated with networks.
+* `gce_forwardingrule`  - Load balancer forwarding rules.
+* `gce_httphealthcheck`  - Load balancer HTTP health checking.
+* `gce_targetpool` - Load balancer collection of instances.
+* `gce_targetpoolhealthcheck`  - Assignment of a health-check to a targetpool.
+* `gce_targetpoolinstance`  - Assignment of an instance to a targetpool.
+
+These types allow users to describe application stacks in Google Compute
+Engine using Puppet's DSL. This provides the following benefits:
+
+* Users can express application deployments as text that can be version
+  controlled.
+* Teams can share and collaborate on application deployments described using
+  Puppet's DSL.
+* Users can take advantage of the composition aspects of the Puppet DSL to
+  create reusable and extendable abstraction layers on top of multi-node
+  deployment descriptions.
+* Allows Puppet to support ongoing management of application stacks created in
+  GCE.
 
 #### Service Account Scopes
 
@@ -256,6 +230,45 @@ services (e.g.
 can specify access with the `--service_account_scopes`. For more information
 about Service Account scopes, see
 [this page](https://developers.google.com/compute/docs/authentication).
+
+The PE Quick Start example assigns the Master a compute-ro service scope which
+allows it to query metadata about other instances within the GCE project. This
+information is used for automatic certificate signing.
+
+#### Automatic Certificate Signing
+
+If you plan to host your Puppet master and agents in Google Compute Engine, this
+module can take advantage of Google's API and Metadata services to verify and
+automatically connect agents to the master so that they can immediately be assigned
+work after creation.
+
+To use this capability, you must specify particular properties in your gce_instance resources.
+
+- Within the Puppet Master resource, assign a service account scope that can query GCE metadata.
+
+`service_account_scopes => ['compute-ro'],`
+
+- The Puppet Master resource also needs to install the gce_compute module and configure itself with the provided autosigner class.
+
+  ```puppet
+    modules  => ['puppetlabs-gce_compute'],
+    manifest => 'include gce_compute::autosign',
+    ```
+
+- Within the Puppet Agent resources, assign the `pe-simplified-agent.sh` startup script.
+
+`startupscript  => 'pe-simplified-agent.sh',`
+
+With this configuration, agents will retrieve particular metadata about themselves
+from the GCE metadata service and insert them into their certificate signing request.
+The Puppet Master will query the metadata service for the same information and ensure
+that it matches what the agent claims in its CSR.
+
+__Be careful.__ This configuration trusts that you've protected your Google credentials
+and that you trust everyone who has credentials to provision instances inside of
+your Google Compute Engine project. So long as this chain remains trustworthy, this
+method will reliably connect newly provisioned instances to your PE infrastructure
+without interaction.
 
 #### Persistent Disks and Instances
 
@@ -351,7 +364,7 @@ on the managed instance and set to restart on boot (in `/etc/default/puppet`).
 
 ### Puppet Enterprise
 
-If you choose `startupscript => 'puppet-enterprise.sh'`, you can provide data needed for the [PE installer answer file](http://docs.puppetlabs.com/pe/latest/install_answer_file_reference.html) in the `metadata` parameter. 
+If you choose `startupscript => 'puppet-enterprise.sh'`, you can provide data needed for the [PE installer answer file](http://docs.puppetlabs.com/pe/latest/install_answer_file_reference.html) in the `metadata` parameter.
 The following example specifies the PE version and PE Console login details.
 
 ```puppet
@@ -375,14 +388,14 @@ This example will provision a PE Agent and will point it to your PE master.
 
 In addition to creating instances with `gce_instance`, you may pass additional parameters to configure and classify the instance. The work is done during instance creation by a bootstrap script. The module includes a script to configure open source Puppet and another script for Puppet Enterprise.
 
-In the `gce_instance` resource, you may provide the following parameter to choose a startup script. You can use any executable script that's located in the gce_compute modules files directory and can be interpreted by the OS GCE provisisions. 
+In the `gce_instance` resource, you may provide the following parameter to choose a startup script. You can use any executable script that's located in the gce_compute modules files directory and can be interpreted by the OS GCE provisisions.
 
 ```puppet
    startupscript => 'script_to_use.sh'
    startupscript => 'puppet-community.sh'
    startupscript => 'puppet-enterprise.sh'
 ```
-   
+
 You can pass additional parameters to `gce_instance` resources to influence the behavior of these startup scripts. Both included scripts are capable of installing Puppet, classifying into a Dashboard/Console ENC, and installing modules. See the `gce_instance` reference (above) for more details.
 
 Common Parameters.
@@ -492,15 +505,15 @@ ssh`.
     $ puppet module list
       /home/erjohnso/.puppet/modules
       |___ puppetlabs-gce_compute (???)
-    $ puppet apply --certname my_project puppetlabs-gce_compute/tests/up-pe3-wheezy.pp 
+    $ puppet apply --certname my_project puppetlabs-gce_compute/tests/up-pe3-wheezy.pp
       notice: /Stage[main]//Gce_instance[pe3-wheezy]/ensure: created
       notice: Finished catalog run in 21.30 seconds
     #// verify that mysql and apache are running, and the node is using puppet3
     $ gcutil ssh pe3-wheezy ' ps ax; puppet --version'
-    $ puppet apply --certname my_project tests/down-pe3-wheezy.pp 
+    $ puppet apply --certname my_project tests/down-pe3-wheezy.pp
 ```
- 
-###Testing   
+
+###Testing
  * Debian-7 (wheezy) puppet debian package (v2.7.23 using ruby1.8.7)
    * Cloud SDK's gcutil version 1.12.0
  * Debian-7 (wheezy) puppet open-source (v3.3.2 using ruby1.9.3p194)
@@ -512,7 +525,7 @@ Puppet Enterprise ships with `facter` and when run will attempt to read the
 value from executing `dmidecode` which can only by done by `root` (or sudo).
 If you run `puppet apply` as an unprivileged user, you will see permission
 denied errors.
-    
+
 ##ToDo
 
 Not all GCE features have been implemented. Currently, the module is missing

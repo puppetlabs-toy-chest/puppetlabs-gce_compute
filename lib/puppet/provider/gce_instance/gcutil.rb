@@ -81,6 +81,8 @@ Puppet::Type.type(:gce_instance).provide(
     if resource[:module_repos]
       args.push("--metadata=puppet_repos:#{resource[:module_repos]}")
     end
+    # Add the resource name (instance name) to metadata for policy autosigning use
+    args.push("--metadata=puppet_instancename:#{resource[:name]}")
     # turn hash into k/v pairs
     # != "" is a hack around receiving an empty string instead of null when param absent
     if resource[:metadata] != ""
