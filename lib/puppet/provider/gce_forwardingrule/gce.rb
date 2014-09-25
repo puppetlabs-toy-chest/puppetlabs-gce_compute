@@ -6,8 +6,6 @@ Puppet::Type.type(:gce_forwardingrule).provide(
   :parent => Puppet::Provider::Gce
 ) do
 
-  commands :fog => 'fog'
-
   def self.subtype
     superclass.connection.forwarding_rules
   end

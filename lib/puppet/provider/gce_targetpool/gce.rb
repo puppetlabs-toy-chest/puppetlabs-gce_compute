@@ -5,8 +5,6 @@ Puppet::Type.type(:gce_targetpool).provide(
   :parent => Puppet::Provider::Gce
 ) do
 
-  commands :fog => 'fog'
-
   def self.subtype
     superclass.connection.target_pools
   end

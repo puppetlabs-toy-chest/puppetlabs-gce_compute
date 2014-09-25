@@ -5,8 +5,6 @@ Puppet::Type.type(:gce_firewall).provide(
   :parent => Puppet::Provider::Gce
 ) do
 
-  commands :fog => 'fog'
-
   @puppet_fog_mappings = {
     :allowed_ip_sources => :source_ranges,
     :allowed_tag_sources => :source_tags
@@ -44,7 +42,7 @@ Puppet::Type.type(:gce_firewall).provide(
     # to an array. Part of the following will have to be rewritten to handle
     # arrays instead of comma separated lists, but parsing will be a little
     # cleaner.
-    
+
     resource[:allowed_ip_sources] = '0.0.0.0/0' unless resource[:allowed_ip_sources] or resource[:allowed_tag_sources]
 
     addedRules = {} # Just to put all rules with the same protocol together

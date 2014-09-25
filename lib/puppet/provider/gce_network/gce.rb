@@ -5,8 +5,6 @@ Puppet::Type.type(:gce_network).provide(
   :parent => Puppet::Provider::Gce
 ) do
 
-  commands :fog => 'fog'
-
   def self.subtype
     superclass.connection.networks
   end

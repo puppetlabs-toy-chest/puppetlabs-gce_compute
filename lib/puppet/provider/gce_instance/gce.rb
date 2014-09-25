@@ -10,8 +10,6 @@ Puppet::Type.type(:gce_instance).provide(
   :parent => Puppet::Provider::Gce
 ) do
 
-  commands :fog => 'fog'
-
   def self.subtype
      superclass.connection.servers
   end
@@ -47,7 +45,7 @@ Puppet::Type.type(:gce_instance).provide(
         break
       end
     } if project.common_instance_metadata['items']
- 
+
     # We want this to be not nil so we don't call this method again later if
     # there are no keys
     @project_ssh_keys ||= '' 

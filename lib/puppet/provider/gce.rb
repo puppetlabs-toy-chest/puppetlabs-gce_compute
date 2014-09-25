@@ -8,6 +8,11 @@ require 'google/api_client/auth/compute_service_account'
 # resources to be updated with new settings where possible.
 class Puppet::Provider::Gce < Puppet::Provider
 
+  HAS_FOG = begin; require 'fog'; true; rescue Exception; false; end
+  HAS_GOOG = begin; require 'google-api-client'; true; rescue Exception; false; end
+
+  confine :true => HAS_FOG and HAS_GOOG
+
   # assignment of variables from gce_auth type for use in authentication
   class << self
     attr_accessor :project

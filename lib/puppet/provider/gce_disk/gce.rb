@@ -5,8 +5,6 @@ Puppet::Type.type(:gce_disk).provide(
   :parent => Puppet::Provider::Gce
 ) do
 
-  commands :fog => 'fog'
-
   mk_resource_methods
   
   def self.subtype
