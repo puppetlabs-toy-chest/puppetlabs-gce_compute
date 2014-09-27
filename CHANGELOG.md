@@ -1,3 +1,7 @@
+##2014-09-26 - Release 0.5.0
+
+Version 0.5.0 adds the ability to autosign certificates in a trusted fashion, between a PE master and the Google Cloud Platform API. See the README for more details which was also improved in this version. 
+
 ##2014-05-27 - Release 0.4.0
 
 This release adds new targetpool functionality, makes it easier to manage the project key, fixes a number of small bugs, and improves the documentation.
