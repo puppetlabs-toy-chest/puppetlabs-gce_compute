@@ -29,6 +29,10 @@ Puppet::Type.newtype(:gce_disk) do
     desc 'boot image to use when creating disk'
   end
 
+  newparam(:source_snapshot) do
+    desc 'boot snapshot to use when creating disk'
+  end
+
   newparam(:wait_until_complete) do
     desc 'wait until disk is complete'
   end
