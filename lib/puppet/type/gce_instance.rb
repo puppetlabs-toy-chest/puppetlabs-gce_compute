@@ -84,6 +84,12 @@ Puppet::Type.newtype(:gce_instance) do
 
   newparam(:can_ip_forward)
 
+  newparam(:boot_disk_type)
+
+  newparam(:noauto_delete_boot_disk)
+
+  newparam(:auto_delete_boot_disk)
+
   # needs to support arrays
   newparam(:tags) do
     desc 'tags that can be used for filtering and to create firewall rules'

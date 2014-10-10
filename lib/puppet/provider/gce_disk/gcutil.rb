@@ -16,7 +16,7 @@ Puppet::Type.type(:gce_disk).provide(
   end
 
   def parameter_list
-    [ 'zone', 'size_gb', 'description', 'wait_until_complete', 'source_image' ]
+    [ 'zone', 'size_gb', 'description', 'wait_until_complete', 'source_image', 'disk_type' ]
   end
 
   def destroy_parameter_list
