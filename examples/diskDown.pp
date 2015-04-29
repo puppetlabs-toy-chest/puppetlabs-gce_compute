@@ -1,6 +1,9 @@
-$zonea = 'us-central1-a'
+gce_disk { 'simple-disk':
+  ensure => absent,
+  zone   => 'us-central1-a'
+}
 
-gce_disk { 'joe':
+gce_disk { 'complex-disk':
   ensure  => absent,
-  zone    => "$zonea",
+  zone    => 'us-central1-a'
 }

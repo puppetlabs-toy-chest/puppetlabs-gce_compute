@@ -1,7 +1,12 @@
-$zonea = 'us-central1-a'
+gce_disk { 'simple-disk':
+  ensure => present,
+  zone   => 'us-central1-a'
+}
 
-gce_disk { 'joe':
-  ensure  => present,
-  size_gb  => 10,
-  zone    => "$zonea",
+gce_disk { 'complex-disk':
+  ensure       => present,
+  zone         => 'us-central1-a',
+  size_gb      => 10,
+  description  => "This is a complicated disk!",
+  source_image => 'coreos'
 }
