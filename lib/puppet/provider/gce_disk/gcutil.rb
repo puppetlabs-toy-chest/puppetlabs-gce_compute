@@ -5,6 +5,8 @@ Puppet::Type.type(:gce_disk).provide(
   :parent => Puppet::Provider::Gce
 ) do
 
+  confine :true => false
+
   commands :gcutil => 'gcutil'
 
   def self.subcommand
