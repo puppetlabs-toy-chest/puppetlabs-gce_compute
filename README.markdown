@@ -467,7 +467,7 @@ $ puppet module install puppetlabs-gce_compute
 Instead, clone this repository, `cd` into the repository, then do
 
 ```bash
-$ puppet module build && puppet module install -f pkg/puppetlabs-gce_compute-0.5.0.tar.gz
+$ rake install
 ```
 
 If you're going to be doing any kind of modifications, I highly recommend using [rbenv](https://github.com/sstephenson/rbenv), [ruby-build](https://github.com/sstephenson/ruby-build), (don't forget the [dependencies](https://github.com/sstephenson/ruby-build/wiki#suggested-build-environment)!) and [bundler](http://bundler.io/).
