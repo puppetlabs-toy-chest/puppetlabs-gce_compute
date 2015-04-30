@@ -23,62 +23,37 @@ In order to use this module, you will need to
 [signup](https://developers.google.com/compute/docs/signup)
  for a Google Cloud Platform account and enable Google Compute Engine.
 
-You will also need to designate one machine to be your Puppet Device Agent.
+### Setup a Puppet Agent with Google Cloud SDK
+
+You will need to designate one machine to be your Puppet Agent.
 This machine will be responsible for provisioning objects into Google Compute
-using the `gcutil` command-line utility that is now bundled as part of the Cloud
-SDK. Follow the setup instructions for the
-[Google Cloud SDK](https://developers.google.com/cloud/sdk/) and make sure
-to authenticate as instructed.
+using the `gcloud compute` command-line utility that is bundled as part of the Cloud
+SDK.
 
-Next, create your `device.conf` file on the Agent. The default location for
-this file can be discovered by running the command (typically
-`/etc/puppet/device.conf`):
+You may either use a virtual machine inside of your Google Cloud project as your Puppet Agent, or you may use a machine outside of the project.
 
-    puppet apply --configprint deviceconfig
+#### Setup a Puppet Agent inside of your Google Cloud project
 
-The `device.conf` file is used to map multiple certificate names to Google
-Compute projects.
+If you would like to use a virtual machine inside of your project as your Puppet Agent, setup is simple.  Create the instance manually, either on the [Developers Console](https://console.developers.google.com/) or via the `gcloud` command-line interface, making sure to enable the `compute-rw` scope for your instance.
 
-Each section header in this file is the name of the certificate that is
-associated with a specified set of credential placeholder path and project
-identifier.  The element type should be set to 'gce' and the url should
-contain both a file path and the name of the project in the format below:
+- In the Developers Console, create an instance via `Compute > Compute Engine > VM instances > New instance`, show the security options, and select "Read Write" under `Project Access > Compute`.
+- In `gcloud`, just use `gcloud compute instances create` with the `--scopes compute-rw` flag.
 
-    #/etc/puppet/device.conf
-    [my_project1]
-      type gce
-      url [/dev/null]:project_id
+Once you've setup your instance with the `compute-rw` scope, you don't need do anything else: `gcloud` comes preinstalled on the VM, and the instance is able to read and write resources within its project.
 
-Note that this version of the gce_compute module sets the file path to
-`/dev/null`.  This is a placeholder value that will be used to reference
-a credentials file in a newer release of this module.  For now, setting
-the value to `/dev/null` is a working solution as long as you have previously
-set up Cloud SDK with the `gcloud auth login` command.
+#### Setup a Puppet Agent outisde of your Google Cloud project
 
-### Multiple Projects
+If you would like to use a machine outside of your project as your Puppet Agent, you'll need to [install and authenticate gcloud](https://cloud.google.com/sdk/).
 
-You can use multiple cloud projects by making the appropriate entries in your
-`device.conf` file and adjusting the Cloud SDK settings.  For each project,
-you'll first need to create authorize each project with:
+### Install Puppet and this module
 
-    gcloud config set account ANOTHER_ACCOUNT_NAME
-    gcloud auth login
+You'll now want to [install Puppet](https://docs.puppetlabs.com/guides/install_puppet/pre_install.html) on your Puppet Agent.  Once you've installed Puppet, do
 
-Once all of your projects have been authorized, you can toggle which project
-will be used prior to invoking `puppet apply` by using:
+```bash
+$ puppet module install puppetlabs-gce_compute
+```
 
-    gcloud config set project PROJECT
-
-The example below show how multiple certificate names can be used to represent
-multiple projects in GCE.
-
-    #/etc/puppet/device.conf
-    [certname1]
-      type gce
-      url [/dev/null]:group:my_project1
-    [certname2]
-      type gce
-      url [/dev/null]:group:my_project2
+At this point, you should be ready to go!
 
 ## Quick Start with Puppet Enterprise
 
@@ -483,35 +458,19 @@ It should work on any system that supports Google's [Cloud SDK](https://develope
 
 ##Development
 
-These are some condensed *raw* notes on how the module was developed and
-tested. Mostly, it's the output of my `history` with a few annotations. I
-spun up a GCE instance through the console, and the logged into it via `gcutil
-ssh`.
+To setup a development environment, follow the [Setup](#setup) instructions above, up until
 
 ```bash
-    #// This block was done with a fresh 'wheezy' and the puppet version included
-    #// in the distro's repo (e.g. puppet 2.7.18)
-    $ sudo apt-get update && sudo apt-get upgrade -y
-    $ sudo apt-get install git puppet -y
-    $ git clone https://github.com/puppetlabs/puppetlabs-gce_compute.git
-    $ puppet apply --configprint deviceconfig
-    $ mkdir -p ~/.puppet/modules
-    $ cat <<eof > ~/.puppet/device.conf
-      [my_project]
-         type gce
-         url [/dev/null]:google.com:erjohnso
-      eof
-    $ ln -s ~/puppetlabs-gce_compute ~/.puppet/modules/
-    $ puppet module list
-      /home/erjohnso/.puppet/modules
-      |___ puppetlabs-gce_compute (???)
-    $ puppet apply --certname my_project puppetlabs-gce_compute/tests/up-pe3-wheezy.pp
-      notice: /Stage[main]//Gce_instance[pe3-wheezy]/ensure: created
-      notice: Finished catalog run in 21.30 seconds
-    #// verify that mysql and apache are running, and the node is using puppet3
-    $ gcutil ssh pe3-wheezy ' ps ax; puppet --version'
-    $ puppet apply --certname my_project tests/down-pe3-wheezy.pp
+$ puppet module install puppetlabs-gce_compute
 ```
+
+Instead, clone this repository, `cd` into the repository, then do
+
+```bash
+$ puppet module build && puppet module install -f pkg/puppetlabs-gce_compute-0.5.0.tar.gz
+```
+
+If you're going to be doing any kind of modifications, I highly recommend using [rbenv](https://github.com/sstephenson/rbenv), [ruby-build](https://github.com/sstephenson/ruby-build), (don't forget the [dependencies](https://github.com/sstephenson/ruby-build/wiki#suggested-build-environment)!) and [bundler](http://bundler.io/).
 
 ###Testing
  * Debian-7 (wheezy) puppet debian package (v2.7.23 using ruby1.8.7)
