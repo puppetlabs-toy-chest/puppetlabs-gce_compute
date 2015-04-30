@@ -1,8 +1,7 @@
 Puppet::Type.type(:gce_disk).provide(:gcloud) do
   commands :gcloud => "gcloud"
 
-  ARGS = {:zone => '--zone',
-          :size_gb => '--size',
+  ARGS = {:size_gb => '--size',
           :description => '--description',
           :source_image => '--image'}
 
