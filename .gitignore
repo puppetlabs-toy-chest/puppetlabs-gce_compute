@@ -2,3 +2,4 @@
 *.swp
 *.swo
 *.lock
+.ruby-version
