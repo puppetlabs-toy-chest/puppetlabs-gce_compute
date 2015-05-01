@@ -10,7 +10,7 @@ Puppet::Type.type(:gce_httphealthcheck).provide(:gcloud) do
      :port => '--port',
      :request_path => '--request-path',
      :unhealthy_threshold => '--unhealthy-threshold'}
-   end
+  end
 
   def exists?
     begin

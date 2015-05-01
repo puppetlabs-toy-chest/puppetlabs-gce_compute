@@ -5,7 +5,7 @@ Puppet::Type.type(:gce_disk).provide(:gcloud) do
     {:size_gb => '--size',
      :description => '--description',
      :source_image => '--image'}
-   end
+  end
 
   def exists?
     begin
