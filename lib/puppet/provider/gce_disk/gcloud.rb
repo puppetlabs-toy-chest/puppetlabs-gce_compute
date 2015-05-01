@@ -1,9 +1,11 @@
 Puppet::Type.type(:gce_disk).provide(:gcloud) do
   commands :gcloud => "gcloud"
 
-  ARGS = {:size_gb => '--size',
-          :description => '--description',
-          :source_image => '--image'}
+  def gcloud_args
+    {:size_gb => '--size',
+     :description => '--description',
+     :source_image => '--image'}
+   end
 
   def exists?
     begin
@@ -16,7 +18,7 @@ Puppet::Type.type(:gce_disk).provide(:gcloud) do
 
   def create
     args = ["compute", "disks", "create", resource[:name], '--zone', resource[:zone]]
-    ARGS.each do |symbol, arg|
+    gcloud_args.each do |symbol, arg|
       if resource[symbol]
         args << arg
         args << resource[symbol]
