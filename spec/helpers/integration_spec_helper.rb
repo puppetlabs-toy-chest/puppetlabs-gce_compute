@@ -3,6 +3,7 @@ require 'json'
 class IntegrationSpecHelper
   def self.describe_out(resource, args)
     out, _ = describe_resource(resource, args)
+    # NOTE This will throw a TypeError if `describe_resource` had no content in stdout
     return JSON.parse(out)
   end
 

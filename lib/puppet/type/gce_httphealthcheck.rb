@@ -13,20 +13,10 @@ Puppet::Type.newtype(:gce_httphealthcheck) do
 
   newparam(:check_interval_sec) do
     desc 'How often in seconds to send a health check'
-    validate do |value|
-      unless value.is_a? Integer and value > 0
-        raise "Check interval needs to be integer seconds greater than zero #{value}"
-      end
-    end
   end
 
   newparam(:check_timeout_sec) do
     desc 'How long to wait on a check before declaring failure'
-    validate do |value|
-      unless value.is_a? Integer and value > 0
-        raise "Check timeout needs to be integer seconds greater than zero #{value}"
-      end
-    end
   end
 
   newparam(:description) do
@@ -35,11 +25,6 @@ Puppet::Type.newtype(:gce_httphealthcheck) do
 
   newparam(:healthy_threshold) do
     desc 'A so-far unhealthy instance will be marked healthy after this many postivie checks'
-    validate do |value|
-      unless value.is_a? Integer and value > 0
-        raise "Healthy threshold must an integer greather than zero #{value}"
-      end
-    end
   end
 
   newparam(:host) do
@@ -48,11 +33,6 @@ Puppet::Type.newtype(:gce_httphealthcheck) do
 
   newparam(:port) do
     desc 'The port to use for HTTP health check requests'
-    validate do |value|
-      unless value.is_a? Integer and value > 0
-        raise "The port must an integer greather than zero #{value}"
-      end
-    end
   end
 
   newparam(:request_path) do
@@ -66,11 +46,5 @@ Puppet::Type.newtype(:gce_httphealthcheck) do
 
   newparam(:unhealthy_threshold) do
     desc 'Number of times to fail a healthcheck before being marked as failed'
-    validate do |value|
-      unless value.is_a? Integer and value > 0
-        raise "Unhealthy threshold must an integer greather than zero #{value}"
-      end
-    end
   end
-
 end
