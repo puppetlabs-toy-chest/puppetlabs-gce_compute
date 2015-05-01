@@ -22,3 +22,16 @@ task :spec_unit do
   Rake::Task[:spec_unit_standalone].invoke
   Rake::Task[:spec_clean].invoke
 end
+
+desc "Run spec tests on an existing fixtures directory"
+RSpec::Core::RakeTask.new(:spec_integration_standalone) do |t|
+  t.rspec_opts = ['--color']
+  t.pattern = 'spec/integration/**/*_spec.rb'
+end
+
+desc "Run spec tests in a clean fixtures directory"
+task :spec_integration do
+  Rake::Task[:spec_prep].invoke
+  Rake::Task[:spec_integration_standalone].invoke
+  Rake::Task[:spec_clean].invoke
+end
