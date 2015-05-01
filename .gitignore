@@ -4,3 +4,4 @@
 *.lock
 .ruby-version
 pkg
+spec/fixtures
