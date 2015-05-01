@@ -16,7 +16,7 @@ class Puppet::Provider::Gcloud < Puppet::Provider
 
   def create
     args = ['compute', gcloud_resource_arg, 'create', resource[:name]] + gcloud_args
-    # XXX This is a hole in the tests; all of the tests pass, even if I comment out the next block
+    # XXX This is a hole in the integration tests; all of the tests pass, even if I comment out the next block
     gcloud_optional_args.each do |symbol, arg|
       if resource[symbol]
         args << arg
