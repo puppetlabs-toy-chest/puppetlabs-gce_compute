@@ -105,7 +105,7 @@ end
 Puppet::Type.type(:gce_fake).provide(:gcloud, :parent => Puppet::Provider::Gcloud) do
   commands :gcloud => "gcloud"
 
-  def gcloud_resource_arg
+  def gcloud_resource_name
     'fakes'
   end
 
@@ -115,7 +115,7 @@ Puppet::Type.type(:gce_fake).provide(:gcloud, :parent => Puppet::Provider::Gclou
     ['--zone', resource[:zone]]
   end
 
-  def gcloud_optional_args
+  def gcloud_optional_create_args
     {:description => '--description',
      :source => '--source'}
   end

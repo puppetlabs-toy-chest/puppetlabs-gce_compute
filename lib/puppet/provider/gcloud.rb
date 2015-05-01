@@ -6,7 +6,7 @@ class Puppet::Provider::Gcloud < Puppet::Provider
 
   def exists?
     begin
-      args = ['compute', gcloud_resource_arg, 'describe', resource[:name]] + gcloud_args
+      args = ['compute', gcloud_resource_name, 'describe', resource[:name]] + gcloud_args
       gcloud(*args)
       return true
     rescue Puppet::ExecutionFailure => e
@@ -15,18 +15,18 @@ class Puppet::Provider::Gcloud < Puppet::Provider
   end
 
   def create
-    args = ['compute', gcloud_resource_arg, 'create', resource[:name]] + gcloud_args
-    gcloud_optional_args.each do |symbol, arg|
-      if resource[symbol]
-        args << arg
-        args << resource[symbol]
+    args = ['compute', gcloud_resource_name, 'create', resource[:name]] + gcloud_args
+    gcloud_optional_create_args.each do |attribute, flag|
+      if resource[attribute]
+        args << flag
+        args << resource[attribute]
       end
     end
     gcloud(*args)
   end
 
   def destroy
-    args = ['compute', gcloud_resource_arg, 'delete', resource[:name]] + gcloud_args
+    args = ['compute', gcloud_resource_name, 'delete', resource[:name]] + gcloud_args
     gcloud(*args)
   end
 end

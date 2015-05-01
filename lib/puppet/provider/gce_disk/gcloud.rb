@@ -3,7 +3,7 @@ require File.expand_path(File.join(File.dirname(__FILE__), '..', 'gcloud'))
 Puppet::Type.type(:gce_disk).provide(:gcloud, :parent => Puppet::Provider::Gcloud) do
   commands :gcloud => "gcloud"
 
-  def gcloud_resource_arg
+  def gcloud_resource_name
     'disks'
   end
 
@@ -12,7 +12,7 @@ Puppet::Type.type(:gce_disk).provide(:gcloud, :parent => Puppet::Provider::Gclou
     ['--zone', resource[:zone]]
   end
 
-  def gcloud_optional_args
+  def gcloud_optional_create_args
     {:size_gb => '--size',
      :description => '--description',
      :source_image => '--image'}
