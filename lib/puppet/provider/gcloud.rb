@@ -4,6 +4,10 @@ class Puppet::Provider::Gcloud < Puppet::Provider
     []
   end
 
+  def gcloud_optional_create_args
+    []
+  end
+
   def exists?
     begin
       args = ['compute', gcloud_resource_name, 'describe', resource[:name]] + gcloud_args
