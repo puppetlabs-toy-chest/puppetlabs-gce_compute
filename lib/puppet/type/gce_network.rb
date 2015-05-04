@@ -11,15 +11,6 @@ Puppet::Type.newtype(:gce_network) do
     end
   end
 
-  newparam(:gateway) do
-    desc 'gateway'
-    validate do |value|
-      unless value =~ /[0-9]{1,3}(?:\.[0-9]{1,3}){3}/
-        raise "Invalid gateway IP address #{value}"
-      end
-    end
-  end
-
   newparam(:description) do
     desc 'network description'
   end

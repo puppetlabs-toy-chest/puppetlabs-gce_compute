@@ -9,7 +9,6 @@ describe gce_network do
     [
      :name,
      :description,
-     :gateway,
      :range,
     ]
   end

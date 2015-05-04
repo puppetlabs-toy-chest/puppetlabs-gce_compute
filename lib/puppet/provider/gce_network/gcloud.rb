@@ -1,0 +1,14 @@
+require File.expand_path(File.join(File.dirname(__FILE__), '..', 'gcloud'))
+
+Puppet::Type.type(:gce_network).provide(:gcloud, :parent => Puppet::Provider::Gcloud) do
+  commands :gcloud => "gcloud"
+
+  def gcloud_resource_name
+    'networks'
+  end
+
+  def gcloud_optional_create_args
+    {:range => '--range',
+     :description => '--description'}
+  end
+end
