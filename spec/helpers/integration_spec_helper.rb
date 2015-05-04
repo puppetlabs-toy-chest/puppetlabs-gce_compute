@@ -22,3 +22,29 @@ class IntegrationSpecHelper
     return stdout.gets(nil), stderr.gets(nil)
   end
 end
+
+RSpec.shared_examples "a resource that can be created and destroyed" do
+  let(:gcloud_resource_name) { provider.gcloud_resource_name }
+
+  it "runs creates and destroys a resource" do
+    expect(IntegrationSpecHelper.describe_err(gcloud_resource_name, describe_args)).to match(/ERROR: .* Could not fetch resource/)
+
+    IntegrationSpecHelper.apply_example("#{type}/up")
+    out = IntegrationSpecHelper.describe_out(gcloud_resource_name, describe_args)
+    expected_properties.each do |property, value|
+      if value.is_a? Regexp
+        expect(out[property]).to match(value)
+      else
+        expect(out[property]).to eq(value)
+      end
+    end
+
+    IntegrationSpecHelper.apply_example("#{type}/down")
+    expect(IntegrationSpecHelper.describe_err(gcloud_resource_name, describe_args)).to match(/ERROR: .* Could not fetch resource/)
+  end
+
+  it "complains about an invalid resource" do
+    _, err = IntegrationSpecHelper.apply_example("#{type}/bad")
+    expect(err).to match(/failed/)
+  end
+end
