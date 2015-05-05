@@ -7,6 +7,13 @@ describe "gce_instance" do
     let(:describe_args) { 'puppet-test-instance --zone us-central1-a' }
     let(:expected_properties) { {'name'        => 'puppet-test-instance',
                                  'zone'        => /us-central1-a/,
-                                 'description' => "Instance for testing the puppetlabs-gce_compute module"} }
+                                 'description' => "Instance for testing the puppetlabs-gce_compute module",
+                                 'machineType' => /f1-micro/} }
+    let(:other_property_expectations) do
+      Proc.new do |out|
+        expect(out['networkInterfaces'].size).to eq(1)
+        expect(out['networkInterfaces'][0]['network']).to match(/puppet-test-instance-network/)
+      end
+    end
   end
 end

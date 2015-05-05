@@ -13,6 +13,8 @@ Puppet::Type.type(:gce_instance).provide(:gcloud, :parent => Puppet::Provider::G
   end
 
   def gcloud_optional_create_args
-    {:description => '--description'}
+    {:description  => '--description',
+     :network      => '--network',
+     :machine_type => '--machine-type'}
   end
 end
