@@ -13,8 +13,21 @@ Puppet::Type.type(:gce_instance).provide(:gcloud, :parent => Puppet::Provider::G
   end
 
   def gcloud_optional_create_args
-    {:description  => '--description',
-     :network      => '--network',
-     :machine_type => '--machine-type'}
+    {:description         => '--description',
+     :network             => '--network',
+     :machine_type        => '--machine-type',
+     :on_host_maintenance => '--maintenance-policy'}
+  end
+
+  def create
+    args = ['compute', gcloud_resource_name, 'create', resource[:name]] + gcloud_args
+    gcloud_optional_create_args.each do |attribute, flag|
+      if resource[attribute]
+        args << flag
+        args << resource[attribute]
+      end
+    end
+    args << '--can-ip-forward' if resource[:can_ip_forward]
+    gcloud(*args)
   end
 end
