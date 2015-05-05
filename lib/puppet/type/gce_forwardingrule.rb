@@ -25,9 +25,9 @@ Puppet::Type.newtype(:gce_forwardingrule) do
   end
 
   newparam(:protocol) do
-    desc 'The IP protocol for the forwarding rule, TCP or UDP'
+    desc 'The IP protocol for the forwarding rule: AH, ESP, SCTP, TCP, or UDP'
     validate do |value|
-      unless ['TCP', 'UDP'].include? value
+      unless ['AH', 'ESP', 'SCTP', 'TCP', 'UDP'].include? value
         raise "Protocol value can only be 'TCP' or 'UDP': #{value}"
       end
     end

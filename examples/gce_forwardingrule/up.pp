@@ -8,5 +8,7 @@ gce_forwardingrule { 'puppet-test-forwarding-rule':
   ensure      => present,
   region      => 'us-central1',
   description => "Forwarding rule for testing the puppetlabs-gce_compute module",
+  protocol    => 'UDP',
+  port_range  => '1-66',
   target      => 'puppet-test-forwarding-rule-target-pool'
 }
