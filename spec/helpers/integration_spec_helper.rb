@@ -24,12 +24,15 @@ class IntegrationSpecHelper
 end
 
 RSpec.shared_examples "a resource that can be created and destroyed" do
+  let(:type_name) { type.name.to_s }
+  # NOTE we have to create an actual resource in order to find the gcloud provider
+  let(:provider) { type.new({'name' => 'name'}).provider }
   let(:gcloud_resource_name) { provider.gcloud_resource_name }
 
   it "runs creates and destroys a resource" do
     expect(IntegrationSpecHelper.describe_err(gcloud_resource_name, describe_args)).to match(/ERROR: .* Could not fetch resource/)
 
-    IntegrationSpecHelper.apply_example("#{type}/up")
+    IntegrationSpecHelper.apply_example("#{type_name}/up")
     out = IntegrationSpecHelper.describe_out(gcloud_resource_name, describe_args)
     expected_properties.each do |property, value|
       if value.is_a? Regexp
@@ -39,12 +42,12 @@ RSpec.shared_examples "a resource that can be created and destroyed" do
       end
     end
 
-    IntegrationSpecHelper.apply_example("#{type}/down")
+    IntegrationSpecHelper.apply_example("#{type_name}/down")
     expect(IntegrationSpecHelper.describe_err(gcloud_resource_name, describe_args)).to match(/ERROR: .* Could not fetch resource/)
   end
 
   it "complains about an invalid resource" do
-    _, err = IntegrationSpecHelper.apply_example("#{type}/bad")
+    _, err = IntegrationSpecHelper.apply_example("#{type_name}/bad")
     expect(err).to match(/failed/)
   end
 end

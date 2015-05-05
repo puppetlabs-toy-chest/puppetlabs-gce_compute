@@ -3,12 +3,7 @@ require 'helpers/integration_spec_helper'
 
 describe "gce_firewall" do
   it_behaves_like "a resource that can be created and destroyed" do
-
-    let(:resource) { Puppet::Type.type(:gce_firewall).new(:name => 'fake-name') }
-    let(:provider) { resource.provider }
-
-    let(:type) { 'gce_firewall' }
-    #let(:provider) { Puppet::Type::Gce_firewall::ProviderGcloud.new }
+    let(:type) { Puppet::Type.type(:gce_firewall) }
     let(:describe_args) { 'puppet-test-firewall' }
     let(:expected_properties) { {'name'        => 'puppet-test-firewall',
                                  'description' => "Firewall for testing the puppetlabs-gce_compute module",
