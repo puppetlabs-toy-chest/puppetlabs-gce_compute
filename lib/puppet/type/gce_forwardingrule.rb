@@ -45,4 +45,7 @@ Puppet::Type.newtype(:gce_forwardingrule) do
     desc 'The name of the target pool for the forwarding rule'
   end
 
+  autorequire(:gce_targetpool) do
+    self[:target]
+  end
 end
