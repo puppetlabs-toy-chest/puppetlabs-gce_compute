@@ -5,6 +5,8 @@ Puppet::Type.type(:gce_firewall).provide(
   :parent => Puppet::Provider::Gce
 ) do
 
+  confine :true => false
+
   commands :gcutil => 'gcutil'
 
   def self.subcommand
