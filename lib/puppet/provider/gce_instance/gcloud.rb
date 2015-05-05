@@ -16,7 +16,8 @@ Puppet::Type.type(:gce_instance).provide(:gcloud, :parent => Puppet::Provider::G
     {:description         => '--description',
      :network             => '--network',
      :machine_type        => '--machine-type',
-     :on_host_maintenance => '--maintenance-policy'}
+     :on_host_maintenance => '--maintenance-policy',
+     :tags                => '--tags'}
   end
 
   def create

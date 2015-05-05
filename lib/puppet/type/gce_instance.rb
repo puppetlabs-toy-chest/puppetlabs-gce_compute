@@ -90,10 +90,8 @@ Puppet::Type.newtype(:gce_instance) do
     validate do |v|
       raise(Puppet::Error, 'Tags can only be arrays or strings') unless v.is_a?(Array) || v.is_a?(String)
     end
-    munge do |v|
-      v.is_a?(Array) ? v.join(',') : v
-    end
   end
+
 # TODO I am going to use metadata for my own custom purposes.
 # The laziest way to avoid conflicts is just to not yet users modify
 # it. I will likely have to figure out a better solution for this... later

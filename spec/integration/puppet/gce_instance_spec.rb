@@ -16,6 +16,7 @@ describe "gce_instance" do
         expect(out['networkInterfaces'].size).to eq(1)
         expect(out['networkInterfaces'][0]['network']).to match(/puppet-test-instance-network/)
         expect(out['scheduling']['onHostMaintenance']).to match('TERMINATE')
+        expect(out['tags']['items']).to match_array(['tag1', 'tag2'])
       end
     end
   end
