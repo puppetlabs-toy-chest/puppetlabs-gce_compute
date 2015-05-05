@@ -228,9 +228,7 @@ Puppet::Type.newtype(:gce_instance) do
 
   validate do
     if self[:ensure] == :present
-      raise(Puppet::Error, "Did not specify required param machine_type") unless self[:machine_type]
       raise(Puppet::Error, "Did not specify required param zone") unless self[:zone]
-      raise(Puppet::Error, "Did not specify required param image or disk") unless self[:image] or self[:disk]
     end
   end
 
