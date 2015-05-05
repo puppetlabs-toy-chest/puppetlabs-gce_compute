@@ -41,6 +41,9 @@ RSpec.shared_examples "a resource that can be created and destroyed" do
         expect(out[property]).to eq(value)
       end
     end
+    if defined?(other_property_expectations)
+      other_property_expectations.call(out)
+    end
 
     IntegrationSpecHelper.apply_example("#{type_name}/down")
     expect(IntegrationSpecHelper.describe_err(gcloud_resource_name, describe_args)).to match(/ERROR: .* Could not fetch resource/)
