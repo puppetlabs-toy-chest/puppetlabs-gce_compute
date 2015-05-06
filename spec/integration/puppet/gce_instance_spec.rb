@@ -19,6 +19,9 @@ describe "gce_instance" do
         expect(out['tags']['items']).to match_array(['tag1', 'tag2'])
         expect(out['metadata']['items']).to match_array([{'key'   => 'test-metadata-key',
                                                           'value' => 'test-metadata-value'}])
+
+        disk_out = IntegrationSpecHelper.describe_out('disks', 'puppet-test-instance --zone us-central1-a')
+        expect(disk_out['sourceImage']).to match(/coreos/)
       end
     end
   end
