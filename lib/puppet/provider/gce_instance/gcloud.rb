@@ -29,6 +29,11 @@ Puppet::Type.type(:gce_instance).provide(:gcloud, :parent => Puppet::Provider::G
         args << resource[attribute]
       end
     end
+    if resource[:disk]
+      args << '--disk'
+      args << "name=#{resource[:disk]}"
+      args << "boot=yes"
+    end
     args << '--can-ip-forward' if resource[:can_ip_forward]
     if resource[:metadata]
       args << '--metadata'

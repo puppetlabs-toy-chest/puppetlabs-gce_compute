@@ -22,6 +22,10 @@ describe "gce_instance" do
 
         disk_out = IntegrationSpecHelper.describe_out('disks', 'puppet-test-instance --zone us-central1-a')
         expect(disk_out['sourceImage']).to match(/coreos/)
+
+        instance_from_disk_out = IntegrationSpecHelper.describe_out('instances', 'puppet-test-instance-from-disk --zone us-central1-a')
+        expect(instance_from_disk_out['disks'].size).to eq(1)
+        expect(instance_from_disk_out['disks'][0]['source']).to match(/puppet-test-instance-from-disk-disk/)
       end
     end
   end

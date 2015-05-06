@@ -15,3 +15,18 @@ gce_instance { 'puppet-test-instance':
   tags                => ['tag1','tag2'],
   metadata            => {test-metadata-key => 'test-metadata-value'}
 }
+
+gce_disk { 'puppet-test-instance-from-disk-disk':
+  ensure       => present,
+  zone         => 'us-central1-a',
+  size_gb      => 10,
+  description  => "Disk for testing the puppetlabs-gce_compute module instance started from a disk",
+  source_image => 'coreos'
+}
+
+gce_instance { 'puppet-test-instance-from-disk':
+  ensure              => present,
+  zone                => 'us-central1-a',
+  description         => "Instance for testing the puppetlabs-gce_compute module instance started from a disk",
+  disk                => 'puppet-test-instance-from-disk-disk'
+}
