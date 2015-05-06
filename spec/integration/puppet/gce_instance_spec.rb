@@ -17,8 +17,9 @@ describe "gce_instance" do
         expect(out['networkInterfaces'][0]['network']).to match(/puppet-test-instance-network/)
         expect(out['scheduling']['onHostMaintenance']).to match('TERMINATE')
         expect(out['tags']['items']).to match_array(['tag1', 'tag2'])
-        expect(out['metadata']['items']).to match_array([{'key'   => 'test-metadata-key',
-                                                          'value' => 'test-metadata-value'}])
+        expect(out['metadata']['items'].size).to eq(1)
+        expect(out['metadata']['items']).to include({'key'   => 'test-metadata-key',
+                                                     'value' => 'test-metadata-value'})
 
         disk_out = IntegrationSpecHelper.describe_out('disks', 'puppet-test-instance --zone us-central1-a')
         expect(disk_out['sourceImage']).to match(/coreos/)
