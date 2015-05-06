@@ -17,6 +17,8 @@ describe "gce_instance" do
         expect(out['networkInterfaces'][0]['network']).to match(/puppet-test-instance-network/)
         expect(out['scheduling']['onHostMaintenance']).to match('TERMINATE')
         expect(out['tags']['items']).to match_array(['tag1', 'tag2'])
+        expect(out['metadata']['items']).to match_array([{'key'   => 'test-metadata-key',
+                                                          'value' => 'test-metadata-value'}])
       end
     end
   end

@@ -11,5 +11,6 @@ gce_instance { 'puppet-test-instance':
   network             => 'puppet-test-instance-network',
   on_host_maintenance => 'TERMINATE',
   can_ip_forward      => true,
-  tags                => ['tag1','tag2']
+  tags                => ['tag1','tag2'],
+  metadata            => {test-metadata-key => 'test-metadata-value'}
 }

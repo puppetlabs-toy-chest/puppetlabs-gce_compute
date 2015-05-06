@@ -29,6 +29,12 @@ Puppet::Type.type(:gce_instance).provide(:gcloud, :parent => Puppet::Provider::G
       end
     end
     args << '--can-ip-forward' if resource[:can_ip_forward]
+    if resource[:metadata]
+      args << '--metadata'
+      resource[:metadata].each do |k, v|
+        args << "#{k}=#{v}"
+      end
+    end
     gcloud(*args)
   end
 end
