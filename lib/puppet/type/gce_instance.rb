@@ -196,10 +196,6 @@ Puppet::Type.newtype(:gce_instance) do
 #
   newparam(:metadata) do
     desc 'Creates vm metadata out of k => v hashes'
-    defaultto ''
-    validate do |v|
-      raise(Puppet::Error, "metadata expects a Hash.") unless(v.is_a?(Hash) || v.empty?)
-    end
   end
 
   newparam(:startupscript) do
