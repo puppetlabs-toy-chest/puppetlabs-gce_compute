@@ -41,6 +41,11 @@ Puppet::Type.type(:gce_instance).provide(:gcloud, :parent => Puppet::Provider::G
         args << "#{k}=#{v}"
       end
     end
+    if resource[:startupscript]
+      startupscript_file = File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..', '..', 'files', "#{resource[:startupscript]}"))
+      args << '--metadata-from-file'
+      args << "startup-script=#{startupscript_file}"
+    end
     gcloud(*args)
   end
 end

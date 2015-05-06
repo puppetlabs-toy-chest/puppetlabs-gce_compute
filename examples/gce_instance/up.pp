@@ -13,7 +13,8 @@ gce_instance { 'puppet-test-instance':
   on_host_maintenance => 'TERMINATE',
   can_ip_forward      => true,
   tags                => ['tag1','tag2'],
-  metadata            => {test-metadata-key => 'test-metadata-value'}
+  metadata            => {test-metadata-key => 'test-metadata-value'},
+  startupscript       => '../examples/gce_instance/example-startup-script.sh'
 }
 
 gce_disk { 'puppet-test-instance-from-disk-disk':
