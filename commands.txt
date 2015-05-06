@@ -1,2 +1,0 @@
-puppet device --server localhost --deviceconfig /Users/danbode/dev/modules/gce_types/spec/fixtures/device.conf  --debug --trace
-puppet resource gce_instance --modulepath ~/dev/modules/ --confdir ~/dev/modules/gce_types/spec/fixtures
