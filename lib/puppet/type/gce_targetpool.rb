@@ -23,7 +23,6 @@ Puppet::Type.newtype(:gce_targetpool) do
     desc 'Comma separated list of HttpHealthChecks'
   end
 
-  # TODO this can't be done on creation; it must be executed separately
   newparam(:instances) do
     desc 'Comma separated list of "zone/instance" pairs that will be in this pool'
   end
