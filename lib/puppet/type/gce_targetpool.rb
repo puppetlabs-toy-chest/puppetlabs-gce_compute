@@ -41,7 +41,7 @@ Puppet::Type.newtype(:gce_targetpool) do
   end
 
   autorequire(:gce_httphealthcheck) do
-    self[:health_checks]
+    self[:health_check]
   end
 
   validate do
