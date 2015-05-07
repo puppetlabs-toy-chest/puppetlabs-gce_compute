@@ -1,6 +1,6 @@
 require File.expand_path(File.join(File.dirname(__FILE__), '..', 'gcloud'))
 
-Puppet::Type.type(:gce_firewall).provide(:gcloud, :parent => Puppet::Provider::Gcloud) do
+Puppet::Type.type(:gce_firewallrule).provide(:gcloud, :parent => Puppet::Provider::Gcloud) do
   commands :gcloud => "gcloud"
 
   def gcloud_resource_name

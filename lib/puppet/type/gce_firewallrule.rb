@@ -1,20 +1,20 @@
-Puppet::Type.newtype(:gce_firewall) do
+Puppet::Type.newtype(:gce_firewallrule) do
 
   ensurable
 
-  desc 'type for managing firewalls in google compute'
+  desc 'type for managing firewall rules in google compute'
 
   newparam(:name, :namevar => true) do
-    desc 'name of firewall'
+    desc 'name of firewall rule'
     validate do |v|
       unless v =~ /^[a-z]([-a-z0-9]*[a-z0-9])?$/
-        raise(Puppet::Error, "Invalid firewall name: #{v}")
+        raise(Puppet::Error, "Invalid firewall rule name: #{v}")
       end
     end
   end
 
   newparam(:description) do
-    desc 'Description of firewall'
+    desc 'Description of firewall rule'
   end
 
   newparam(:allowed) do
@@ -36,7 +36,7 @@ Puppet::Type.newtype(:gce_firewall) do
   end
 
   newparam(:network) do
-    desc 'Network on which the firewall resides.'
+    desc 'Network on which the firewall rule resides.'
   end
 
   newparam(:target_tags) do

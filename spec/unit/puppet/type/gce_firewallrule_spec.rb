@@ -1,9 +1,9 @@
 require 'puppet'
 require 'spec_helper'
 
-gce_firewall = Puppet::Type.type(:gce_firewall)
+gce_firewallrule = Puppet::Type.type(:gce_firewallrule)
 
-describe gce_firewall do
+describe gce_firewallrule do
 
   let :params do
     [
@@ -19,7 +19,7 @@ describe gce_firewall do
 
   it "should have expected parameters" do
     params.each do |param|
-      gce_firewall.parameters.should be_include(param)
+      gce_firewallrule.parameters.should be_include(param)
     end
   end
 end
