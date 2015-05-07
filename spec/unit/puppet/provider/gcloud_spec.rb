@@ -52,7 +52,10 @@ describe Puppet::Provider::Gcloud do
   end
 
   context "with an invalid resource" do
-    let(:resource) { Puppet::Type.type(:gce_disk).new(:name => 'invalid-disk') }
+    let(:resource) { Puppet::Type.type(:gce_fake).new(:name => 'fake-name',
+                                                      :zone => 'us-central1-a',
+                                                      :description => 'Invalid fake description',
+                                                      :source => 'invalid-source-place') }
     let(:provider) { resource.provider }
 
     describe "#exists?" do
@@ -86,19 +89,17 @@ Puppet::Type.newtype(:gce_fake) do
 
   ensurable
 
-  newparam(:name, :namevar => true) {}
+  newparam(:name, :namevar => true)
 
   # required params
-  newparam(:zone) {}
+  newparam(:zone)
 
   # optional params
-  newparam(:description) {}
-  newparam(:source) {}
+  newparam(:description)
+  newparam(:source)
 
   validate do
-    if self[:ensure] == :present
-        raise(Puppet::Error, 'Must specify a zone') unless self[:zone]
-    end
+    fail('You must specify a zone for the fake') unless self[:zone]
   end
 end
 
