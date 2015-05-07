@@ -8,9 +8,9 @@ Puppet::Type.type(:gce_httphealthcheck).provide(:gcloud, :parent => Puppet::Prov
   end
 
   def gcloud_optional_create_args
-    {:check_interval_sec => '--check-interval',
-     :check_timeout_sec => '--timeout',
-     :description => '--description',
+    {:description => '--description',
+     :check_interval => '--check-interval',
+     :timeout => '--timeout',
      :healthy_threshold => '--healthy-threshold',
      :host => '--host',
      :port => '--port',

@@ -1,27 +1,26 @@
 require 'puppet'
 require 'spec_helper'
 
-gce_httphealthcheck = Puppet::Type.type(:gce_httphealthcheck)
-
-describe gce_httphealthcheck do
-
-  let :params do
-    [
-     :name,
-     :description,
-     :check_interval_sec,
-     :check_timeout_sec,
-     :healthy_threshold,
-     :host,
-     :port,
-     :request_path,
-     :unhealthy_threshold,
-    ]
-  end
+describe Puppet::Type.type(:gce_httphealthcheck) do
+  let(:params) { [:name,
+                  :description,
+                  :check_interval,
+                  :timeout,
+                  :healthy_threshold,
+                  :host,
+                  :port,
+                  :request_path,
+                  :unhealthy_threshold] }
 
   it "should have expected parameters" do
-    params.each do |param|
-      gce_httphealthcheck.parameters.should be_include(param)
-    end
+    expect(described_class.parameters).to match_array(params + [:provider])
+  end
+
+  it "should be invalid without a name" do
+    expect { described_class.new({}) }.to raise_error(/name/)
+  end
+
+  it "should be invalid with an invalid name" do
+    expect { described_class.new({:name => 'invalid-name-'}) }.to raise_error(/name/)
   end
 end
