@@ -13,14 +13,15 @@ describe Puppet::Type.type(:gce_disk) do
   end
 
   it "should be invalid without a name" do
-    expect { Puppet::Type.type(:gce_disk).new({:zone => 'zone'}) }.to raise_error(/name/)
+    expect { described_class.new({:zone => 'zone'}) }.to raise_error(/name/)
   end
 
   it "should be invalid without a zone" do
-    expect { Puppet::Type.type(:gce_disk).new({:name => 'name'}) }.to raise_error(/zone/)
+    expect { described_class.new({:name => 'name'}) }.to raise_error(/zone/)
   end
 
   it "should be invalid with an invalid name" do
-    expect { Puppet::Type.type(:gce_disk).new({:name => 'invalid-name-', :zone => 'zone'}) }.to raise_error(/name/)
+    expect { described_class.new({:name => 'invalid-name-',
+                                  :zone => 'zone'}) }.to raise_error(/name/)
   end
 end
