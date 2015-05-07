@@ -1,14 +1,40 @@
+require 'puppet/util/name_validator'
+
 Puppet::Type.newtype(:gce_forwardingrule) do
   desc 'forwardingrule'
 
   ensurable
 
   newparam(:name, :namevar => true) do
-    validate do |value|
-      unless value =~ /[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?/
-        raise(Puppet::Error, "Invalid forwardingrule name: #{v}")
+    desc 'The name of the forwarding rule.'
+    validate do |v|
+      Puppet::Util::NameValidator.validate(v)
+    end
+  end
+
+  newparam(:region) do
+    desc 'The region of the forwarding rule to operate on.'
+  end
+
+  newparam(:description) do
+    desc 'An optional, textual description for the forwarding rule.'
+  end
+
+  newparam(:ip_protocol) do
+    desc 'The IP protocol that the rule will serve. If left empty, TCP is used.'
+    validate do |v|
+      unless ['AH', 'ESP', 'SCTP', 'TCP', 'UDP'].include? v
+        fail("Invalid protocol: #{v}. Supported protocols are: AH, ESP, SCTP, TCP, and UDP.")
       end
     end
+  end
+
+  newparam(:port_range) do
+    desc 'If specified, only packets addressed to ports in the specified range will be forwarded.'
+  end
+
+  newparam(:target_pool) do
+    desc 'The target pool that will receive the traffic.'
   end
 
   newparam(:ip) do
@@ -20,32 +46,11 @@ Puppet::Type.newtype(:gce_forwardingrule) do
     end
   end
 
-  newparam(:description) do
-    desc 'forwardingrule description'
-  end
-
-  newparam(:protocol) do
-    desc 'The IP protocol for the forwarding rule: AH, ESP, SCTP, TCP, or UDP'
-    validate do |value|
-      unless ['AH', 'ESP', 'SCTP', 'TCP', 'UDP'].include? value
-        raise "Protocol value can only be 'TCP' or 'UDP': #{value}"
-      end
-    end
-  end
-
-  newparam(:port_range) do
-    desc 'If protocol is TCP, the port range for the forwarding rule'
-  end
-
-  newparam(:region) do
-    desc 'The specified region for the forwarding rule'
-  end
-
-  newparam(:target) do
-    desc 'The name of the target pool for the forwarding rule'
+  validate do
+    fail('You must specify a region for the forwarding rule.') unless self[:region]
   end
 
   autorequire(:gce_targetpool) do
-    self[:target]
+    self[:target_pool]
   end
 end

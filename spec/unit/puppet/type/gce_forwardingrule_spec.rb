@@ -1,25 +1,35 @@
 require 'puppet'
 require 'spec_helper'
 
-gce_forwardingrule = Puppet::Type.type(:gce_forwardingrule)
-
-describe gce_forwardingrule do
-
-  let :params do
-    [
-     :name,
-     :description,
-     :ip,
-     :port_range,
-     :protocol,
-     :region,
-     :target,
-    ]
-  end
+describe Puppet::Type.type(:gce_forwardingrule) do
+  let(:params) { [:name,
+                  :region,
+                  :description,
+                  :ip_protocol,
+                  :port_range,
+                  :target_pool,
+                  :ip] }
 
   it "should have expected parameters" do
-    params.each do |param|
-      gce_forwardingrule.parameters.should be_include(param)
-    end
+    expect(described_class.parameters).to match_array(params + [:provider])
+  end
+
+  it "should be invalid without a name" do
+    expect { described_class.new({:region => 'region'}) }.to raise_error(/name/)
+  end
+
+  it "should be invalid without a region" do
+    expect { described_class.new({:name => 'name'}) }.to raise_error(/region/)
+  end
+
+  it "should be invalid with an invalid name" do
+    expect { described_class.new({:name => 'invalid-name-',
+                                               :region => 'region'}) }.to raise_error(/name/)
+  end
+
+  it "should be invalid with an invalid protocol" do
+    expect { described_class.new({:name => 'name',
+                                  :region => 'region',
+                                  :ip_protocol => 'NOPE'}) }.to raise_error(/protocol/)
   end
 end

@@ -14,8 +14,8 @@ Puppet::Type.type(:gce_forwardingrule).provide(:gcloud, :parent => Puppet::Provi
 
   def gcloud_optional_create_args
     {:description => '--description',
-     :protocol    => '--ip-protocol',
+     :ip_protocol => '--ip-protocol',
      :port_range  => '--port-range',
-     :target      => '--target-pool'}
+     :target_pool => '--target-pool'}
   end
 end
