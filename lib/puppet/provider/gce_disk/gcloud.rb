@@ -13,8 +13,8 @@ Puppet::Type.type(:gce_disk).provide(:gcloud, :parent => Puppet::Provider::Gclou
   end
 
   def gcloud_optional_create_args
-    {:size_gb => '--size',
-     :description => '--description',
-     :source_image => '--image'}
+    {:description => '--description',
+     :size => '--size',
+     :image => '--image'}
   end
 end

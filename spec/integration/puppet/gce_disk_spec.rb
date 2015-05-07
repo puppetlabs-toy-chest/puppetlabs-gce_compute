@@ -8,8 +8,8 @@ describe "gce_disk" do
     let(:describe_args) { 'puppet-test-disk --zone us-central1-a' }
     let(:expected_properties) { {'name'        => 'puppet-test-disk',
                                  'zone'        => /us-central1-a/,
-                                 'sizeGb'      => '11',
                                  'description' => "Disk for testing the puppetlabs-gce_compute module",
+                                 'sizeGb'      => '11',
                                  'sourceImage' => /coreos/} }
   end
 end

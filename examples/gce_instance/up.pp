@@ -20,9 +20,9 @@ gce_instance { 'puppet-test-instance':
 gce_disk { 'puppet-test-instance-from-disk-disk':
   ensure       => present,
   zone         => 'us-central1-a',
-  size_gb      => 10,
   description  => "Disk for testing the puppetlabs-gce_compute module instance started from a disk",
-  source_image => 'coreos'
+  size         => 10,
+  image        => 'coreos'
 }
 
 gce_instance { 'puppet-test-instance-from-disk':

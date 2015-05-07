@@ -1,42 +1,35 @@
 Puppet::Type.newtype(:gce_disk) do
 
-  desc 'creates a persistent disk image'
+  desc 'Google Compute Engine persistent disk.'
 
   ensurable
 
   newparam(:name, :namevar => true) do
-    desc 'name of disk to create'
+    desc 'The name of disk.'
     validate do |v|
-      unless v =~ /[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?/
-        raise(Puppet::Error, "Invalid disk name: #{v}")
+      unless v =~ /^[a-z]([-a-z0-9]{0,61}[a-z0-9])$/
+        fail("Invalid disk name: #{v}.  Must be a match of regex /^[a-z]([-a-z0-9]{0,61}[a-z0-9])$/.")
       end
     end
   end
 
   newparam(:zone) do
-    desc 'zone where this disk lives'
-  end
-
-  newparam(:size_gb) do
-    desc 'size in GB for disk'
+    desc 'The zone of the disk.'
   end
 
   newparam(:description) do
-    desc 'description of disk'
+    desc 'An optional, textual description for the disk.'
   end
 
-  newparam(:source_image) do
-    desc 'boot image to use when creating disk'
+  newparam(:size) do
+    desc 'Indicates the size (in GB) of the disk.'
   end
 
-  newparam(:wait_until_complete) do
-    desc 'wait until disk is complete'
+  newparam(:image) do
+    desc 'An image to apply to the disk.'
   end
 
   validate do
-    if self[:ensure] == :present
-        raise(Puppet::Error, 'Must specify a zone for the disk') unless self[:zone]
-    end
+    fail('You must specify a zone for the disk.') unless self[:zone]
   end
-
 end
