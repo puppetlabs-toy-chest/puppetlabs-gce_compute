@@ -1,5 +1,6 @@
-Puppet::Type.newtype(:gce_disk) do
+require 'puppet/util/name_validator'
 
+Puppet::Type.newtype(:gce_disk) do
   desc 'Google Compute Engine persistent disk.'
 
   ensurable
@@ -7,9 +8,7 @@ Puppet::Type.newtype(:gce_disk) do
   newparam(:name, :namevar => true) do
     desc 'The name of disk.'
     validate do |v|
-      unless v =~ /^[a-z]([-a-z0-9]{0,61}[a-z0-9])$/
-        fail("Invalid disk name: #{v}.  Must be a match of regex /^[a-z]([-a-z0-9]{0,61}[a-z0-9])$/.")
-      end
+      Puppet::Util::NameValidator.validate(v)
     end
   end
 
