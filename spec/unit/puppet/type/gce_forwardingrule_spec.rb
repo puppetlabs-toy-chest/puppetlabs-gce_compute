@@ -1,4 +1,3 @@
-require 'puppet'
 require 'spec_helper'
 
 describe Puppet::Type.type(:gce_forwardingrule) do
@@ -15,7 +14,7 @@ describe Puppet::Type.type(:gce_forwardingrule) do
   end
 
   it "should be invalid without a name" do
-    expect { described_class.new({:region => 'region'}) }.to raise_error(/name/)
+    expect { described_class.new({:region => 'region'}) }.to raise_error(/Title or name/)
   end
 
   it "should be invalid without a region" do
@@ -24,7 +23,7 @@ describe Puppet::Type.type(:gce_forwardingrule) do
 
   it "should be invalid with an invalid name" do
     expect { described_class.new({:name => 'invalid-name-',
-                                               :region => 'region'}) }.to raise_error(/name/)
+                                               :region => 'region'}) }.to raise_error(/Invalid name/)
   end
 
   it "should be invalid with an invalid protocol" do

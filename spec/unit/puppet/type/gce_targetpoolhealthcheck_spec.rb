@@ -1,4 +1,3 @@
-require 'puppet'
 require 'spec_helper'
 
 gce_targetpoolhealthcheck = Puppet::Type.type(:gce_targetpoolhealthcheck)

@@ -1,4 +1,3 @@
-require 'puppet'
 require 'spec_helper'
 
 gce_network = Puppet::Type.type(:gce_network)
