@@ -8,7 +8,7 @@ Puppet::Type.type(:gce_network).provide(:gcloud, :parent => Puppet::Provider::Gc
   end
 
   def gcloud_optional_create_args
-    {:range => '--range',
-     :description => '--description'}
+    {:description => '--description',
+     :range => '--range'}
   end
 end

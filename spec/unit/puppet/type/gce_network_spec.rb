@@ -1,20 +1,19 @@
 require 'spec_helper'
 
-gce_network = Puppet::Type.type(:gce_network)
-
-describe gce_network do
-
-  let :params do
-    [
-     :name,
-     :description,
-     :range,
-    ]
-  end
+describe Puppet::Type.type(:gce_network) do
+  let(:params) { [:name,
+                  :description,
+                  :range] }
 
   it "should have expected parameters" do
-    params.each do |param|
-      gce_network.parameters.should be_include(param)
-    end
+    expect(described_class.parameters).to match_array(params + [:provider])
+  end
+
+  it "should be invalid without a name" do
+    expect { described_class.new({:region => 'region'}) }.to raise_error(/Title or name/)
+  end
+
+  it "should be invalid with an invalid name" do
+    expect { described_class.new({:name => 'invalid-name-'}) }.to raise_error(/Invalid name/)
   end
 end
