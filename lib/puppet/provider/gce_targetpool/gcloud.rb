@@ -14,7 +14,7 @@ Puppet::Type.type(:gce_targetpool).provide(:gcloud, :parent => Puppet::Provider:
 
   def gcloud_optional_create_args
     {:description      => '--description',
-     :health_checks    => '--health-check',
+     :health_check     => '--health-check',
      :session_affinity => '--session-affinity',
      :backup_pool      => '--backup-pool',
      :failover_ratio   => '--failover-ratio'}
