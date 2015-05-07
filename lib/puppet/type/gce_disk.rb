@@ -6,7 +6,7 @@ Puppet::Type.newtype(:gce_disk) do
   ensurable
 
   newparam(:name, :namevar => true) do
-    desc 'The name of disk.'
+    desc 'The name of the disk.'
     validate do |v|
       Puppet::Util::NameValidator.validate(v)
     end

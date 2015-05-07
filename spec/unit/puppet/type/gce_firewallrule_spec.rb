@@ -1,25 +1,24 @@
 require 'puppet'
 require 'spec_helper'
 
-gce_firewallrule = Puppet::Type.type(:gce_firewallrule)
-
-describe gce_firewallrule do
-
-  let :params do
-    [
-     :name,
-     :description,
-     :network,
-     :allowed,
-     :allowed_ip_sources,
-     :allowed_tag_sources,
-     :target_tags
-    ]
-  end
+describe Puppet::Type.type(:gce_firewallrule) do
+  let(:params) { [:name,
+                  :description,
+                  :allow,
+                  :network,
+                  :source_ranges,
+                  :source_tags,
+                  :target_tags] }
 
   it "should have expected parameters" do
-    params.each do |param|
-      gce_firewallrule.parameters.should be_include(param)
-    end
+    expect(described_class.parameters).to match_array(params + [:provider])
+  end
+
+  it "should be invalid without a name" do
+    expect { described_class.new({}) }.to raise_error(/name/)
+  end
+
+  it "should be invalid with an invalid name" do
+    expect { described_class.new({:name => 'invalid-name-'}) }.to raise_error(/name/)
   end
 end

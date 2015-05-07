@@ -9,10 +9,10 @@ Puppet::Type.type(:gce_firewallrule).provide(:gcloud, :parent => Puppet::Provide
 
   def gcloud_optional_create_args
     {:description => '--description',
-     :allowed => '--allow',
+     :allow => '--allow',
      :network => '--network',
-     :allowed_ip_sources => '--source-ranges',
-     :allowed_tag_sources => '--source-tags',
+     :source_ranges => '--source-ranges',
+     :source_tags => '--source-tags',
      :target_tags => '--target-tags'}
   end
 end

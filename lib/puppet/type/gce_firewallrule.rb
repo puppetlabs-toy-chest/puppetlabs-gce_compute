@@ -1,50 +1,42 @@
+require 'puppet/util/name_validator'
+
 Puppet::Type.newtype(:gce_firewallrule) do
+  desc 'Google Compute Engine firewall rule.'
 
   ensurable
 
-  desc 'type for managing firewall rules in google compute'
-
   newparam(:name, :namevar => true) do
-    desc 'name of firewall rule'
+    desc 'The name of the firewall rule.'
     validate do |v|
-      unless v =~ /^[a-z]([-a-z0-9]*[a-z0-9])?$/
-        raise(Puppet::Error, "Invalid firewall rule name: #{v}")
-      end
+      Puppet::Util::NameValidator.validate(v)
     end
   end
 
   newparam(:description) do
-    desc 'Description of firewall rule'
+    desc 'An optional, textual description for the firewall rule.'
   end
 
-  newparam(:allowed) do
-    desc 'List of allowed protocols and ports'
-    validate do |v|
-     # unless v =~ /(\w+)?:?\d+(-\d+)?/
-     #   raise(Puppet::Error, "Invalid allowed string: #{v}.")
-     # end
-    end
-  end
-
-  newparam(:allowed_ip_sources) do
-    desc 'List of sources allowed to comminucate to allowed destinations'
-
-  end
-
-  newparam(:allowed_tag_sources) do
-    desc 'List of tag sources allowed to comminucate to allowed destinations'
+  newparam(:allow) do
+    desc 'A list of protocols and ports whose traffic will be allowed.'
   end
 
   newparam(:network) do
-    desc 'Network on which the firewall rule resides.'
+    desc 'The network to which this rule is attached. If omitted, the rule is attached to the default network.'
+  end
+
+  newparam(:source_ranges) do
+    desc 'A list of IP address blocks that are allowed to make inbound connections that match the firewall rule to the instances on the network.'
+  end
+
+  newparam(:source_tags) do
+    desc 'A list of instance tags indicating the set of instances on the network which may make network connections that match the firewall rule.'
   end
 
   newparam(:target_tags) do
-    desc 'Set of tagged instances to apply the firewall rules to'
+    desc 'A list of instance tags indicating the set of instances on the network which may make accept inbound connections that match the firewall rule.'
   end
 
   autorequire(:gce_network) do
     self[:network]
   end
-
 end
