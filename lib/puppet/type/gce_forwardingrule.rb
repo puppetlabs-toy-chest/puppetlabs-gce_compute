@@ -37,14 +37,15 @@ Puppet::Type.newtype(:gce_forwardingrule) do
     desc 'The target pool that will receive the traffic.'
   end
 
-  newparam(:ip) do
-    desc 'the project-reserved IP address for the forwarding rule'
-    validate do |value|
-      unless value =~ /[0-9]{1,3}(?:\.[0-9]{1,3}){3}/
-        raise "Invalid IP address #{value}"
-      end
-    end
-  end
+  # TODO not implemented in gcloud
+  # newparam(:ip) do
+  #   desc 'the project-reserved IP address for the forwarding rule'
+  #   validate do |value|
+  #     unless value =~ /[0-9]{1,3}(?:\.[0-9]{1,3}){3}/
+  #       raise "Invalid IP address #{value}"
+  #     end
+  #   end
+  # end
 
   validate do
     fail('You must specify a region for the forwarding rule.') unless self[:region]

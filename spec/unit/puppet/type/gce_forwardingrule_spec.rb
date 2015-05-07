@@ -6,8 +6,7 @@ describe Puppet::Type.type(:gce_forwardingrule) do
                   :description,
                   :ip_protocol,
                   :port_range,
-                  :target_pool,
-                  :ip] }
+                  :target_pool] }
 
   it "should have expected parameters" do
     expect(described_class.parameters).to match_array(params + [:provider])
