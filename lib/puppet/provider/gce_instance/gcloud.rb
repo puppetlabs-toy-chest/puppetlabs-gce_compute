@@ -22,13 +22,7 @@ Puppet::Type.type(:gce_instance).provide(:gcloud, :parent => Puppet::Provider::G
   end
 
   def create
-    args = ['compute', gcloud_resource_name, 'create', resource[:name]] + gcloud_args
-    gcloud_optional_create_args.each do |attribute, flag|
-      if resource[attribute]
-        args << flag
-        args << resource[attribute]
-      end
-    end
+    args = build_gcloud_create_args
     if resource[:disk]
       args << '--disk'
       args << "name=#{resource[:disk]}"
