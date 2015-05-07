@@ -3,7 +3,8 @@ require 'helpers/integration_spec_helper'
 
 describe "gce_instance" do
   it_behaves_like "a resource that can be created and destroyed" do
-    let(:type) { Puppet::Type.type(:gce_instance) }
+    let(:type_name) { 'gce_instance' }
+    let(:gcloud_resource_name) { 'instances' }
     let(:describe_args) { 'puppet-test-instance --zone us-central1-a' }
     let(:expected_properties) { {'name'        => 'puppet-test-instance',
                                  'zone'        => /us-central1-a/,

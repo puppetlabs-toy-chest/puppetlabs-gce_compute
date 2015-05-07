@@ -24,11 +24,6 @@ class IntegrationSpecHelper
 end
 
 RSpec.shared_examples "a resource that can be created and destroyed" do
-  let(:type_name) { type.name.to_s }
-  # NOTE we have to create an actual resource in order to find the gcloud provider
-  let(:provider) { type.new({'name' => 'name'}).provider }
-  let(:gcloud_resource_name) { provider.gcloud_resource_name }
-
   it "runs creates and destroys a resource" do
     expect(IntegrationSpecHelper.describe_err(gcloud_resource_name, describe_args)).to match(/ERROR: .* Could not fetch resource/)
 

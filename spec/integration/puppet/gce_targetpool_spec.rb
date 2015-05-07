@@ -3,7 +3,8 @@ require 'helpers/integration_spec_helper'
 
 describe "gce_targetpool" do
   it_behaves_like "a resource that can be created and destroyed" do
-    let(:type) { Puppet::Type.type(:gce_targetpool) }
+    let(:type_name) { 'gce_targetpool' }
+    let(:gcloud_resource_name) { 'target-pools' }
     let(:describe_args) { 'puppet-test-target-pool --region us-central1' }
     let(:expected_properties) { {'name'            => 'puppet-test-target-pool',
                                  'description'     => "Target pool for testing the puppetlabs-gce_compute module",
