@@ -1,32 +1,33 @@
 require 'spec_helper'
 
-gce_instance = Puppet::Type.type(:gce_instance)
-
-describe gce_instance do
-
-  let :params do
-    [
-     :name,
-     :authorized_ssh_keys,
-     :description,
-     :disk,
-     :zone,
-     :tags,
-     :use_compute_key,
-     :network,
-     :image,
-     :machine_type,
-     :on_host_maintenance,
-     :puppet_master,
-     :puppet_service,
-     :can_ip_forward,
-     :add_compute_key_to_project,
-    ]
-  end
+describe Puppet::Type.type(:gce_instance) do
+  let(:params) { [:name,
+                  :zone,
+                  :can_ip_forward,
+                  :description,
+                  :boot_disk,
+                  :image,
+                  :machine_type,
+                  :metadata,
+                  :network,
+                  :maintenance_policy,
+                  :startup_script,
+                  :tags] }
 
   it "should have expected parameters" do
-    params.each do |param|
-      gce_instance.parameters.should be_include(param)
-    end
+    expect(described_class.parameters).to match_array(params + [:provider])
+  end
+
+  it "should be invalid without a name" do
+    expect { described_class.new({:zone => 'zone'}) }.to raise_error(/Title or name/)
+  end
+
+  it "should be invalid without a zone" do
+    expect { described_class.new({:name => 'name'}) }.to raise_error(/zone/)
+  end
+
+  it "should be invalid with an invalid name" do
+    expect { described_class.new({:name => 'invalid-name-',
+                                  :zone => 'zone'}) }.to raise_error(/Invalid name/)
   end
 end
