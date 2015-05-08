@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'helpers/unit_spec_helper'
 
 describe Puppet::Type.type(:gce_disk) do
   let(:params) { [:name,
@@ -6,21 +7,13 @@ describe Puppet::Type.type(:gce_disk) do
                   :description,
                   :size,
                   :image] }
+  let(:create_params) { {:name => 'name', :zone => 'zone'} }
 
-  it "should have expected parameters" do
-    expect(described_class.parameters).to match_array(params + [:provider])
-  end
-
-  it "should be invalid without a name" do
-    expect { described_class.new({:zone => 'zone'}) }.to raise_error(/Title or name/)
-  end
+  it_behaves_like "a resource with expected parameters"
+  it_behaves_like "it has a validated name"
 
   it "should be invalid without a zone" do
-    expect { described_class.new({:name => 'name'}) }.to raise_error(/zone/)
-  end
-
-  it "should be invalid with an invalid name" do
-    expect { described_class.new({:name => 'invalid-name-',
-                                  :zone => 'zone'}) }.to raise_error(/Invalid name/)
+    create_params[:zone] = nil
+    expect { described_class.new(create_params) }.to raise_error(/zone/)
   end
 end
