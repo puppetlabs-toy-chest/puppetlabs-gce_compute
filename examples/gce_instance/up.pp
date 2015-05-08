@@ -3,10 +3,17 @@ gce_network { 'puppet-test-instance-network':
   description  => "Network for testing the puppetlabs-gce_compute module instances"
 }
 
+gce_address { 'puppet-test-instance-address':
+  ensure       => present,
+  region       => 'us-central1',
+  description  => "Address for testing the puppetlabs-gce_compute module instances"
+}
+
 gce_instance { 'puppet-test-instance':
   ensure             => present,
   zone               => 'us-central1-a',
   description        => "Instance for testing the puppetlabs-gce_compute module",
+  address            => 'puppet-test-instance-address',
   image              => 'coreos',
   machine_type       => 'f1-micro',
   network            => 'puppet-test-instance-network',

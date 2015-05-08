@@ -4,6 +4,7 @@ require 'helpers/unit_spec_helper'
 describe Puppet::Type.type(:gce_instance) do
   let(:params) { [:name,
                   :zone,
+                  :address,
                   :can_ip_forward,
                   :description,
                   :boot_disk,

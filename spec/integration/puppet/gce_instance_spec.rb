@@ -15,6 +15,12 @@ describe "gce_instance" do
       Proc.new do |out|
         expect(out['networkInterfaces'].size).to eq(1)
         expect(out['networkInterfaces'][0]['network']).to match(/puppet-test-instance-network/)
+
+        # test address
+        address_out = IntegrationSpecHelper.describe_out('addresses', 'puppet-test-instance-address --region us-central1')
+        expect(out['networkInterfaces'][0]['accessConfigs'].size).to eq(1)
+        expect(out['networkInterfaces'][0]['accessConfigs'][0]['natIP']).to eq(address_out['address'])
+
         expect(out['scheduling']['onHostMaintenance']).to match('TERMINATE')
         expect(out['tags']['items']).to match_array(['tag1', 'tag2'])
         expect(out['metadata']['items']).to include({'key'   => 'test-metadata-key',

@@ -16,6 +16,10 @@ Puppet::Type.newtype(:gce_instance) do
     desc 'The zone of the instance.'
   end
 
+  newparam(:address) do
+    desc 'Assigns the given external address to the instance that is created.'
+  end
+
   newparam(:can_ip_forward) do
     desc 'If provided, allows the instances to send and receive packets with non-matching destination or source IP addresses.'
   end
@@ -62,11 +66,6 @@ Puppet::Type.newtype(:gce_instance) do
   #   validate do |v|
   #     raise(Puppet::Error, 'Value should be a hash') unless v.is_a? Hash
   #   end
-  # end
-
-  # TODO not implemented in gcloud
-  # newproperty(:external_ip_address) do
-  #   desc 'external ip address to assign. Takes ephemeral, None, or an ip addr'
   # end
 
   # TODO not implemented in gcloud
