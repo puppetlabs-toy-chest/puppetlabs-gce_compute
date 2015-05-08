@@ -1,7 +1,7 @@
 require 'puppet/util/name_validator'
 
 Puppet::Type.newtype(:gce_forwardingrule) do
-  desc 'forwardingrule'
+  desc 'Google Compute Engine forwarding rule to send traffic to load balancers'
 
   ensurable
 
