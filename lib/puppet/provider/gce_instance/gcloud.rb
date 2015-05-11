@@ -19,6 +19,7 @@ Puppet::Type.type(:gce_instance).provide(:gcloud, :parent => Puppet::Provider::G
      :machine_type       => '--machine-type',
      :network            => '--network',
      :maintenance_policy => '--maintenance-policy',
+     :scopes             => '--scopes',
      :tags               => '--tags'}
   end
 

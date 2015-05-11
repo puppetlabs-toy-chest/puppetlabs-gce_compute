@@ -32,6 +32,12 @@ describe "gce_instance" do
         expect(out['metadata']['items']).to include({'key'   => 'test-metadata-key',
                                                      'value' => 'test-metadata-value'})
 
+        # expect scopes
+        expect(out['serviceAccounts'].size).to eq(1)
+        expect(out['serviceAccounts'][0]['scopes'].size).to eq(2)
+        expect(out['serviceAccounts'][0]['scopes']).to match_array(['https://www.googleapis.com/auth/compute',
+                                                                    'https://www.googleapis.com/auth/devstorage.read_write'])
+
         # expect startup_script
         startup_script_metadata = out['metadata']['items'].select { |item| item['key'] == 'startup-script' }[0]
         expect(startup_script_metadata).not_to be_nil
@@ -42,9 +48,9 @@ describe "gce_instance" do
         expect(disk_out['sourceImage']).to match(/coreos/)
 
         # expect disk
-        instance_from_disk_out = IntegrationSpecHelper.describe_out('instances', 'puppet-test-instance-from-disk --zone us-central1-a')
-        expect(instance_from_disk_out['disks'].size).to eq(1)
-        expect(instance_from_disk_out['disks'][0]['source']).to match(/puppet-test-instance-from-disk-disk/)
+        instance_alt_out = IntegrationSpecHelper.describe_out('instances', 'puppet-test-instance-alt --zone us-central1-a')
+        expect(instance_alt_out['disks'].size).to eq(1)
+        expect(instance_alt_out['disks'][0]['source']).to match(/puppet-test-instance-alt-disk/)
       end
     end
   end

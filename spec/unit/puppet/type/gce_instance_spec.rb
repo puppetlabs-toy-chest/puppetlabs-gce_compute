@@ -13,6 +13,7 @@ describe Puppet::Type.type(:gce_instance) do
                   :metadata,
                   :network,
                   :maintenance_policy,
+                  :scopes,
                   :startup_script,
                   :tags] }
   let(:create_params) { {:name => 'name', :zone => 'zone'} }

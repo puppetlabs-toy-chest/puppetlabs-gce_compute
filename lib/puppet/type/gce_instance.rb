@@ -52,6 +52,10 @@ Puppet::Type.newtype(:gce_instance) do
     desc 'Specifies the behavior of the instances when their host machines undergo maintenance.'
   end
 
+  newparam(:scopes) do
+    desc 'Specifies service accounts and scopes for the instances.'
+  end
+
   newparam(:startup_script) do
     desc 'Specifies a script that will be executed by the instances once they start running.'
   end
@@ -71,20 +75,6 @@ Puppet::Type.newtype(:gce_instance) do
   # TODO not implemented in gcloud
   # newproperty(:internal_ip_address) do
   #   desc 'internal ip address to assign.'
-  # end
-
-  # TODO not implemented in gcloud
-  # newparam(:service_account)
-
-  # TODO not implemented in gcloud
-  # newparam(:service_account_scopes) do
-  #   desc 'Service account scopes indicate the level of access the instance has'
-  #   validate do |v|
-  #     raise(Puppet::Error, 'Scopes can only be arrays or strings') unless v.is_a?(Array) || v.is_a?(String)
-  #   end
-  #   munge do |v|
-  #     v.is_a?(Array) ? v.join(',') : v
-  #   end
   # end
 
 # TODO I am going to use metadata for my own custom purposes.
