@@ -11,6 +11,7 @@ describe "gce_instance" do
                                  'description' => "Instance for testing the puppetlabs-gce_compute module",
                                  'machineType' => /f1-micro/,
                                  'canIpForward' => true} }
+
     let(:other_property_expectations) do
       Proc.new do |out|
         # expect network
