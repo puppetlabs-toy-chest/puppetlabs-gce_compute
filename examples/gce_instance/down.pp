@@ -14,13 +14,13 @@ gce_instance { 'puppet-test-instance':
   zone   => 'us-central1-a'
 }
 
-gce_disk { 'puppet-test-instance-from-disk-disk':
+gce_disk { 'puppet-test-instance-alt-disk':
   ensure  => absent,
   zone    => 'us-central1-a',
-  require => Gce_instance['puppet-test-instance-from-disk']
+  require => Gce_instance['puppet-test-instance-alt']
 }
 
-gce_instance { 'puppet-test-instance-from-disk':
+gce_instance { 'puppet-test-instance-alt':
   ensure => absent,
   zone   => 'us-central1-a'
 }

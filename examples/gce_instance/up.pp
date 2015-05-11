@@ -24,7 +24,7 @@ gce_instance { 'puppet-test-instance':
   startup_script     => '../examples/gce_instance/example-startup-script.sh'
 }
 
-gce_disk { 'puppet-test-instance-from-disk-disk':
+gce_disk { 'puppet-test-instance-alt-disk':
   ensure       => present,
   zone         => 'us-central1-a',
   description  => "Disk for testing the puppetlabs-gce_compute module instance started from a disk",
@@ -32,9 +32,9 @@ gce_disk { 'puppet-test-instance-from-disk-disk':
   image        => 'coreos'
 }
 
-gce_instance { 'puppet-test-instance-from-disk':
+gce_instance { 'puppet-test-instance-alt':
   ensure              => present,
   zone                => 'us-central1-a',
-  description         => "Instance for testing the puppetlabs-gce_compute module instance started from a disk",
-  boot_disk           => 'puppet-test-instance-from-disk-disk'
+  description         => "Instance for testing the puppetlabs-gce_compute module instance alternate options",
+  boot_disk           => 'puppet-test-instance-alt-disk'
 }
