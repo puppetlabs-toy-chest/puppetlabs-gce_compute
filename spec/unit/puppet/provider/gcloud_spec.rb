@@ -36,7 +36,6 @@ describe Puppet::Provider::Gcloud do
       expect(provider).to receive(:gcloud).with(*required_params_with('create')+optional_params).and_raise(Puppet::ExecutionFailure.new(''))
       expect { provider.create }.to raise_error(Puppet::ExecutionFailure)
     end
-
   end
 
   describe "destroy" do
