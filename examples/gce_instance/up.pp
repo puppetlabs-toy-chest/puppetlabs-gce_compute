@@ -21,7 +21,7 @@ gce_instance { 'puppet-test-instance':
   can_ip_forward     => true,
   tags               => ['tag1','tag2'],
   metadata           => {test-metadata-key => 'test-metadata-value'},
-  scopes             => ['compute-rw','storage-rw'],
+  scopes             => ['compute-rw','default=storage-rw'],
   startup_script     => '../examples/gce_instance/example-startup-script.sh'
 }
 
