@@ -42,7 +42,7 @@ describe Puppet::Type.type(:gce_instance).provider(:gcloud) do
     end
   end
 
-  context "with can_ip_forward" do
+  context "with metadata" do
     let(:resource) { Puppet::Type.type(:gce_instance).new(:name => 'name',
                                                           :zone => 'us-central1-a',
                                                           :metadata => {'test-metadata-key' => 'test-metadata-value'}) }
@@ -54,7 +54,7 @@ describe Puppet::Type.type(:gce_instance).provider(:gcloud) do
     end
   end
 
-  context "with can_ip_forward" do
+  context "with startup_script" do
     let(:resource) { Puppet::Type.type(:gce_instance).new(:name => 'name',
                                                           :zone => 'us-central1-a',
                                                           :startup_script => '../examples/gce_instance/example-startup-script.sh') }
