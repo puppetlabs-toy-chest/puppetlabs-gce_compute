@@ -30,6 +30,7 @@ Puppet::Type.type(:gce_instance).provide(:gcloud, :parent => Puppet::Provider::G
     append_metadata_args(args, resource)
     append_startup_script_args(args, resource)
     gcloud(*args)
+    block_for_startup_script(resource)
   end
 
   def append_can_ip_forward_args(args, resource)
@@ -59,5 +60,25 @@ Puppet::Type.type(:gce_instance).provide(:gcloud, :parent => Puppet::Provider::G
       args << '--metadata-from-file'
       args << "startup-script=#{startup_script_file}"
     end
+  end
+
+  def block_for_startup_script(resource)
+    if resource[:block_for_startup_script]
+      begin
+        # NOTE if startup_script_timeout is nil, the block will run without timing out
+        status = Timeout::timeout(resource[:startup_script_timeout]) do
+          loop do
+            break if gcloud(*build_gcloud_ssh_startup_script_check_args) =~ /Finished running startup script/
+            sleep 10
+          end
+        end
+      rescue Timeout::Error
+        fail('Timed out waiting for bootstrap script to execute')
+      end
+    end
+  end
+
+  def build_gcloud_ssh_startup_script_check_args
+    ['compute', 'ssh', resource[:name]] + gcloud_args + ['--command', 'tail /var/log/startupscript.log -n 1']
   end
 end

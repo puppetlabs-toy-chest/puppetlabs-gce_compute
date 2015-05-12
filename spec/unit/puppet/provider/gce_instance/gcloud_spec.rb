@@ -5,6 +5,7 @@ describe Puppet::Type.type(:gce_instance).provider(:gcloud) do
                                                         :zone => 'us-central1-a') }
   let(:provider) { resource.provider }
   let(:required_params) { ['compute', 'instances', 'create', 'name', '--zone', 'us-central1-a'] }
+  let(:startup_script_file) { File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..', '..', '..', 'files', "#{resource[:startup_script]}")) }
 
   describe "create" do
     it "should return nil when a resource is created" do
@@ -60,9 +61,40 @@ describe Puppet::Type.type(:gce_instance).provider(:gcloud) do
                                                           :startup_script => '../examples/gce_instance/example-startup-script.sh') }
     describe "create" do
       it "should return nil when a resource is created" do
-        startup_script_file = File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..', '..', '..', 'files', "#{resource[:startup_script]}"))
         expect(provider).to receive(:gcloud).with(*required_params + ['--metadata-from-file', "startup-script=#{startup_script_file}"])
         expect(provider.create).to be_nil
+      end
+    end
+  end
+
+  context "with block_for_startup_script" do
+    let(:ssh_params) { ['compute', 'ssh', 'name', '--zone', 'us-central1-a', '--command', 'tail /var/log/startupscript.log -n 1'] }
+    let(:resource) { Puppet::Type.type(:gce_instance).new(:name => 'name',
+                                                          :zone => 'us-central1-a',
+                                                          :startup_script => '../examples/gce_instance/example-startup-script.sh',
+                                                          :block_for_startup_script => true) }
+
+    describe "create" do
+      it "should return nil when a resource is created" do
+        expect(provider).to receive(:gcloud).with(*required_params + ['--metadata-from-file', "startup-script=#{startup_script_file}"])
+        expect(provider).to receive(:gcloud).with(*ssh_params).exactly(3).times.and_return('Not done', 'Still not done', 'Finished running startup script')
+        expect(provider).to receive(:sleep).exactly(2).times.and_return(nil)
+        expect(provider.create).to be_nil
+      end
+    end
+
+    context "and with a startup_script_timeout" do
+      let(:resource) { Puppet::Type.type(:gce_instance).new(:name => 'name',
+                                                            :zone => 'us-central1-a',
+                                                            :startup_script => '../examples/gce_instance/example-startup-script.sh',
+                                                            :block_for_startup_script => true,
+                                                            :startup_script_timeout => 0.001) }
+      describe "create" do
+        it "should raise an error when a resource is created because the timeout is reached" do
+          expect(provider).to receive(:gcloud).with(*required_params + ['--metadata-from-file', "startup-script=#{startup_script_file}"])
+          expect(provider).to receive(:gcloud).with(*ssh_params) { sleep 1 }
+          expect { provider.create }.to raise_error(Puppet::Error)
+        end
       end
     end
   end

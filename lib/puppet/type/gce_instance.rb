@@ -60,6 +60,15 @@ Puppet::Type.newtype(:gce_instance) do
     desc 'Specifies a script that will be executed by the instances once they start running.'
   end
 
+  newparam(:block_for_startup_script) do
+    desc 'Whether the instance creation should block until the startup script has finished executing.'
+  end
+
+  newparam(:startup_script_timeout) do
+    desc 'When provided with :block_for_startup_script, the blocking will timeout after this time (in seconds) has elapsed, and the resource creation will fail, (although the instance will likely have been created).'
+    munge { |t| Float(t) }
+  end
+
   newparam(:tags) do
     desc 'Specifies a list of tags to apply to the instance for identifying the instances to which network firewall rules will apply.'
   end
@@ -103,21 +112,6 @@ Puppet::Type.newtype(:gce_instance) do
 #  newparam(:wait_until_running) do
 #    desc 'rather the program should wait until the instance is in a running state'
 #  end
-
-  # TODO not implemented in gcloud
-  # newparam(:block_for_startup_script) do
-  #   desc 'whether the resource should block until after the startup script executes'
-  #   newvalues(:true, :false)
-  # end
-
-  # TODO not implemented in gcloud
-  # newparam(:startup_script_timeout) do
-  #   desc 'timeout for bootstrap script. If this time is passed before the bootstrap script has finished, the resource will fail'
-  #   defaultto '420'
-  #   munge do |value|
-  #     Integer(value)
-  #   end
-  # end
 
 #  newparam(:auth_file) do
 #    desc 'Authorization file. In general, this is retrieved from device.conf'
@@ -213,5 +207,11 @@ Puppet::Type.newtype(:gce_instance) do
 
   validate do
     fail('You must specify a zone for the instance.') unless self[:zone]
+    if self[:block_for_startup_script]
+      fail('You must specify a startup script if :block_for_startup_script is set to true.') unless self[:startup_script]
+    end
+    if self[:startup_script_timeout]
+      fail(':block_for_startup_script must be set to true if you specify :startup_script_timeout.') unless self[:block_for_startup_script]
+    end
   end
 end

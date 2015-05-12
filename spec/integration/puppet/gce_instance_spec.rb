@@ -2,9 +2,10 @@ require 'spec_helper'
 require 'helpers/integration_spec_helper'
 
 describe "gce_instance" do
+  let(:type_name) { 'gce_instance' }
+  let(:gcloud_resource_name) { 'instances' }
+
   it_behaves_like "a resource that can be created and destroyed" do
-    let(:type_name) { 'gce_instance' }
-    let(:gcloud_resource_name) { 'instances' }
     let(:describe_args) { 'puppet-test-instance --zone us-central1-a' }
     let(:expected_properties) { {'name'        => 'puppet-test-instance',
                                  'zone'        => /us-central1-a/,
@@ -54,5 +55,15 @@ describe "gce_instance" do
         expect(instance_alt_out['disks'][0]['source']).to match(/puppet-test-instance-alt-disk/)
       end
     end
+  end
+
+  it "times out when creating a resource with a short timeout" do
+    expect(IntegrationSpecHelper.describe_err(gcloud_resource_name, 'puppet-test-timeout-instance --zone us-central1-a')).to match(/ERROR: .* Could not fetch resource/)
+
+    _, err = IntegrationSpecHelper.apply_example("#{type_name}/timeout_up")
+    expect(err).to match(/Timed out/)
+
+    IntegrationSpecHelper.apply_example("#{type_name}/timeout_down")
+    expect(IntegrationSpecHelper.describe_err(gcloud_resource_name, 'puppet-test-timeout-instance --zone us-central1-a')).to match(/ERROR: .* Could not fetch resource/)
   end
 end
