@@ -65,6 +65,9 @@ Puppet::Type.type(:gce_instance).provide(:gcloud, :parent => Puppet::Provider::G
       if resource[:modules]
         args << "puppet_modules=#{resource[:modules]}"
       end
+      if resource[:module_repos]
+        args << "puppet_repos=#{resource[:module_repos]}"
+      end
     end
   end
 
@@ -97,6 +100,6 @@ Puppet::Type.type(:gce_instance).provide(:gcloud, :parent => Puppet::Provider::G
   end
 
   def has_metadata_args?(resource)
-    resource[:metadata] or resource[:puppet_master] or resource[:puppet_service] or resource[:manifest] or resource[:modules]
+    resource[:metadata] or resource[:puppet_master] or resource[:puppet_service] or resource[:manifest] or resource[:modules] or resource[:module_repos]
   end
 end

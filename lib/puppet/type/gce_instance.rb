@@ -91,6 +91,19 @@ Puppet::Type.newtype(:gce_instance) do
     munge { |v| v.join(' ') }
   end
 
+  newparam(:module_repos) do
+    desc 'Hash of module repos (localdir => repo) to be downloaded from github. Ex. apache => git@github.com:puppetlabs/puppetlabs-apache.git'
+    munge do |v|
+      new_value = []
+      if v.respond_to?('each')
+        v.each do |v,k|
+          new_value << "#{k}##{v}"
+        end
+      end
+      new_value.join(' ')
+    end
+  end
+
   # TODO not implemented in gcloud
   # newparam(:authorized_ssh_keys) do
   #   desc 'key value pairs of user:keypair_name'
@@ -145,24 +158,6 @@ Puppet::Type.newtype(:gce_instance) do
   #   desc 'A hash of ENC classes used to assign a Puppet class to this instance.'
   #   validate do |v|
   #     raise(Puppet::Error, "ENC classes expects a Hash.") unless v.is_a?(Hash)
-  #   end
-  # end
-
-  # TODO not implemented in gcloud (Puppet functionality)
-  # newparam(:module_repos) do
-  #   desc 'Hash of module repos (localdir => repo) to be downloaded from github. Ex. apache => git@github.com:puppetlabs/puppetlabs-apache.git'
-  #   defaultto ''
-  #   validate do |v|
-  #     raise(Puppet::Error, "module_repos expects a Hash.") unless(v.is_a?(Hash) || v.empty?)
-  #   end
-  #   munge do |v|
-  #     new_value = []
-  #     if v.respond_to?('each')
-  #       v.each do |v,k|
-  #         new_value << "#{k}##{v}"
-  #       end
-  #     end
-  #     new_value.join(',')
   #   end
   # end
 

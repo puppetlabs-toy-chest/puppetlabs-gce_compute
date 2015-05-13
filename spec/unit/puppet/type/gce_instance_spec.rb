@@ -21,7 +21,8 @@ describe Puppet::Type.type(:gce_instance) do
                   :puppet_master,
                   :puppet_service,
                   :manifest,
-                  :modules] }
+                  :modules,
+                  :module_repos] }
   let(:create_params) { {:name => 'name', :zone => 'zone'} }
 
   it_behaves_like "a resource with expected parameters"

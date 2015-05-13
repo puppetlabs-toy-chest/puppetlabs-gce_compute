@@ -54,6 +54,8 @@ describe "gce_instance" do
                                                      'value' => 'class apache ($v = "latest") { ensure => $v }'})
         expect(out['metadata']['items']).to include({'key'   => 'puppet_modules',
                                                      'value' => 'puppetlabs-gce_compute puppetlabs-mysql'})
+        expect(out['metadata']['items']).to include({'key'   => 'puppet_repos',
+                                                     'value' => 'git://github.com/puppetlabs/puppetlabs-gce_compute#puppetlabs-gce_compute git://github.com/puppetlabs/puppetlabs-mysql#puppetlabs-mysql'})
 
         # expect image
         disk_out = IntegrationSpecHelper.describe_out('disks', 'puppet-test-instance --zone us-central1-a')
