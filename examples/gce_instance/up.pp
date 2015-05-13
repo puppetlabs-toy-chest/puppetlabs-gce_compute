@@ -23,7 +23,9 @@ gce_instance { 'puppet-test-instance':
   metadata                 => {test-metadata-key => 'test-metadata-value'},
   scopes                   => ['compute-rw','default=storage-rw'],
   startup_script           => '../examples/gce_instance/example-startup-script.sh',
-  block_for_startup_script => true
+  block_for_startup_script => true,
+  puppet_master            => 'master-blaster',
+  puppet_service           => present
 }
 
 gce_disk { 'puppet-test-instance-alt-disk':

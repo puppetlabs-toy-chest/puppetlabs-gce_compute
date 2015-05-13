@@ -45,6 +45,12 @@ describe "gce_instance" do
         expect(startup_script_metadata).not_to be_nil
         expect(startup_script_metadata['value']).to match(/an example startup script that does nothing/)
 
+        # expect puppet stuff
+        expect(out['metadata']['items']).to include({'key'   => 'puppet_master',
+                                                     'value' => 'master-blaster'})
+        expect(out['metadata']['items']).to include({'key'   => 'puppet_service',
+                                                     'value' => 'present'})
+
         # expect image
         disk_out = IntegrationSpecHelper.describe_out('disks', 'puppet-test-instance --zone us-central1-a')
         expect(disk_out['sourceImage']).to match(/coreos/)

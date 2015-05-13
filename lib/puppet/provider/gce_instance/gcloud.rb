@@ -46,10 +46,18 @@ Puppet::Type.type(:gce_instance).provide(:gcloud, :parent => Puppet::Provider::G
   end
 
   def append_metadata_args(args, resource)
-    if resource[:metadata]
+    if has_metadata_args?(resource)
       args << '--metadata'
-      resource[:metadata].each do |k, v|
-        args << "#{k}=#{v}"
+      if resource[:metadata]
+        resource[:metadata].each do |k, v|
+          args << "#{k}=#{v}"
+        end
+      end
+      if resource[:puppet_master]
+        args << "puppet_master=#{resource[:puppet_master]}"
+      end
+      if resource[:puppet_service]
+        args << "puppet_service=#{resource[:puppet_service]}"
       end
     end
   end
@@ -80,5 +88,9 @@ Puppet::Type.type(:gce_instance).provide(:gcloud, :parent => Puppet::Provider::G
 
   def build_gcloud_ssh_startup_script_check_args
     ['compute', 'ssh', resource[:name]] + gcloud_args + ['--command', 'tail /var/log/startupscript.log -n 1']
+  end
+
+  def has_metadata_args?(resource)
+    resource[:metadata] or resource[:puppet_master] or resource[:puppet_service]
   end
 end

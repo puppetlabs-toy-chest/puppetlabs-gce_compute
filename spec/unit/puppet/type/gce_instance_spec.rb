@@ -17,7 +17,9 @@ describe Puppet::Type.type(:gce_instance) do
                   :startup_script,
                   :block_for_startup_script,
                   :startup_script_timeout,
-                  :tags] }
+                  :tags,
+                  :puppet_master,
+                  :puppet_service] }
   let(:create_params) { {:name => 'name', :zone => 'zone'} }
 
   it_behaves_like "a resource with expected parameters"
@@ -37,5 +39,17 @@ describe Puppet::Type.type(:gce_instance) do
     expect { described_class.new({:name => 'name',
                                   :zone => 'zone',
                                   :startup_script_timeout => 10}) }.to raise_error(/block_for_startup_script/)
+  end
+
+  it "should be valid if given a valid puppet_service" do
+    expect { described_class.new({:name => 'name',
+                                  :zone => 'zone',
+                                  :puppet_service => 'present'}) }.not_to raise_error
+  end
+
+  it "should be invalid if given puppet_service that isn't absent or present" do
+    expect { described_class.new({:name => 'name',
+                                  :zone => 'zone',
+                                  :puppet_service => 'hello'}) }.to raise_error(/puppet_service/)
   end
 end

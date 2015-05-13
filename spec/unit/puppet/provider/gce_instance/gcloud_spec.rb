@@ -98,4 +98,28 @@ describe Puppet::Type.type(:gce_instance).provider(:gcloud) do
       end
     end
   end
+
+  context "with puppet_master" do
+    let(:resource) { Puppet::Type.type(:gce_instance).new(:name => 'name',
+                                                          :zone => 'us-central1-a',
+                                                          :puppet_master => 'master-blaster') }
+    describe "create" do
+      it "should return nil when a resource is created" do
+        expect(provider).to receive(:gcloud).with(*required_params + ['--metadata', 'puppet_master=master-blaster'])
+        expect(provider.create).to be_nil
+      end
+    end
+  end
+
+  context "with puppet_service" do
+    let(:resource) { Puppet::Type.type(:gce_instance).new(:name => 'name',
+                                                          :zone => 'us-central1-a',
+                                                          :puppet_service => 'present') }
+    describe "create" do
+      it "should return nil when a resource is created" do
+        expect(provider).to receive(:gcloud).with(*required_params + ['--metadata', 'puppet_service=present'])
+        expect(provider.create).to be_nil
+      end
+    end
+  end
 end

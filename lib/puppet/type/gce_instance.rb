@@ -73,6 +73,15 @@ Puppet::Type.newtype(:gce_instance) do
     desc 'Specifies a list of tags to apply to the instance for identifying the instances to which network firewall rules will apply.'
   end
 
+  newparam(:puppet_master) do
+    desc 'Hostname of the puppet master instance to connect to.'
+  end
+
+  newparam(:puppet_service) do
+    desc 'Whether to start the puppet service or not'
+    newvalues(:present, :absent)
+  end
+
   # TODO not implemented in gcloud
   # newparam(:authorized_ssh_keys) do
   #   desc 'key value pairs of user:keypair_name'
@@ -120,19 +129,6 @@ Puppet::Type.newtype(:gce_instance) do
 #  newparam(:project_id) do
 #    desc 'id of the project. In the general case, this is retrieved from device.conf.'
 #  end
-
-  # TODO not implemented in gcloud (Puppet functionality)
-  # newparam(:puppet_master) do
-  #   desc 'Hostname of the puppet master instance to connect to'
-  # end
-
-  # TODO not implemented in gcloud (Puppet functionality)
-  # newparam(:puppet_service) do
-  #   desc 'Whether to start the puppet service or not'
-  #   validate do |v|
-  #     raise(Puppet::Error, "puppet_service must be 'absent' or 'present'.") unless v.is_a?(String) and (v == 'absent' or v == 'present')
-  #   end
-  # end
 
   # TODO not implemented in gcloud (Puppet functionality)
   # classification specific parameters
