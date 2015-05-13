@@ -86,6 +86,11 @@ Puppet::Type.newtype(:gce_instance) do
     desc 'A local manifest file specific to this instance.'
   end
 
+  newparam(:modules) do
+    desc 'List of modules to be downloaded from the forge. This is only needed for puppet masters or when running in puppet apply mode.'
+    munge { |v| v.join(' ') }
+  end
+
   # TODO not implemented in gcloud
   # newparam(:authorized_ssh_keys) do
   #   desc 'key value pairs of user:keypair_name'
@@ -140,15 +145,6 @@ Puppet::Type.newtype(:gce_instance) do
   #   desc 'A hash of ENC classes used to assign a Puppet class to this instance.'
   #   validate do |v|
   #     raise(Puppet::Error, "ENC classes expects a Hash.") unless v.is_a?(Hash)
-  #   end
-  # end
-
-  # TODO not implemented in gcloud (Puppet functionality)
-  # newparam(:modules) do
-  #   desc 'list of modules to be downloaded from the forge. This is only needed for puppet masters or when running in puppet apply mode'
-  #   defaultto []
-  #   munge do |v|
-  #     v.to_a.join(',')
   #   end
   # end
 

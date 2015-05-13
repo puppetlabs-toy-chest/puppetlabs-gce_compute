@@ -26,7 +26,8 @@ gce_instance { 'puppet-test-instance':
   block_for_startup_script => true,
   puppet_master            => 'master-blaster',
   puppet_service           => present,
-  manifest                 => 'class apache ($v = "latest") { ensure => $v }'
+  manifest                 => 'class apache ($v = "latest") { ensure => $v }',
+  modules                  => ['puppetlabs-gce_compute', 'puppetlabs-mysql']
 }
 
 gce_disk { 'puppet-test-instance-alt-disk':

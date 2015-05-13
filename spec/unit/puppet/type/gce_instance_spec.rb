@@ -20,7 +20,8 @@ describe Puppet::Type.type(:gce_instance) do
                   :tags,
                   :puppet_master,
                   :puppet_service,
-                  :manifest] }
+                  :manifest,
+                  :modules] }
   let(:create_params) { {:name => 'name', :zone => 'zone'} }
 
   it_behaves_like "a resource with expected parameters"
