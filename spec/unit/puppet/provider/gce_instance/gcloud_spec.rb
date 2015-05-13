@@ -122,4 +122,16 @@ describe Puppet::Type.type(:gce_instance).provider(:gcloud) do
       end
     end
   end
+
+  context "with manifest" do
+    let(:resource) { Puppet::Type.type(:gce_instance).new(:name => 'name',
+                                                          :zone => 'us-central1-a',
+                                                          :manifest => 'class apache ($v = "latest") { ensure => $v }') }
+    describe "create" do
+      it "should return nil when a resource is created" do
+        expect(provider).to receive(:gcloud).with(*required_params + ['--metadata', "manifest=class apache ($v = \"latest\") { ensure => $v }"])
+        expect(provider.create).to be_nil
+      end
+    end
+  end
 end

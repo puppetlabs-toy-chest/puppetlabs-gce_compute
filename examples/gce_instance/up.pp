@@ -25,7 +25,8 @@ gce_instance { 'puppet-test-instance':
   startup_script           => '../examples/gce_instance/example-startup-script.sh',
   block_for_startup_script => true,
   puppet_master            => 'master-blaster',
-  puppet_service           => present
+  puppet_service           => present,
+  manifest                 => 'class apache ($v = "latest") { ensure => $v }'
 }
 
 gce_disk { 'puppet-test-instance-alt-disk':

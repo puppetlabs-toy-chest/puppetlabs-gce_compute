@@ -82,6 +82,10 @@ Puppet::Type.newtype(:gce_instance) do
     newvalues(:present, :absent)
   end
 
+  newparam(:manifest) do
+    desc 'A local manifest file specific to this instance.'
+  end
+
   # TODO not implemented in gcloud
   # newparam(:authorized_ssh_keys) do
   #   desc 'key value pairs of user:keypair_name'
@@ -136,15 +140,6 @@ Puppet::Type.newtype(:gce_instance) do
   #   desc 'A hash of ENC classes used to assign a Puppet class to this instance.'
   #   validate do |v|
   #     raise(Puppet::Error, "ENC classes expects a Hash.") unless v.is_a?(Hash)
-  #   end
-  # end
-
-  # TODO not implemented in gcloud (Puppet functionality)
-  # manifest specific parameters
-  # newparam(:manifest) do
-  #   desc 'A local manifest file specific to this instance.'
-  #   validate do |v|
-  #     raise(Puppet::Error, "Manifest expects to be a String.") unless v.is_a?(String)
   #   end
   # end
 

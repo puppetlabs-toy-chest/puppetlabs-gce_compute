@@ -19,7 +19,8 @@ describe Puppet::Type.type(:gce_instance) do
                   :startup_script_timeout,
                   :tags,
                   :puppet_master,
-                  :puppet_service] }
+                  :puppet_service,
+                  :manifest] }
   let(:create_params) { {:name => 'name', :zone => 'zone'} }
 
   it_behaves_like "a resource with expected parameters"
