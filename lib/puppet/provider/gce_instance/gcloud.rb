@@ -23,6 +23,14 @@ Puppet::Type.type(:gce_instance).provide(:gcloud, :parent => Puppet::Provider::G
      :tags               => '--tags'}
   end
 
+  def puppet_metadata
+    {'puppet_master'  => :puppet_master,
+     'puppet_service' => :puppet_service,
+     'manifest'       => :manifest,
+     'puppet_modules' => :modules,
+     'puppet_repos'   => :module_repos}
+  end
+
   def create
     args = build_gcloud_create_args
     append_can_ip_forward_args(args, resource)
@@ -53,20 +61,8 @@ Puppet::Type.type(:gce_instance).provide(:gcloud, :parent => Puppet::Provider::G
           args << "#{k}=#{v}"
         end
       end
-      if resource[:puppet_master]
-        args << "puppet_master=#{resource[:puppet_master]}"
-      end
-      if resource[:puppet_service]
-        args << "puppet_service=#{resource[:puppet_service]}"
-      end
-      if resource[:manifest]
-        args << "manifest=#{resource[:manifest]}"
-      end
-      if resource[:modules]
-        args << "puppet_modules=#{resource[:modules]}"
-      end
-      if resource[:module_repos]
-        args << "puppet_repos=#{resource[:module_repos]}"
+      puppet_metadata.each do |k, v|
+        args << "#{k}=#{resource[v]}" if resource[v]
       end
     end
   end
@@ -100,6 +96,6 @@ Puppet::Type.type(:gce_instance).provide(:gcloud, :parent => Puppet::Provider::G
   end
 
   def has_metadata_args?(resource)
-    resource[:metadata] or resource[:puppet_master] or resource[:puppet_service] or resource[:manifest] or resource[:modules] or resource[:module_repos]
+    resource[:metadata] or (puppet_metadata.values.map{ |v| resource[v] }.any?)
   end
 end
