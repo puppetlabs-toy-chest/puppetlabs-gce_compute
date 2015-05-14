@@ -26,9 +26,9 @@ gce_instance { 'puppet-test-instance':
   block_for_startup_script => true,
   puppet_master            => 'master-blaster',
   puppet_service           => present,
-  manifest                 => 'class apache ($v = "latest") { ensure => $v }',
-  modules                  => ['puppetlabs-gce_compute', 'puppetlabs-mysql'],
-  module_repos             => {puppetlabs-gce_compute => 'git://github.com/puppetlabs/puppetlabs-gce_compute',
+  puppet_manifest          => 'class apache ($v = "latest") { ensure => $v }',
+  puppet_modules           => ['puppetlabs-gce_compute', 'puppetlabs-mysql'],
+  puppet_module_repos      => {puppetlabs-gce_compute => 'git://github.com/puppetlabs/puppetlabs-gce_compute',
                                puppetlabs-mysql       => 'git://github.com/puppetlabs/puppetlabs-mysql'}
 }
 

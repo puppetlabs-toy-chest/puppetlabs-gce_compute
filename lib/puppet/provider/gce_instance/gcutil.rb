@@ -81,7 +81,7 @@ Puppet::Type.type(:gce_instance).provide(
       args.push("--metadata=puppet_modules:#{resource[:modules]}")
     end
     if resource[:module_repos]
-      args.push("--metadata=puppet_repos:#{resource[:module_repos]}")
+      args.push("--metadata=puppet_module_repos:#{resource[:module_repos]}")
     end
     # Add the resource name (instance name) to metadata for policy autosigning use
     args.push("--metadata=puppet_instancename:#{resource[:name]}")

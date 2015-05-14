@@ -24,11 +24,11 @@ Puppet::Type.type(:gce_instance).provide(:gcloud, :parent => Puppet::Provider::G
   end
 
   def puppet_metadata
-    {'puppet_master'  => :puppet_master,
-     'puppet_service' => :puppet_service,
-     'manifest'       => :manifest,
-     'puppet_modules' => :modules,
-     'puppet_repos'   => :module_repos}
+    {'puppet_master'       => :puppet_master,
+     'puppet_service'      => :puppet_service,
+     'puppet_manifest'     => :puppet_manifest,
+     'puppet_modules'      => :puppet_modules,
+     'puppet_module_repos' => :puppet_module_repos}
   end
 
   def create

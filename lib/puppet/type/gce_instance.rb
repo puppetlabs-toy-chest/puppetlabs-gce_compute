@@ -82,16 +82,16 @@ Puppet::Type.newtype(:gce_instance) do
     newvalues(:present, :absent)
   end
 
-  newparam(:manifest) do
+  newparam(:puppet_manifest) do
     desc 'A local manifest file specific to this instance.'
   end
 
-  newparam(:modules) do
+  newparam(:puppet_modules) do
     desc 'List of modules to be downloaded from the forge. This is only needed for puppet masters or when running in puppet apply mode.'
     munge { |v| v.join(' ') }
   end
 
-  newparam(:module_repos) do
+  newparam(:puppet_module_repos) do
     desc 'Hash of module repos (localdir => repo) to be downloaded from github. Ex. apache => git@github.com:puppetlabs/puppetlabs-apache.git'
     munge do |v|
       new_value = []

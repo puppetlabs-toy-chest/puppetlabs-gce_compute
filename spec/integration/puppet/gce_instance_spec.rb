@@ -50,11 +50,11 @@ describe "gce_instance" do
                                                      'value' => 'master-blaster'})
         expect(out['metadata']['items']).to include({'key'   => 'puppet_service',
                                                      'value' => 'present'})
-        expect(out['metadata']['items']).to include({'key'   => 'manifest',
+        expect(out['metadata']['items']).to include({'key'   => 'puppet_manifest',
                                                      'value' => 'class apache ($v = "latest") { ensure => $v }'})
         expect(out['metadata']['items']).to include({'key'   => 'puppet_modules',
                                                      'value' => 'puppetlabs-gce_compute puppetlabs-mysql'})
-        expect(out['metadata']['items']).to include({'key'   => 'puppet_repos',
+        expect(out['metadata']['items']).to include({'key'   => 'puppet_module_repos',
                                                      'value' => 'git://github.com/puppetlabs/puppetlabs-gce_compute#puppetlabs-gce_compute git://github.com/puppetlabs/puppetlabs-mysql#puppetlabs-mysql'})
 
         # expect image

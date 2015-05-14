@@ -123,22 +123,22 @@ describe Puppet::Type.type(:gce_instance).provider(:gcloud) do
     end
   end
 
-  context "with manifest" do
+  context "with puppet_manifest" do
     let(:resource) { Puppet::Type.type(:gce_instance).new(:name => 'name',
                                                           :zone => 'us-central1-a',
-                                                          :manifest => 'class apache ($v = "latest") { ensure => $v }') }
+                                                          :puppet_manifest => 'class apache ($v = "latest") { ensure => $v }') }
     describe "create" do
       it "should return nil when a resource is created" do
-        expect(provider).to receive(:gcloud).with(*required_params + ['--metadata', "manifest=class apache ($v = \"latest\") { ensure => $v }"])
+        expect(provider).to receive(:gcloud).with(*required_params + ['--metadata', "puppet_manifest=class apache ($v = \"latest\") { ensure => $v }"])
         expect(provider.create).to be_nil
       end
     end
   end
 
-  context "with modules" do
+  context "with puppet_modules" do
     let(:resource) { Puppet::Type.type(:gce_instance).new(:name => 'name',
                                                           :zone => 'us-central1-a',
-                                                          :modules => ['puppetlabs-gce_compute','puppetlabs-mysql']) }
+                                                          :puppet_modules => ['puppetlabs-gce_compute','puppetlabs-mysql']) }
     describe "create" do
       it "should return nil when a resource is created" do
         expect(provider).to receive(:gcloud).with(*required_params + ['--metadata', "puppet_modules=puppetlabs-gce_compute puppetlabs-mysql"])
@@ -147,14 +147,14 @@ describe Puppet::Type.type(:gce_instance).provider(:gcloud) do
     end
   end
 
-  context "with module_repos" do
+  context "with puppet_module_repos" do
     let(:resource) { Puppet::Type.type(:gce_instance).new(:name => 'name',
                                                           :zone => 'us-central1-a',
-                                                          :module_repos => {'puppetlabs-gce_compute' => 'git://github.com/puppetlabs/puppetlabs-gce_compute',
-                                                                            'puppetlabs-mysql' => 'git://github.com/puppetlabs/puppetlabs-mysql'}) }
+                                                          :puppet_module_repos => {'puppetlabs-gce_compute' => 'git://github.com/puppetlabs/puppetlabs-gce_compute',
+                                                                                   'puppetlabs-mysql' => 'git://github.com/puppetlabs/puppetlabs-mysql'}) }
     describe "create" do
       it "should return nil when a resource is created" do
-        expect(provider).to receive(:gcloud).with(*required_params + ['--metadata', "puppet_repos=git://github.com/puppetlabs/puppetlabs-gce_compute#puppetlabs-gce_compute git://github.com/puppetlabs/puppetlabs-mysql#puppetlabs-mysql"])
+        expect(provider).to receive(:gcloud).with(*required_params + ['--metadata', "puppet_module_repos=git://github.com/puppetlabs/puppetlabs-gce_compute#puppetlabs-gce_compute git://github.com/puppetlabs/puppetlabs-mysql#puppetlabs-mysql"])
         expect(provider.create).to be_nil
       end
     end
