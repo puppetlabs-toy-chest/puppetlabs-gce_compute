@@ -26,7 +26,6 @@ Puppet::Type.type(:gce_instance).provide(:gcloud, :parent => Puppet::Provider::G
   def puppet_metadata
     {'puppet_master'       => :puppet_master,
      'puppet_service'      => :puppet_service,
-     'puppet_manifest'     => :puppet_manifest,
      'puppet_modules'      => :puppet_modules,
      'puppet_module_repos' => :puppet_module_repos}
   end
@@ -68,10 +67,16 @@ Puppet::Type.type(:gce_instance).provide(:gcloud, :parent => Puppet::Provider::G
   end
 
   def append_startup_script_args(args, resource)
-    if resource[:startup_script]
-      startup_script_file = File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..', '..', 'files', "#{resource[:startup_script]}"))
+    if resource[:startup_script] or resource[:puppet_manifest]
       args << '--metadata-from-file'
-      args << "startup-script=#{startup_script_file}"
+      if resource[:startup_script]
+        startup_script_file = File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..', '..', 'files', "#{resource[:startup_script]}"))
+        args << "startup-script=#{startup_script_file}"
+      end
+      if resource[:puppet_manifest]
+        puppet_manifest_file = File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..', '..', 'files', "#{resource[:puppet_manifest]}"))
+        args << "puppet_manifest=#{puppet_manifest_file}"
+      end
     end
   end
 

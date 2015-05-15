@@ -6,6 +6,7 @@ describe Puppet::Type.type(:gce_instance).provider(:gcloud) do
   let(:provider) { resource.provider }
   let(:required_params) { ['compute', 'instances', 'create', 'name', '--zone', 'us-central1-a'] }
   let(:startup_script_file) { File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..', '..', '..', 'files', "#{resource[:startup_script]}")) }
+  let(:puppet_manifest_file) { File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..', '..', '..', 'files', "#{resource[:puppet_manifest]}")) }
 
   describe "create" do
     it "should return nil when a resource is created" do
@@ -126,10 +127,10 @@ describe Puppet::Type.type(:gce_instance).provider(:gcloud) do
   context "with puppet_manifest" do
     let(:resource) { Puppet::Type.type(:gce_instance).new(:name => 'name',
                                                           :zone => 'us-central1-a',
-                                                          :puppet_manifest => 'class apache ($v = "latest") { ensure => $v }') }
+                                                          :puppet_manifest => '../examples/gce_instance/example-puppet-manifest.pp') }
     describe "create" do
       it "should return nil when a resource is created" do
-        expect(provider).to receive(:gcloud).with(*required_params + ['--metadata', "puppet_manifest=class apache ($v = \"latest\") { ensure => $v }"])
+        expect(provider).to receive(:gcloud).with(*required_params + ['--metadata-from-file', "puppet_manifest=#{puppet_manifest_file}"])
         expect(provider.create).to be_nil
       end
     end
