@@ -39,4 +39,11 @@ namespace :spec do
   task :unit => [:spec_prep, :spec_unit_standalone, :spec_clean]
   desc "Run integration spec tests in a clean fixtures directory"
   task :integration => [:spec_prep, :spec_integration_standalone, :spec_clean]
+
+  namespace :integration do
+    desc "Cleanup after failed integration specs"
+    task :clean do
+      puts `ls examples/gce_*/*down.pp | xargs -n 1 puppet apply`
+    end
+  end
 end
