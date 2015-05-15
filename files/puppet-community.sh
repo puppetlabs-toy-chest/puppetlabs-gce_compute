@@ -107,9 +107,8 @@ EOFPUPPETDEFAULT
 }
 
 function download_modules() {
-  if [ -n $1 ]; then
-    MODULE_LIST=`echo "$1" | sed 's/,/ /g'`
-    for i in $MODULE_LIST; do puppet module install --force $i ; done;
+  if [ -n "$1" ]; then
+    for i in $1; do puppet module install --force $i ; done;
   fi
 }
 
