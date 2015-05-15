@@ -13,12 +13,15 @@ class IntegrationSpecHelper
   end
 
   def self.describe_resource(resource, args)
-    _, stdout, stderr = Open3.popen3("gcloud compute #{resource} describe #{args} --format json")
-    return stdout.gets(nil), stderr.gets(nil)
+    return run_command("gcloud compute #{resource} describe #{args} --format json")
   end
 
   def self.apply_example(example)
-    _, stdout, stderr = Open3.popen3("puppet apply examples/#{example}.pp")
+    return run_command("puppet apply examples/#{example}.pp")
+  end
+
+  def self.run_command(command)
+    _, stdout, stderr = Open3.popen3(command)
     return stdout.gets(nil), stderr.gets(nil)
   end
 end
