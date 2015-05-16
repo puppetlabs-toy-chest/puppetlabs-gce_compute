@@ -9,6 +9,10 @@ describe "puppet-community.sh" do
 
     IntegrationSpecHelper.apply_example("puppet_community/up")
 
+    # expect puppet_master
+    config_out, _ = IntegrationSpecHelper.run_command('gcloud compute ssh puppet-test-community-instance --zone us-central1-a --command "sudo puppet config print"')
+    expect(config_out).to match(/^server = master-blaster$/)
+
     # expect puppet_modules
     modules_out, _ = IntegrationSpecHelper.run_command('gcloud compute ssh puppet-test-community-instance --zone us-central1-a --command "sudo puppet module list"')
     expect(modules_out).to match(/puppetlabs-mysql/)
