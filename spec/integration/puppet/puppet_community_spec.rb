@@ -13,6 +13,12 @@ describe "puppet-community.sh" do
     config_out, _ = IntegrationSpecHelper.run_command('gcloud compute ssh puppet-test-community-instance --zone us-central1-a --command "sudo puppet config print"')
     expect(config_out).to match(/^server = master-blaster$/)
 
+    # expect puppet_service
+    rc_out, _ = IntegrationSpecHelper.run_command('gcloud compute ssh puppet-test-community-instance --zone us-central1-a --command "ls /etc/rc*.d -1"')
+    expect(rc_out).to match(/puppet$/)
+    ps_out, _ = IntegrationSpecHelper.run_command('gcloud compute ssh puppet-test-community-instance --zone us-central1-a --command "ps ax"')
+    expect(ps_out).to match(/puppet agent$/)
+
     # expect puppet_modules
     modules_out, _ = IntegrationSpecHelper.run_command('gcloud compute ssh puppet-test-community-instance --zone us-central1-a --command "sudo puppet module list"')
     expect(modules_out).to match(/puppetlabs-mysql/)

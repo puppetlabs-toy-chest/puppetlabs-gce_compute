@@ -5,5 +5,6 @@ gce_instance { 'puppet-test-community-instance':
   startup_script           => 'puppet-community.sh',
   block_for_startup_script => true,
   puppet_master            => 'master-blaster',
+  puppet_service           => present,
   puppet_modules           => ['puppetlabs-mysql', 'puppetlabs-apache', 'puppetlabs-stdlib', 'puppetlabs-concat']
 }
