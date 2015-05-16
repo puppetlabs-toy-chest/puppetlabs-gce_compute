@@ -9,6 +9,8 @@ describe "puppet-community.sh" do
 
     IntegrationSpecHelper.apply_example("puppet_community/up")
 
+    ps_out, _ = IntegrationSpecHelper.run_command('gcloud compute ssh puppet-test-community-instance --zone us-central1-a --command "ps ax"')
+
     # expect puppet_master
     config_out, _ = IntegrationSpecHelper.run_command('gcloud compute ssh puppet-test-community-instance --zone us-central1-a --command "sudo puppet config print"')
     expect(config_out).to match(/^server = master-blaster$/)
@@ -16,8 +18,12 @@ describe "puppet-community.sh" do
     # expect puppet_service
     rc_out, _ = IntegrationSpecHelper.run_command('gcloud compute ssh puppet-test-community-instance --zone us-central1-a --command "ls /etc/rc*.d -1"')
     expect(rc_out).to match(/puppet$/)
-    ps_out, _ = IntegrationSpecHelper.run_command('gcloud compute ssh puppet-test-community-instance --zone us-central1-a --command "ps ax"')
     expect(ps_out).to match(/puppet agent$/)
+
+    # expect puppet_manifest
+    index_out, _ = IntegrationSpecHelper.run_command('gcloud compute ssh puppet-test-community-instance --zone us-central1-a --command "cat /var/www/index.html"')
+    expect(index_out).to match(/Pinocchio says hello!/)
+    expect(ps_out).to match(/apache/)
 
     # expect puppet_modules
     modules_out, _ = IntegrationSpecHelper.run_command('gcloud compute ssh puppet-test-community-instance --zone us-central1-a --command "sudo puppet module list"')
