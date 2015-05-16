@@ -43,7 +43,7 @@ namespace :spec do
   namespace :integration do
     desc "Cleanup after failed integration specs"
     task :clean do
-      puts `ls examples/gce_*/*down.pp | xargs -n 1 puppet apply`
+      puts `ls examples/**/*down.pp | xargs -n 1 puppet apply`
     end
   end
 end
