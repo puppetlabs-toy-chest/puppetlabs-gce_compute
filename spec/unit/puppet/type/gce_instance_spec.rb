@@ -44,6 +44,14 @@ describe Puppet::Type.type(:gce_instance) do
                                   :startup_script_timeout => 10}) }.to raise_error(/block_for_startup_script/)
   end
 
+  it "should valid if given a startup_script, block_for_startup_script, and startup_script_timeout" do
+    expect { described_class.new({:name => 'name',
+                                  :zone => 'zone',
+                                  :startup_script => 'some_startup_script',
+                                  :block_for_startup_script => true,
+                                  :startup_script_timeout => 10}) }.not_to raise_error
+  end
+
   it "should be valid if given a valid puppet_service" do
     expect { described_class.new({:name => 'name',
                                   :zone => 'zone',
@@ -54,5 +62,26 @@ describe Puppet::Type.type(:gce_instance) do
     expect { described_class.new({:name => 'name',
                                   :zone => 'zone',
                                   :puppet_service => 'hello'}) }.to raise_error(/puppet_service/)
+  end
+
+  it "should munge startup_script_timeout to a Float" do
+    expect(described_class.new({:name => 'name',
+                                :zone => 'zone',
+                                :startup_script => 'some_startup_script',
+                                :block_for_startup_script => true,
+                                :startup_script_timeout => 10})[:startup_script_timeout]).to be_an_instance_of(Float)
+  end
+
+  it "should munge puppet_modules to a space-separated string" do
+    expect(described_class.new({:name => 'name',
+                                :zone => 'zone',
+                                :puppet_modules => ['module1', 'module2']})[:puppet_modules]).to eq('module1 module2')
+  end
+
+  it "should munge puppet_module_repos to a properly-formatted space-separated string" do
+    expect(described_class.new({:name => 'name',
+                                :zone => 'zone',
+                                :puppet_module_repos => {'module1' => 'git1',
+                                                         'module2' => 'git2'}})[:puppet_module_repos]).to eq('git1#module1 git2#module2')
   end
 end
