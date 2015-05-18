@@ -45,36 +45,6 @@ describe "gce_instance" do
         expect(startup_script_metadata).not_to be_nil
         expect(startup_script_metadata['value']).to match(/an example startup script that does nothing/)
 
-        # expect puppet stuff
-        expect(out['metadata']['items']).to include({'key'   => 'puppet_master',
-                                                     'value' => 'master-blaster'})
-        expect(out['metadata']['items']).to include({'key'   => 'puppet_service',
-                                                     'value' => 'present'})
-        expect(out['metadata']['items']).to include({'key'   => 'puppet_manifest',
-                                                     'value' => <<-PUPPET_MANIFEST
-class apache ($version = "latest") {
-  package {"apache2":
-    ensure => $version, # Using the class parameter from above
-  }
-  file {"/var/www/index.html":
-    ensure  => present,
-    content => "<html>\\n<body>\\n\\t<h2>Hi, this is $gce_external_ip.</h2>\\n</body>\\n</html>\\n",
-    require => Package["apache2"],
-  }
-  service {"apache2":
-    ensure => running,
-    enable => true,
-    require => File["/var/www/index.html"],
-  }
-}
-include apache
-PUPPET_MANIFEST
-          })
-        expect(out['metadata']['items']).to include({'key'   => 'puppet_modules',
-                                                     'value' => 'puppetlabs-gce_compute puppetlabs-mysql'})
-        expect(out['metadata']['items']).to include({'key'   => 'puppet_module_repos',
-                                                     'value' => 'git://github.com/puppetlabs/puppetlabs-gce_compute#puppetlabs-gce_compute git://github.com/puppetlabs/puppetlabs-mysql#puppetlabs-mysql'})
-
         # expect image
         disk_out = IntegrationSpecHelper.describe_out('disks', 'puppet-test-instance --zone us-central1-a')
         expect(disk_out['sourceImage']).to match(/coreos/)

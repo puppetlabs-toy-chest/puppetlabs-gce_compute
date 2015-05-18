@@ -23,13 +23,7 @@ gce_instance { 'puppet-test-instance':
   metadata                 => {test-metadata-key => 'test-metadata-value'},
   scopes                   => ['compute-rw','default=storage-rw'],
   startup_script           => '../examples/gce_instance/example-startup-script.sh',
-  block_for_startup_script => true,
-  puppet_master            => 'master-blaster',
-  puppet_service           => present,
-  puppet_manifest          => '../examples/gce_instance/example-puppet-manifest.pp',
-  puppet_modules           => ['puppetlabs-gce_compute', 'puppetlabs-mysql'],
-  puppet_module_repos      => {puppetlabs-gce_compute => 'git://github.com/puppetlabs/puppetlabs-gce_compute',
-                               puppetlabs-mysql       => 'git://github.com/puppetlabs/puppetlabs-mysql'}
+  block_for_startup_script => true
 }
 
 gce_disk { 'puppet-test-instance-alt-disk':
