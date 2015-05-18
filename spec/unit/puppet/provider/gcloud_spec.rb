@@ -5,10 +5,11 @@ describe Puppet::Provider::Gcloud do
   let(:resource) { Puppet::Type.type(:gce_fake).new(:name => 'fake-name',
                                                     :zone => 'us-central1-a',
                                                     :description => 'Fake description',
-                                                    :source => 'source-place') }
+                                                    :source => 'source-place',
+                                                    :tags => ['tag1','tag2']) }
   let(:provider) { resource.provider }
   let(:required_params) { ['compute', 'fakes', 'fake-name', '--zone', 'us-central1-a'] }
-  let(:optional_params) { ['--description', 'Fake description', '--source', 'source-place'] }
+  let(:optional_params) { ['--description', 'Fake description', '--source', 'source-place', '--tags', 'tag1,tag2'] }
 
   def required_params_with(action)
     required_params.insert(2, action)
@@ -54,7 +55,8 @@ describe Puppet::Provider::Gcloud do
     let(:resource) { Puppet::Type.type(:gce_fake).new(:name => 'fake-name',
                                                       :zone => 'us-central1-a',
                                                       :description => 'Invalid fake description',
-                                                      :source => 'invalid-source-place') }
+                                                      :source => 'invalid-source-place',
+                                                      :tags => []) }
     let(:provider) { resource.provider }
 
     describe "#exists?" do
@@ -96,6 +98,7 @@ Puppet::Type.newtype(:gce_fake) do
   # optional params
   newparam(:description)
   newparam(:source)
+  newparam(:tags)
 
   validate do
     fail('You must specify a zone for the fake') unless self[:zone]
@@ -117,6 +120,7 @@ Puppet::Type.type(:gce_fake).provide(:gcloud, :parent => Puppet::Provider::Gclou
 
   def gcloud_optional_create_args
     {:description => '--description',
-     :source => '--source'}
+     :source => '--source',
+     :tags => '--tags'}
   end
 end

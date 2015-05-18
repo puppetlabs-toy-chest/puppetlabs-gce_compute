@@ -38,7 +38,11 @@ class Puppet::Provider::Gcloud < Puppet::Provider
     gcloud_optional_create_args.each do |attribute, flag|
       if resource[attribute]
         args << flag
-        args << resource[attribute]
+        if resource[attribute].is_a? Array
+          args << resource[attribute].join(',')
+        else
+          args << resource[attribute]
+        end
       end
     end
     return args

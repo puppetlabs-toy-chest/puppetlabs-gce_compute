@@ -47,36 +47,39 @@ Puppet::Type.type(:gce_instance).provide(:gcloud, :parent => Puppet::Provider::G
   def append_boot_disk_args(args, resource)
     if resource[:boot_disk]
       args << '--disk'
-      args << "name=#{resource[:boot_disk]}"
-      args << "boot=yes"
+      args << "name=#{resource[:boot_disk]},boot=yes"
     end
   end
 
   def append_metadata_args(args, resource)
     if has_metadata_args?(resource)
-      args << '--metadata'
+      metadata_args = []
       if resource[:metadata]
         resource[:metadata].each do |k, v|
-          args << "#{k}=#{v}"
+          metadata_args << "#{k}=#{v}"
         end
       end
       puppet_metadata.each do |k, v|
-        args << "#{k}=#{resource[v]}" if resource[v]
+        metadata_args << "#{k}=#{resource[v]}" if resource[v]
       end
+      args << '--metadata'
+      args << metadata_args.join(',')
     end
   end
 
   def append_startup_script_args(args, resource)
     if resource[:startup_script] or resource[:puppet_manifest]
-      args << '--metadata-from-file'
+      metadata_args = []
       if resource[:startup_script]
         startup_script_file = File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..', '..', 'files', "#{resource[:startup_script]}"))
-        args << "startup-script=#{startup_script_file}"
+        metadata_args << "startup-script=#{startup_script_file}"
       end
       if resource[:puppet_manifest]
         puppet_manifest_file = File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..', '..', 'files', "#{resource[:puppet_manifest]}"))
-        args << "puppet_manifest=#{puppet_manifest_file}"
+        metadata_args << "puppet_manifest=#{puppet_manifest_file}"
       end
+      args << '--metadata-from-file'
+      args << metadata_args.join(',')
     end
   end
 

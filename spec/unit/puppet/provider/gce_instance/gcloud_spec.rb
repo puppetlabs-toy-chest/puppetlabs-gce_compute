@@ -39,14 +39,14 @@ describe Puppet::Type.type(:gce_instance).provider(:gcloud) do
   context "with boot_disk" do
     it_behaves_like "an instance that returns nil when created" do
       let(:additional_params) { {:boot_disk => 'disk'} }
-      let(:gcloud_additional_params) { ['--disk', 'name=disk', 'boot=yes'] }
+      let(:gcloud_additional_params) { ['--disk', 'name=disk,boot=yes'] }
     end
   end
 
   context "with metadata" do
     it_behaves_like "an instance that returns nil when created" do
-      let(:additional_params) { {:metadata => {'test-metadata-key' => 'test-metadata-value'}} }
-      let(:gcloud_additional_params) { ['--metadata', 'test-metadata-key=test-metadata-value'] }
+      let(:additional_params) { {:metadata => {'key1' => 'value1', 'key2' => 'value2'}} }
+      let(:gcloud_additional_params) { ['--metadata', 'key1=value1,key2=value2'] }
     end
   end
 
