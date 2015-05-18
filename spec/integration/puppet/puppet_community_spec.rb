@@ -27,10 +27,18 @@ describe "puppet-community.sh" do
 
     # expect puppet_modules
     modules_out, _ = IntegrationSpecHelper.run_command('gcloud compute ssh puppet-test-community-instance --zone us-central1-a --command "sudo puppet module list"')
-    expect(modules_out).to match(/puppetlabs-mysql/)
     expect(modules_out).to match(/puppetlabs-apache/)
     expect(modules_out).to match(/puppetlabs-stdlib/)
     expect(modules_out).to match(/puppetlabs-concat/)
+
+    # expect puppet_module_repos
+    expect(modules_out).to match(/puppetlabs-gce_compute/)
+    ls_gce_compute_out, _ = IntegrationSpecHelper.run_command('gcloud compute ssh puppet-test-community-instance --zone us-central1-a --command "sudo cat /etc/puppet/modules/puppetlabs-gce_compute/.git/config"')
+    expect(ls_gce_compute_out).to match(/url = git:\/\/github.com\/puppetlabs\/puppetlabs-gce_compute/)
+
+    expect(modules_out).to match(/puppetlabs-mysql/)
+    ls_gce_compute_out, _ = IntegrationSpecHelper.run_command('gcloud compute ssh puppet-test-community-instance --zone us-central1-a --command "sudo cat /etc/puppet/modules/puppetlabs-mysql/.git/config"')
+    expect(ls_gce_compute_out).to match(/url = git:\/\/github.com\/puppetlabs\/puppetlabs-mysql/)
 
     IntegrationSpecHelper.apply_example("puppet_community/down")
     expect(IntegrationSpecHelper.describe_err(gcloud_resource_name, 'puppet-test-community-instance --zone us-central1-a')).to match(/ERROR: .* Could not fetch resource/)

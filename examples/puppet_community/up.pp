@@ -7,5 +7,7 @@ gce_instance { 'puppet-test-community-instance':
   puppet_master            => 'master-blaster',
   puppet_service           => present,
   puppet_manifest          => '../examples/puppet_community/manifest.pp',
-  puppet_modules           => ['puppetlabs-mysql', 'puppetlabs-apache', 'puppetlabs-stdlib', 'puppetlabs-concat']
+  puppet_modules           => ['puppetlabs-apache', 'puppetlabs-stdlib', 'puppetlabs-concat'],
+  puppet_module_repos      => {puppetlabs-gce_compute => 'git://github.com/puppetlabs/puppetlabs-gce_compute',
+                               puppetlabs-mysql       => 'git://github.com/puppetlabs/puppetlabs-mysql'}
 }

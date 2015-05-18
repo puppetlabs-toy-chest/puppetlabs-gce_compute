@@ -115,8 +115,7 @@ function download_modules() {
 function clone_modules() {
   if [ -n "$1" ]; then
     pushd /etc/puppet/modules
-    MODULE_LIST=`echo "$1" | sed 's/,/ /g'`
-    for i in $MODULE_LIST; do
+    for i in $1; do
       MODULE=`echo "$i" | sed 's/#/ /'`
       if [ ! -d `echo $MODULE | cut -d' ' -f2` ]; then
         git clone $MODULE ;
@@ -212,7 +211,7 @@ function provision_puppet() {
   PUPPET_CLASSES=$(curl -fs $MD/attributes/puppet_classes)
   PUPPET_MANIFEST=$(curl -fs $MD/attributes/puppet_manifest)
   PUPPET_MODULES=$(curl -fs $MD/attributes/puppet_modules)
-  PUPPET_REPOS=$(curl -fs $MD/attributes/puppet_repos)
+  PUPPET_REPOS=$(curl -fs $MD/attributes/puppet_module_repos)
   PUPPET_HOSTNAME=$(curl -fs $MD/hostname)
 
   # BEGIN HACK
