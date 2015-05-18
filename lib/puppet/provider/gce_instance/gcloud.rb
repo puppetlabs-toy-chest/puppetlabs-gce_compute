@@ -3,6 +3,8 @@ require File.expand_path(File.join(File.dirname(__FILE__), '..', 'gcloud'))
 Puppet::Type.type(:gce_instance).provide(:gcloud, :parent => Puppet::Provider::Gcloud) do
   commands :gcloud => "gcloud"
 
+  BLOCK_FOR_STARTUP_SCRIPT_INTERVAL = 10
+
   def gcloud_resource_name
     'instances'
   end
@@ -90,7 +92,7 @@ Puppet::Type.type(:gce_instance).provide(:gcloud, :parent => Puppet::Provider::G
         status = Timeout::timeout(resource[:startup_script_timeout]) do
           loop do
             break if gcloud(*build_gcloud_ssh_startup_script_check_args) =~ /Finished running startup script/
-            sleep 10
+            sleep BLOCK_FOR_STARTUP_SCRIPT_INTERVAL
           end
         end
       rescue Timeout::Error
