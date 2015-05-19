@@ -485,6 +485,67 @@ value from executing `dmidecode` which can only by done by `root` (or sudo).
 If you run `puppet apply` as an unprivileged user, you will see permission
 denied errors.
 
+## Migrating from v0
+
+In rewriting this module since v0, types have changed to be as consistent with `gcloud` as possible, which causes some breaking changes in the types.  Below are notes about what attributes have changed name, (and to what,) what attributes are no longer supported, and also the manifest syntax changes.
+
+(This attempts to be a complete list, but may not be.  If you have questions, ask, or file a bug.)
+
+### gce_disk
+
+- `size_gb` is now `size`;
+- `source_image` is now `image`; and
+- `wait_until_complete` is no longer supported—all commands wait until they are complete.
+
+### gce_firewallrule
+
+This resource used to be called gce_firewall.
+
+- `allowed` is now `allow`, and takes an array of strings rather than a comma-separated string;
+- `allowed_ip_sources` is now `source_ranges`, and takes an array of strings rather than a comma-separated string; and
+- `allowed_tag_sources` is now `source_tags`, and takes an array of strings rather than a comma-separated string.
+
+### gce_forwardingrule
+
+- `ip` is currently not supported (see above);
+- `protocol` is now `ip_protocol`; and
+- `target` is now `target_pool`.
+
+### gce_httphealthcheck
+
+- `check_interval_sec` is now `check_interval`;
+- `check_timeout_sec` is now `timeout`;
+
+### gce_instance
+
+- `authorized_ssh_keys` is no longer supported, (read more at [Connecting to an instance using ssh](https://cloud.google.com/compute/docs/instances/#sshing));
+- `disk` is now `boot_disk`;
+- `external_ip_address` was read-only, and is no longer supported;
+- `internal_ip_address` was read-only, and is no longer supported;
+- `on_host_maintenance` is now `maintenance_policy`;
+- `service_account` and `service_account_scopes` are now both reflected in `scopes`, and `scopes` takes an array of strings, (see `examples/gce_instance/up.pp` for an example);
+- `add_compute_key_to_project` is no longer supported, (read more at [Connecting to an instance using ssh](https://cloud.google.com/compute/docs/instances/#sshing));
+- `use_compute_key` is no longer supported, (read more at [Connecting to an instance using ssh](https://cloud.google.com/compute/docs/instances/#sshing));
+- `enc_classes` is no longer supported;
+- `manifest` is now `puppet_manifest`, and takes a manifest filename, rather than an inline manifest;
+- `modules` is now `puppet_modules`, and the metadata is space-separated rather than comma-separated; and
+- `module_repos` is now `puppet_module_repos`, is now stored in `puppet_module_repos` metadata, instead of `puppet_repos`, and that metadata is space-separated rather than comma-separated.
+
+See `examples/puppet_community/up.pp` for an example of how to use the Puppet attributes: `puppet_master`, `puppet_service`, `puppet_manifest`, `puppet_modules`, and `puppet_module_repos`.
+
+### gce_network
+
+- `gateway` was read-only, and is no longer supported.
+
+### gce_targetpool
+
+- `health_checks` is now `health_check`.
+- `instances` now takes a hash, of zones and lists of instances, (see `examples/gce_targetpool/up.pp` for an example).
+
+### gce_targetpoolhealthcheck & gce_targetpoolinstance
+
+Both of these types are now reflected in `gce_targetpool`, (see `examples/gce_targetpool/up.pp` for an example).
+
 ##ToDo
 
 Not all GCE features have been implemented. Currently, the module is missing
