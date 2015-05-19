@@ -3,7 +3,7 @@ require 'spec_helper'
 describe Puppet::Util::NameValidator do
   describe "#validate" do
     it "raises an error for an invalid name" do
-      %w(123 aaa- a_a aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa).each do |v|
+      ['123', 'aaa-', 'a_a', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', "\naaa"].each do |v|
         expect { described_class.validate(v) }.to raise_error(/Invalid name: #{v}.  Must be a match of regex/)
       end
     end
