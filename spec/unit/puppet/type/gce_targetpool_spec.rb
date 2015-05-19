@@ -6,6 +6,7 @@ describe Puppet::Type.type(:gce_targetpool) do
                   :region,
                   :description,
                   :health_check,
+                  :instances,
                   :session_affinity,
                   :backup_pool,
                   :failover_ratio] }

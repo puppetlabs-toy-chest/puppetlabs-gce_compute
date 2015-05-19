@@ -32,6 +32,10 @@ Puppet::Type.newtype(:gce_targetpool) do
     desc 'Specifies an HTTP health check resource to use to determine the health of instances in this pool.'
   end
 
+  newparam(:instances) do
+    desc 'Specifies a list of instances to add to the target pool.'
+  end
+
   newparam(:session_affinity) do
     desc 'Specifies the session affinity option for the connection.'
   end
@@ -42,6 +46,12 @@ Puppet::Type.newtype(:gce_targetpool) do
 
   autorequire(:gce_httphealthcheck) do
     self[:health_check]
+  end
+
+  autorequire(:gce_instance) do
+    if self[:instances]
+      self[:instances].values.flatten
+    end
   end
 
   validate do

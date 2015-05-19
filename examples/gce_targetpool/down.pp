@@ -9,6 +9,12 @@ gce_httphealthcheck { 'puppet-test-target-pool-http-health-check':
   require => Gce_targetpool['puppet-test-target-pool']
 }
 
+gce_instance { 'puppet-test-target-pool-instance':
+  ensure  => absent,
+  zone    => 'us-central1-a',
+  require => Gce_targetpool['puppet-test-target-pool']
+}
+
 gce_targetpool { 'puppet-test-target-pool':
   ensure => absent,
   region => 'us-central1'

@@ -19,4 +19,22 @@ Puppet::Type.type(:gce_targetpool).provide(:gcloud, :parent => Puppet::Provider:
      :backup_pool      => '--backup-pool',
      :failover_ratio   => '--failover-ratio'}
   end
+
+  def create
+    gcloud(*(build_gcloud_args('create') + build_gcloud_flags(gcloud_optional_create_args)))
+    add_instances
+  end
+
+  def add_instances
+    if resource[:instances]
+      resource[:instances].each do |zone, instances|
+        # we should be able to do this with #build_gcloud_args,
+        # but add_instances doesn't accept region, so we have to do it by hand
+        gcloud('compute', gcloud_resource_name,
+               'add-instances', resource[:name],
+               '--zone', zone,
+               '--instances', instances.join(','))
+      end
+    end
+  end
 end

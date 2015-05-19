@@ -16,6 +16,9 @@ describe "gce_targetpool" do
       Proc.new do |out|
         expect(out['healthChecks'].size).to eq(1)
         expect(out['healthChecks'][0]).to match(/puppet-test-target-pool-http-health-check/)
+
+        expect(out['instances'].size).to eq(1)
+        expect(out['instances'][0]).to match(/puppet-test-target-pool-instance/)
       end
     end
   end
