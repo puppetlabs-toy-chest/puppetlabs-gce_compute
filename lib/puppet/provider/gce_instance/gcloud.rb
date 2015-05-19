@@ -11,7 +11,7 @@ Puppet::Type.type(:gce_instance).provide(:gcloud, :parent => Puppet::Provider::G
 
   # These arguments are required for both create and destroy
   def gcloud_args
-    ['--zone', resource[:zone]]
+    {:zone => '--zone'}
   end
 
   def gcloud_optional_create_args
@@ -33,7 +33,7 @@ Puppet::Type.type(:gce_instance).provide(:gcloud, :parent => Puppet::Provider::G
   end
 
   def create
-    args = build_gcloud_create_args
+    args = build_gcloud_args('create') + build_gcloud_flags(gcloud_optional_create_args)
     append_can_ip_forward_args(args, resource)
     append_boot_disk_args(args, resource)
     append_metadata_args(args, resource)
@@ -102,7 +102,7 @@ Puppet::Type.type(:gce_instance).provide(:gcloud, :parent => Puppet::Provider::G
   end
 
   def build_gcloud_ssh_startup_script_check_args
-    ['compute', 'ssh', resource[:name]] + gcloud_args + ['--command', 'tail /var/log/startupscript.log -n 1']
+    ['compute', 'ssh', resource[:name]] + build_gcloud_flags(gcloud_args) + ['--command', 'tail /var/log/startupscript.log -n 1']
   end
 
   def has_metadata_args?(resource)

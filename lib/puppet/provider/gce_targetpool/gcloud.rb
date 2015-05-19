@@ -9,7 +9,7 @@ Puppet::Type.type(:gce_targetpool).provide(:gcloud, :parent => Puppet::Provider:
 
   # These arguments are required for both create and destroy
   def gcloud_args
-    ['--region', resource[:region]]
+    {:region => '--region'}
   end
 
   def gcloud_optional_create_args

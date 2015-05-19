@@ -9,7 +9,7 @@ Puppet::Type.type(:gce_disk).provide(:gcloud, :parent => Puppet::Provider::Gclou
 
   # These arguments are required for both create and destroy
   def gcloud_args
-    ['--zone', resource[:zone]]
+    {:zone => '--zone'}
   end
 
   def gcloud_optional_create_args
