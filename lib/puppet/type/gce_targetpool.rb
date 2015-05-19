@@ -55,6 +55,7 @@ Puppet::Type.newtype(:gce_targetpool) do
   end
 
   validate do
+    fail('You must specify a region for the target-pool.') unless self[:region]
     if (self[:backup_pool] and self[:failover_ratio].nil?) or (self[:backup_pool].nil? and self[:failover_ratio])
       fail('Either both or neither of backup_pool and failover_ratio must be provided.')
     end
