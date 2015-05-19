@@ -21,7 +21,7 @@ It should work on any system that supports Google's [Cloud SDK](https://develope
 
 In order to use this module, you will need to
 [signup](https://developers.google.com/compute/docs/signup)
- for a Google Cloud Platform account and enable Google Compute Engine.
+for a Google Cloud Platform account and enable Google Compute Engine.
 
 ### Setup a Puppet Agent with Google Cloud SDK
 
@@ -166,7 +166,8 @@ One of the easiest ways to take advantage of this module is to build a single in
 
 ## A Complete Demo Stack
 
-Google Cloud Platform hosts [a complete demo stack on GitHub](https://github.com/GoogleCloudPlatform/compute-video-demo-puppet). It includes more GCE resources like load balancers and firewall rules.
+As of right now, the [complete demo stack on GitHub](https://github.com/GoogleCloudPlatform/compute-video-demo-puppet) works with v0, but not v1.  Check it out for inspiration,
+but you may have to change parameters to get it to work.  See [Migrating from v0](#migrating-from-v0).
 
 ## Reference
 
