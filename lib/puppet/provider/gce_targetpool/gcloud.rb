@@ -23,6 +23,7 @@ Puppet::Type.type(:gce_targetpool).provide(:gcloud, :parent => Puppet::Provider:
   def create
     gcloud(*(build_gcloud_args('create') + build_gcloud_flags(gcloud_optional_create_args)))
     add_instances
+    return nil
   end
 
   def add_instances
