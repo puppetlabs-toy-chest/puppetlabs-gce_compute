@@ -1,6 +1,6 @@
 gce_targetpool { 'puppet-test-target-pool-backup':
-  ensure => absent,
-  region => 'us-central1',
+  ensure  => absent,
+  region  => 'us-central1',
   require => Gce_targetpool['puppet-test-target-pool']
 }
 

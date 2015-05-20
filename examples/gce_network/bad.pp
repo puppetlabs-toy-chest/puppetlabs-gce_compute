@@ -1,4 +1,4 @@
 gce_network { 'puppet-test-bad-network':
-  ensure       => present,
-  range        => "bad-range"
+  ensure => present,
+  range  => 'bad-range'
 }

@@ -6,6 +6,8 @@ require 'rspec-system/rake_task'
 
 task :default => :spec
 
+PuppetLint.configuration.send('disable_80chars')
+
 task :install => :build do
   puts `puppet module install -f pkg/puppetlabs-gce_compute-*.tar.gz`
 end
