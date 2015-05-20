@@ -57,6 +57,11 @@ At this point, you should be ready to go!
 
 ## Quick Start with Puppet Enterprise
 
+*Puppet Enterprise ships with `facter` and when run will attempt to read the
+value from executing `dmidecode` which can only by done by `root` (or sudo).
+If you run `puppet apply` as an unprivileged user, you will see permission
+denied errors.*
+
 These instructions assume you have installed and configured the Google Cloud
 SDK from the previous step. They also assume you have installed
 a [Puppet](http://docs.puppetlabs.com/guides/install_puppet/pre_install.html) or
@@ -331,17 +336,36 @@ $ rake install
 If you're going to be doing any kind of modifications, I highly recommend using [rbenv](https://github.com/sstephenson/rbenv), [ruby-build](https://github.com/sstephenson/ruby-build), (don't forget the [dependencies](https://github.com/sstephenson/ruby-build/wiki#suggested-build-environment)!) and [bundler](http://bundler.io/).
 
 ###Testing
- * Debian-7 (wheezy) puppet debian package (v2.7.23 using ruby1.8.7)
-   * Cloud SDK's gcutil version 1.12.0
- * Debian-7 (wheezy) puppet open-source (v3.3.2 using ruby1.9.3p194)
-   * Cloud SDK's gcutil version 1.12.0
- * Debian-7 (wheezy) Puppet Enterprise v3.1.0 (v3.3.1 using ruby1.9.3p448)
-   * Cloud SDK's gcutil version 1.12.0
 
-Puppet Enterprise ships with `facter` and when run will attempt to read the
-value from executing `dmidecode` which can only by done by `root` (or sudo).
-If you run `puppet apply` as an unprivileged user, you will see permission
-denied errors.
+This module has unit and live integration, (acceptance,) tests.  The whole test suite takes about 20 minutes, and can be run using
+```bash
+$ rake spec
+```
+
+Unit tests live in `spec/unit`, and include tests for types and providers, and can be run with
+```bash
+$ rake spec:unit
+```
+
+Live integration tests live in `spec/integration`, and will actually spin up and tear down live resources in your GCP environment.  Integration
+tests can be run with
+```bash
+$ rake spec:integration
+```
+
+Integration tests use the system puppet and modules, so, in preparation for running, Rake will automatically install the current version
+of the module.  If you would like to run an individual test file, you must reinstall the module manually, for example:
+```bash
+$ rake install && rspec spec/integration/puppet/puppet_community_spec.rb
+```
+If integration tests fail, they'll leave resources lying around in you project.  To cleanup, you can remove them altogether:
+```bash
+$ rake spec:integration:clean
+```
+or individually, for example:
+```bash
+$ rake install && puppet apply examples/puppet_community/down.pp
+```
 
 ## Migrating from v0
 
