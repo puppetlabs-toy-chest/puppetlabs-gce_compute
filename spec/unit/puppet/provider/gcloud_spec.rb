@@ -112,8 +112,6 @@ Puppet::Type.type(:gce_fake).provide(:gcloud, :parent => Puppet::Provider::Gclou
     'fakes'
   end
 
-  # These arguments are required for both create and destroy
-  # TODO refactor these to look the same as the optional args
   def gcloud_args
     {:zone => '--zone'}
   end
