@@ -389,7 +389,7 @@ This resource used to be called gce_firewall.
 
 ### gce_forwardingrule
 
-- `ip` is currently not supported (see above);
+- `ip` is now `address`, and takes the name of an address resource;
 - `protocol` is now `ip_protocol`; and
 - `target` is now `target_pool`.
 
@@ -402,7 +402,7 @@ This resource used to be called gce_firewall.
 
 - `authorized_ssh_keys` is no longer supported, (read more at [Connecting to an instance using ssh](https://cloud.google.com/compute/docs/instances/#sshing));
 - `disk` is now `boot_disk`, and if no `boot_disk` is specified, a disk will be automatically provisioned, and will be set to auto-destroy when the instance is deleted;
-- `external_ip_address` was read-only, and is no longer supported;
+- `external_ip_address` is now `address`, and takes the name of an address resource;
 - `internal_ip_address` was read-only, and is no longer supported;
 - `on_host_maintenance` is now `maintenance_policy`;
 - `service_account` and `service_account_scopes` are now both reflected in `scopes`, and `scopes` takes an array of strings, (see `examples/gce_instance/up.pp` for an example);
