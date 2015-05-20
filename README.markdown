@@ -203,7 +203,7 @@ Note that if your GCE instances will need access to other Google Cloud
 services (e.g.
 [Google Cloud Storage](https://cloud.google.com/products/cloud-storage),
 [Google BigQuery](https://cloud.google.com/products/big-query), etc.) then you
-can specify access with the `--service_account_scopes`. For more information
+can specify access with the `scopes` attribute. For more information
 about Service Account scopes, see
 [this page](https://developers.google.com/compute/docs/authentication).
 
@@ -246,97 +246,51 @@ your Google Compute Engine project. So long as this chain remains trustworthy, t
 method will reliably connect newly provisioned instances to your PE infrastructure
 without interaction.
 
-#### Persistent Disks and Instances
-
-When an instance is created, the module will first check to see if there is a
-pre-existing persistent disk with the same name as the instance and attempt to
-use that as the instance's boot disk. If no such disk exists, a new persistent
-disk will be created.
-
-When you delete an instance, the persistent disk will *not* be deleted. This
-provides the default behavior of persisting your data between instance
-termination and re-creation. If you truly want to delete a persistent disk,
-you must do so explicitly with it's own type-block and `ensure => absent` attribute.
-
 ### Enable/Disable Live Instance Migration
 
 Your Compute Engine instances, by default, will enable live migration.  In
 the event that Google needs to perform a datacenter maintenance, your instance
 will be automatically migrated to a new location without visible impact.
-This feature can be disabled by setting `on_host_migration` to `false`.
+This feature can be disabled by setting `maintenance_policy` to `TERMINATE`.
 
 ### Classifying resources
 
-`gce_instance` resources can also contain classification data to be used by the startup scripts described below.
+In addition to creating instances with `gce_instance`, you may pass additional parameters to configure and classify the instance. The work is done during instance creation by a bootstrap script. The module includes a scripts to configure both open source Puppet and Puppet Enterprise.
+
+In the `gce_instance` resource, you may provide the following parameter to choose a startup script. You can use any executable script that's located in the gce_compute modules files directory and can be interpreted by the OS GCE provisisions.
+
+```puppet
+   startupscript => 'puppet-community.sh'
+   startupscript => 'puppet-enterprise.sh'
+   startupscript => 'script_to_use.sh'
+```
 
 The classification is currently only supported by running `puppet apply`
-during the bootstrapping process of the created instances and can be done
-with the `enc_classes` parameter that utilizes
-[External Node Classifiers](http://docs.puppetlabs.com/guides/external_nodes.html)
-or by passing in the contents of a manifest file with the `manifest` parameter.
-If *both* parameters are specified, both will be applied to the instance with
-ENC first followed by the manifest file.
+during the bootstrapping process of the created instances
+by passing in the contents of a manifest file with the `manifest` parameter.
 
 Classification is specified with the following `gce_instance` parameters:
 
-* `modules` - List of modules that should be installed from the
+* `puppet_master` - Hostname of the puppet master instance that the
+  agent instance must be able to resolve. If this parameter is specified, then it is used as the `server` parameter in
+`puppet.conf`.
+* `puppet_service` - `absent` or `present`; if this parameter is specified, then the puppet service is automatically started
+on the managed instance and set to restart on boot (in `/etc/default/puppet`).
+* `puppet_manifest` - A string to pass in as a local manifest file and applied during
+  the bootstrap process.  You can use any executable script that's located in the gce_compute modules files directory and can
+  be interpreted by the OS GCE provisisions.
+* `puppet_modules` - List of modules that should be installed from the
   [forge](http://forge.puppetlabs.com/).
+* `puppet_module_repos` - Modules that should be installed from GitHub. Accepts a hash
+  where the keys indicates the module directory where the module should be installed and the value points to the GitHub repo.
 
-  ```puppet
-    modules => ['puppetlabs-mysql', 'puppetlabs-apache']
-  ```
+If you would like Puppet to wait until the startup script has completed running, you may use the
+following parameters:
 
-* `module_repos` - Modules that should be installed from github. Accepts a hash
-  where the keys indicates the directory where the module should be installed and the value points to the GitHub repo.
-
-  ```puppet
-  module_repos => { 'mysql' => 'git://github.com/puppetlabs/puppetlabs-mysql' }
-  ```
-
-* `enc_classes` - Hash of classes from our downloaded content that should be
-  applied using External Node Classifers. The key of this hash is the name of
-  a class to apply and the value is a hash of parameters that should be set
-  for that class.
-
-  ```puppet
-  enc_classes => {'mysql' => {'config_hash' => {'bind_address' => '0.0.0.0' }}}
-  ```
-
-* `manifest` - A string to pass in as a local manifest file and applied during
-  the bootstrap process. See the example manifest files in `tests/*.pp`
-  for examples on specifying full manifests.
 * `block_for_startup_script` - Whether the resource should block until its
   startup sctipt has completed.
 * `startup_script_timeout` - Amount of time to wait before timing out when
   blocking for a startup script.
-
-### Puppet Master and Service specification
-
-The solution allows specification of a puppet master instance with the
-`gce_instance` parameter:
-
-* `puppet_master` - Hostname of the puppet master instance that the
-  agent instance must be able to resolve.
-
-  ```puppet
-  puppet_master => 'puppet'
-  ```
-
-If this parameter is specified, then it is used as the `server` parameter in
-`puppet.conf`. If unspecified, the default of `puppet` is used.
-This parameter may be explicitly set to an empty string for a masterless instance.
-
-The solution allows specification of whether to start the puppet agent service
-with the `gce_instance` parameter:
-
-* `puppet_service` - `absent` or `present` (default `absent`)
-
-  ```puppet
-  puppet_service => present
-  ```
-
-If this parameter is specified, then the puppet service is automatically started
-on the managed instance and set to restart on boot (in `/etc/default/puppet`).
 
 ### Puppet Enterprise
 
@@ -359,103 +313,6 @@ This example will provision a PE Agent and will point it to your PE master.
       'pe_version'       => '3.1.0',
    },
 ```
-
-### Implementation of classification
-
-In addition to creating instances with `gce_instance`, you may pass additional parameters to configure and classify the instance. The work is done during instance creation by a bootstrap script. The module includes a script to configure open source Puppet and another script for Puppet Enterprise.
-
-In the `gce_instance` resource, you may provide the following parameter to choose a startup script. You can use any executable script that's located in the gce_compute modules files directory and can be interpreted by the OS GCE provisisions.
-
-```puppet
-   startupscript => 'script_to_use.sh'
-   startupscript => 'puppet-community.sh'
-   startupscript => 'puppet-enterprise.sh'
-```
-
-You can pass additional parameters to `gce_instance` resources to influence the behavior of these startup scripts. Both included scripts are capable of installing Puppet, classifying into a Dashboard/Console ENC, and installing modules. See the `gce_instance` reference (above) for more details.
-
-Common Parameters.
-
-* `puppet_modules`  - set when the `modules` attribute is specified.
-* `puppet_classes`  - set when the ENC classes attribute is specified.
-* `puppet_manifest` - set when the `manifest` attribute is specified.
-* `puppet_repos`    - set when the `module_repos` attribute is specified.
-* `puppet_master`   - set when the `puppet_master` attribute is specified.
-* `puppet_service`  - set when the `puppet_service` attribute is specified.
-
-### Data Lookups
-
-The solution implements the ability to look up internal and external IP
-addresses for the classification of instances.
-
-In order to retrieve the external or internal IP address of a different
-instance, the following syntax can be used from the classes parameter:
-
-```puppet
-    Gce_instance[database][internal_ip_address]
-```
-
-This is interpreted by the resource to mean it should retrieve the value of
-the `internal_ip_address` property from the database resource of
-`Gce_instance`. This syntax only supports retrieving `external_ip_address`
-and `internal_ip_address` from `Gce_instance` resources that are applied as
-part of the same catalog.
-
-It is also possible to lookup an instances of our own `$internal_ip_address`
-or `$external_ip_address`. This value is retrieved from the bootstrap script.
-
-### Destroy GCE Resources
-
-To use the example above, the following manifest could be used to teardown
-the environment. Not all parameters need be supplied when removing
-resources. Recall that persistent disks are not destroyed when an instance
-is destroyed but must be done so explicitly as in the following example:
-
-```puppet
-    # manifests/site.pp
-    gce_disk { 'puppet-disk':
-        ensure      => absent,
-        zone        => 'us-central1-a',
-    }
-    gce_disk { 'www1':
-        ensure      => absent,
-        zone        => 'us-central1-a',
-    }
-    gce_disk { 'www2':
-        ensure      => absent,
-        zone        => 'us-central1-b',
-    }
-    gce_firewall { 'allow-http':
-        ensure      => absent,
-    }
-    gce_instance { 'www1':
-        ensure       => absent,
-        zone         => 'us-central1-a',
-    }
-    gce_instance { 'www2':
-        ensure       => absent,
-        zone         => 'us-central1-b',
-    }
-    gce_httphealthcheck { 'basic-http':
-        ensure       => absent,
-    }
-    gce_targetpool { 'www-pool':
-        ensure       => absent,
-        region       => 'us-central1',
-    }
-    gce_forwardingrule { 'www-rule':
-        ensure       => absent,
-        region       => 'us-central1',
-    }
-
-    Gce_instance["www1", "www2"] -> Gce_disk["www1", "www2", "puppet-disk"]
-    Gce_forwardingrule["www-rule"] -> Gce_targetpool["www-pool"]
-    Gce_targetpool["www-pool"] -> Gce_httphealthcheck["basic-http"]
-```
-
-##Limitations
-
-It should work on any system that supports Google's [Cloud SDK](https://developers.google.com/cloud/sdk/#System_Requirements) but it has not been tested on Windows.
 
 ##Development
 
@@ -520,7 +377,7 @@ This resource used to be called gce_firewall.
 ### gce_instance
 
 - `authorized_ssh_keys` is no longer supported, (read more at [Connecting to an instance using ssh](https://cloud.google.com/compute/docs/instances/#sshing));
-- `disk` is now `boot_disk`;
+- `disk` is now `boot_disk`, and if no `boot_disk` is specified, a disk will be automatically provisioned, and will be set to auto-destroy when the instance is deleted;
 - `external_ip_address` was read-only, and is no longer supported;
 - `internal_ip_address` was read-only, and is no longer supported;
 - `on_host_maintenance` is now `maintenance_policy`;
@@ -546,11 +403,3 @@ See `examples/puppet_community/up.pp` for an example of how to use the Puppet at
 ### gce_targetpoolhealthcheck & gce_targetpoolinstance
 
 Both of these types are now reflected in `gce_targetpool`, (see `examples/gce_targetpool/up.pp` for an example).
-
-##ToDo
-
-Not all GCE features have been implemented. Currently, the module is missing
-support for:
-
-* Routes
-* Snapshots
