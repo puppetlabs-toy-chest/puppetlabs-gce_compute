@@ -5,6 +5,7 @@ describe Puppet::Type.type(:gce_forwardingrule) do
   let(:params) { [:name,
                   :region,
                   :description,
+                  :address,
                   :ip_protocol,
                   :port_range,
                   :target_pool] }
