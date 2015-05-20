@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'helpers/unit_spec_helper'
 
 describe Puppet::Type.type(:gce_targetpool).provider(:gcloud) do
   let(:base_params) { {:name => 'name', :region => 'us-central1'} }
@@ -8,17 +9,7 @@ describe Puppet::Type.type(:gce_targetpool).provider(:gcloud) do
   let(:gcloud_base_params) { ['compute', 'target-pools', 'create', 'name', '--region', 'us-central1'] }
   let(:gcloud_additional_params) { [] }
 
-  describe "create" do
-    it "should return nil when a resource is created" do
-      expect(provider).to receive(:gcloud).with(*gcloud_base_params)
-      expect(provider.create).to be_nil
-    end
-
-    it "should raise an exception when the resource already exists" do
-      expect(provider).to receive(:gcloud).with(*gcloud_base_params).and_raise(Puppet::ExecutionFailure.new(''))
-      expect { provider.create }.to raise_error(Puppet::ExecutionFailure)
-    end
-  end
+  it_behaves_like "a resource that can be created"
 
   context "with instances" do
     let(:additional_params) { {:instances => {'us-central1-a' => ['instance1','instance2']}} }

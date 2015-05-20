@@ -1,18 +1,27 @@
 require 'spec_helper'
+require 'helpers/unit_spec_helper'
 require 'puppet/provider/gcloud'
 
 describe Puppet::Provider::Gcloud do
-  let(:resource) { Puppet::Type.type(:gce_fake).new(:name => 'fake-name',
-                                                    :zone => 'us-central1-a',
-                                                    :description => 'Fake description',
-                                                    :source => 'source-place',
-                                                    :tags => ['tag1','tag2']) }
+  let(:base_params) { {:name => 'name', :zone => 'us-central1-a'} }
+  let(:additional_params) { {} }
+  let(:resource) { Puppet::Type.type(:gce_fake).new(base_params.merge(additional_params)) }
   let(:provider) { resource.provider }
-  let(:required_params) { ['compute', 'fakes', 'fake-name', '--zone', 'us-central1-a'] }
-  let(:optional_params) { ['--description', 'Fake description', '--source', 'source-place', '--tags', 'tag1,tag2'] }
+  let(:gcloud_base_params) { ['compute', 'fakes', 'create', 'name', '--zone', 'us-central1-a'] }
+  let(:gcloud_additional_params) { [] }
 
   def required_params_with(action)
-    required_params.insert(2, action)
+    gcloud_base_params[2] = action
+    return gcloud_base_params
+  end
+
+  it_behaves_like "a resource that can be created"
+
+  context "with extra params" do
+    it_behaves_like "a resource that can be created" do
+      let(:additional_params) { {:source => 'source', :tags => ['t1', 't2']} }
+      let(:gcloud_additional_params) { ['--source', 'source', '--tags', 't1,t2'] }
+    end
   end
 
   describe "#exists?" do
@@ -24,18 +33,6 @@ describe Puppet::Provider::Gcloud do
     it "should return false when no resource is found" do
       expect(provider).to receive(:gcloud).with(*required_params_with('describe')).and_raise(Puppet::ExecutionFailure.new(''))
       expect(provider.exists?).to eq(false)
-    end
-  end
-
-  describe "create" do
-    it "should return nil when a resource is created" do
-      expect(provider).to receive(:gcloud).with(*required_params_with('create')+optional_params)
-      expect(provider.create).to be_nil
-    end
-
-    it "should raise an exception when the resource already exists" do
-      expect(provider).to receive(:gcloud).with(*required_params_with('create')+optional_params).and_raise(Puppet::ExecutionFailure.new(''))
-      expect { provider.create }.to raise_error(Puppet::ExecutionFailure)
     end
   end
 
