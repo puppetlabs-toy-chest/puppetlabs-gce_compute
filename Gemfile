@@ -11,7 +11,6 @@ gem "puppet", puppetversion
 gem "puppet-lint"
 gem "metadata-json-lint"
 gem "rspec-puppet"
-gem "rspec-system-puppet"
 gem "puppetlabs_spec_helper"
 gem "puppet-syntax"
 gem "diff-lcs"
