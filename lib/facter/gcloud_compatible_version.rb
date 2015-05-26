@@ -8,7 +8,10 @@ end
 Facter.add(:gcloud_version) do
   setcode do
     if Facter::Util::Resolution.which('gcloud')
-      Facter::Util::Resolution.exec('gcloud --version').lines.first.split(' ')[3]
+      words = Facter::Util::Resolution.exec('gcloud --version').split
+      # Use the first valid semantic version number.
+      # NOTE If none is found, we return nil.
+      words.select{|word| SemVer.valid?(word)}.first
     end
   end
 end
