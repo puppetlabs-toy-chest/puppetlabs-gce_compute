@@ -1,6 +1,7 @@
 require File.expand_path(File.join(File.dirname(__FILE__), '..', 'gcloud'))
 
 Puppet::Type.type(:gce_instance).provide(:gcloud, :parent => Puppet::Provider::Gcloud) do
+  confine :gcloud_compatible_version => true
   commands :gcloud => "gcloud"
 
   BLOCK_FOR_STARTUP_SCRIPT_INTERVAL = 10

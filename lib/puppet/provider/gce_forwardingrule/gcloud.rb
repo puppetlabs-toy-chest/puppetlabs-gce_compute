@@ -2,6 +2,7 @@ require File.expand_path(File.join(File.dirname(__FILE__), '..', 'gcloud'))
 require 'json'
 
 Puppet::Type.type(:gce_forwardingrule).provide(:gcloud, :parent => Puppet::Provider::Gcloud) do
+  confine :gcloud_compatible_version => true
   commands :gcloud => "gcloud"
 
   def gcloud_resource_name

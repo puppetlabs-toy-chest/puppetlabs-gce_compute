@@ -103,6 +103,7 @@ Puppet::Type.newtype(:gce_fake) do
 end
 
 Puppet::Type.type(:gce_fake).provide(:gcloud, :parent => Puppet::Provider::Gcloud) do
+  confine :gcloud_compatible_version => true
   commands :gcloud => "gcloud"
 
   def gcloud_resource_name
