@@ -11,16 +11,16 @@ gce_address { 'puppet-test-instance-address':
 
 gce_instance { 'puppet-test-instance':
   ensure => absent,
-  zone   => 'us-central1-a'
+  zone   => 'us-central1-f'
 }
 
 gce_disk { 'puppet-test-instance-alt-disk':
   ensure  => absent,
-  zone    => 'us-central1-a',
+  zone    => 'us-central1-f',
   require => Gce_instance['puppet-test-instance-alt']
 }
 
 gce_instance { 'puppet-test-instance-alt':
   ensure => absent,
-  zone   => 'us-central1-a'
+  zone   => 'us-central1-f'
 }

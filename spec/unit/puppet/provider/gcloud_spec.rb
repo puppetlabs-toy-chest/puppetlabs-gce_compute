@@ -3,11 +3,11 @@ require 'helpers/unit_spec_helper'
 require 'puppet/provider/gcloud'
 
 describe Puppet::Provider::Gcloud do
-  let(:base_params) { {:name => 'name', :zone => 'us-central1-a'} }
+  let(:base_params) { {:name => 'name', :zone => 'us-central1-f'} }
   let(:additional_params) { {} }
   let(:resource) { Puppet::Type.type(:gce_fake).new(base_params.merge(additional_params)) }
   let(:provider) { resource.provider }
-  let(:gcloud_base_params) { ['compute', 'fakes', 'create', 'name', '--zone', 'us-central1-a'] }
+  let(:gcloud_base_params) { ['compute', 'fakes', 'create', 'name', '--zone', 'us-central1-f'] }
   let(:gcloud_additional_params) { [] }
 
   def required_params_with(action)
@@ -50,7 +50,7 @@ describe Puppet::Provider::Gcloud do
 
   context "with an invalid resource" do
     let(:resource) { Puppet::Type.type(:gce_fake).new(:name => 'fake-name',
-                                                      :zone => 'us-central1-a',
+                                                      :zone => 'us-central1-f',
                                                       :description => 'Invalid fake description',
                                                       :source => 'invalid-source-place',
                                                       :tags => []) }

@@ -11,7 +11,7 @@ gce_address { 'puppet-test-instance-address':
 
 gce_instance { 'puppet-test-instance':
   ensure                   => present,
-  zone                     => 'us-central1-a',
+  zone                     => 'us-central1-f',
   description              => 'Instance for testing the puppetlabs-gce_compute module',
   address                  => 'puppet-test-instance-address',
   image                    => 'coreos',
@@ -30,7 +30,7 @@ gce_instance { 'puppet-test-instance':
 
 gce_disk { 'puppet-test-instance-alt-disk':
   ensure      => present,
-  zone        => 'us-central1-a',
+  zone        => 'us-central1-f',
   description => 'Disk for testing the puppetlabs-gce_compute module instance started from a disk',
   size        => 10,
   image       => 'coreos'
@@ -38,7 +38,7 @@ gce_disk { 'puppet-test-instance-alt-disk':
 
 gce_instance { 'puppet-test-instance-alt':
   ensure      => present,
-  zone        => 'us-central1-a',
+  zone        => 'us-central1-f',
   description => 'Instance for testing the puppetlabs-gce_compute module instance alternate options',
   boot_disk   => 'puppet-test-instance-alt-disk'
 }

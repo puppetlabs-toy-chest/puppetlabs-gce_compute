@@ -11,7 +11,7 @@ gce_httphealthcheck { 'puppet-test-target-pool-http-health-check':
 
 gce_instance { 'puppet-test-target-pool-instance':
   ensure  => absent,
-  zone    => 'us-central1-a',
+  zone    => 'us-central1-f',
   require => Gce_targetpool['puppet-test-target-pool']
 }
 

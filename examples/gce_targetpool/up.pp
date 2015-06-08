@@ -10,7 +10,7 @@ gce_httphealthcheck { 'puppet-test-target-pool-http-health-check':
 
 gce_instance { 'puppet-test-target-pool-instance':
   ensure => present,
-  zone   => 'us-central1-a'
+  zone   => 'us-central1-f'
 }
 
 gce_targetpool { 'puppet-test-target-pool':
@@ -19,7 +19,7 @@ gce_targetpool { 'puppet-test-target-pool':
   description      => 'Target pool for testing the puppetlabs-gce_compute module',
   health_check     => 'puppet-test-target-pool-http-health-check',
   instances        => {
-    'us-central1-a' => ['puppet-test-target-pool-instance']
+    'us-central1-f' => ['puppet-test-target-pool-instance']
   },
   session_affinity => 'CLIENT_IP',
   backup_pool      => 'puppet-test-target-pool-backup',

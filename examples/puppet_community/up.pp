@@ -1,6 +1,6 @@
 gce_instance { 'puppet-test-community-instance':
   ensure                   => present,
-  zone                     => 'us-central1-a',
+  zone                     => 'us-central1-f',
   description              => 'Instance for testing the puppetlabs-gce_compute module and the puppet-community.sh startup script',
   startup_script           => 'puppet-community.sh',
   block_for_startup_script => true,

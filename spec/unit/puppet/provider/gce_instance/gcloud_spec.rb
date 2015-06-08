@@ -2,11 +2,11 @@ require 'spec_helper'
 require 'helpers/unit_spec_helper'
 
 describe Puppet::Type.type(:gce_instance).provider(:gcloud) do
-  let(:base_params) { {:name => 'name', :zone => 'us-central1-a'} }
+  let(:base_params) { {:name => 'name', :zone => 'us-central1-f'} }
   let(:additional_params) { {} }
   let(:resource) { Puppet::Type.type(:gce_instance).new(base_params.merge(additional_params)) }
   let(:provider) { resource.provider }
-  let(:gcloud_base_params) { ['compute', 'instances', 'create', 'name', '--zone', 'us-central1-a'] }
+  let(:gcloud_base_params) { ['compute', 'instances', 'create', 'name', '--zone', 'us-central1-f'] }
   let(:gcloud_additional_params) { [] }
   let(:startup_script_file) { File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..', '..', '..', 'files', "#{resource[:startup_script]}")) }
   let(:puppet_manifest_file) { File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..', '..', '..', 'files', "#{resource[:puppet_manifest]}")) }
@@ -78,9 +78,9 @@ describe Puppet::Type.type(:gce_instance).provider(:gcloud) do
   end
 
   context "with block_for_startup_script" do
-    let(:ssh_params) { ['compute', 'ssh', 'name', '--zone', 'us-central1-a', '--command', 'tail /var/log/startupscript.log -n 1'] }
+    let(:ssh_params) { ['compute', 'ssh', 'name', '--zone', 'us-central1-f', '--command', 'tail /var/log/startupscript.log -n 1'] }
     let(:resource) { Puppet::Type.type(:gce_instance).new(:name => 'name',
-                                                          :zone => 'us-central1-a',
+                                                          :zone => 'us-central1-f',
                                                           :startup_script => '../examples/gce_instance/example-startup-script.sh',
                                                           :block_for_startup_script => true) }
 
@@ -95,7 +95,7 @@ describe Puppet::Type.type(:gce_instance).provider(:gcloud) do
 
     context "and with a startup_script_timeout" do
       let(:resource) { Puppet::Type.type(:gce_instance).new(:name => 'name',
-                                                            :zone => 'us-central1-a',
+                                                            :zone => 'us-central1-f',
                                                             :startup_script => '../examples/gce_instance/example-startup-script.sh',
                                                             :block_for_startup_script => true,
                                                             :startup_script_timeout => 0.001) }

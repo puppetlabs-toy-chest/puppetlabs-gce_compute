@@ -84,7 +84,7 @@ One of the easiest ways to take advantage of this module is to build a single in
         ensure       => present,
         description  => 'A Puppet Enterprise Master and Console',
         machine_type => 'n1-standard-1',
-        zone         => 'us-central1-a',
+        zone         => 'us-central1-f',
         network      => 'default',
         image        => 'projects/centos-cloud/global/images/centos-6-v20131120',
         tags         => ['puppet', 'pe-master'],
@@ -123,7 +123,7 @@ One of the easiest ways to take advantage of this module is to build a single in
   ```puppet
     gce_instance { 'sample-agent':
       ensure         => present,
-      zone           => 'us-central1-a',
+      zone           => 'us-central1-f',
       machine_type   => 'g1-small',
       network        => 'default',
       image          => 'projects/centos-cloud/global/images/centos-6-v20131120',
@@ -149,7 +149,7 @@ One of the easiest ways to take advantage of this module is to build a single in
 
       gce_instance { "sample-agent-${value}":
         ensure         => present,
-        zone           => 'us-central1-a',
+        zone           => 'us-central1-f',
         machine_type   => 'g1-small',
         network        => 'default',
         image          => 'projects/centos-cloud/global/images/centos-6-v20131120',
