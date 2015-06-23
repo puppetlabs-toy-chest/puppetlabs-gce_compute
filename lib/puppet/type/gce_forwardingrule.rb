@@ -1,4 +1,4 @@
-require 'puppet/util/name_validator'
+require 'puppet_x/puppetlabs/name_validator'
 
 Puppet::Type.newtype(:gce_forwardingrule) do
   desc 'Google Compute Engine forwarding rule to send traffic to load balancers'
@@ -8,7 +8,7 @@ Puppet::Type.newtype(:gce_forwardingrule) do
   newparam(:name, :namevar => true) do
     desc 'The name of the forwarding rule.'
     validate do |v|
-      Puppet::Util::NameValidator.validate(v)
+      PuppetX::Puppetlabs::NameValidator.validate(v)
     end
   end
 

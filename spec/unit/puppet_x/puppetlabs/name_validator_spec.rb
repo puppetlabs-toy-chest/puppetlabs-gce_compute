@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Puppet::Util::NameValidator do
+describe PuppetX::Puppetlabs::NameValidator do
   describe "#validate" do
     it "raises an error for an invalid name" do
       ['123', 'aaa-', 'a_a', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', "\naaa"].each do |v|

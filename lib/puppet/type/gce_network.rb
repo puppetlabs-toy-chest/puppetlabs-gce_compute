@@ -1,4 +1,4 @@
-require 'puppet/util/name_validator'
+require 'puppet_x/puppetlabs/name_validator'
 
 Puppet::Type.newtype(:gce_network) do
   desc 'Google Compute Engine network.'
@@ -8,7 +8,7 @@ Puppet::Type.newtype(:gce_network) do
   newparam(:name, :namevar => true) do
     desc 'The name of the network.'
     validate do |v|
-      Puppet::Util::NameValidator.validate(v)
+      PuppetX::Puppetlabs::NameValidator.validate(v)
     end
   end
 

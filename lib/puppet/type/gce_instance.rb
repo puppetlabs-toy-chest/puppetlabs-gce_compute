@@ -1,4 +1,4 @@
-require 'puppet/util/name_validator'
+require 'puppet_x/puppetlabs/name_validator'
 
 Puppet::Type.newtype(:gce_instance) do
   desc 'Google Compute Engine virtual machine instance'
@@ -8,7 +8,7 @@ Puppet::Type.newtype(:gce_instance) do
   newparam(:name, :namevar => true) do
     desc 'The name of the instance'
     validate do |v|
-      Puppet::Util::NameValidator.validate(v)
+      PuppetX::Puppetlabs::NameValidator.validate(v)
     end
   end
 

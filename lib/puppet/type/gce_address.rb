@@ -1,4 +1,4 @@
-require 'puppet/util/name_validator'
+require 'puppet_x/puppetlabs/name_validator'
 
 Puppet::Type.newtype(:gce_address) do
   desc 'Google Compute Engine reserved IP address'
@@ -8,7 +8,7 @@ Puppet::Type.newtype(:gce_address) do
   newparam(:name, :namevar => true) do
     desc 'The name of the address.'
     validate do |v|
-      Puppet::Util::NameValidator.validate(v)
+      PuppetX::Puppetlabs::NameValidator.validate(v)
     end
   end
 

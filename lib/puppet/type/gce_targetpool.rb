@@ -1,4 +1,4 @@
-require 'puppet/util/name_validator'
+require 'puppet_x/puppetlabs/name_validator'
 
 Puppet::Type.newtype(:gce_targetpool) do
   desc 'Google Compute Engine target pool to handle network load balancing'
@@ -8,7 +8,7 @@ Puppet::Type.newtype(:gce_targetpool) do
   newparam(:name, :namevar => true) do
     desc 'The name of the target pool.'
     validate do |v|
-      Puppet::Util::NameValidator.validate(v)
+      PuppetX::Puppetlabs::NameValidator.validate(v)
     end
   end
 
