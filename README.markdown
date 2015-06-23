@@ -41,7 +41,7 @@ If you would like to use a virtual machine inside of your project as your Puppet
 
 Once you've setup your instance with the `compute-rw` scope, you don't need do anything else: `gcloud` comes preinstalled on the VM, and the instance is able to read and write resources within its project.
 
-#### Setup a Puppet Agent outisde of your Google Cloud project
+#### Setup a Puppet Agent outside of your Google Cloud project
 
 If you would like to use a machine outside of your project as your Puppet Agent, you'll need to [install and authenticate gcloud](https://cloud.google.com/sdk/).
 
@@ -257,7 +257,7 @@ This feature can be disabled by setting `maintenance_policy` to `TERMINATE`.
 
 In addition to creating instances with `gce_instance`, you may pass additional parameters to configure and classify the instance. The work is done during instance creation by a bootstrap script. The module includes a scripts to configure both open source Puppet and Puppet Enterprise.
 
-In the `gce_instance` resource, you may provide the following parameter to choose a startup script. You can use any executable script that's located in the gce_compute modules files directory and can be interpreted by the OS GCE provisisions.
+In the `gce_instance` resource, you may provide the following parameter to choose a startup script. You can use any executable script that's located in the gce_compute modules files directory and can be interpreted by the OS that GCE provisions.
 
 ```puppet
    startupscript => 'puppet-community.sh'
@@ -277,8 +277,7 @@ Classification is specified with the following `gce_instance` parameters:
 * `puppet_service` - `absent` or `present`; if this parameter is specified, then the puppet service is automatically started
 on the managed instance and set to restart on boot (in `/etc/default/puppet`).
 * `puppet_manifest` - A string to pass in as a local manifest file and applied during
-  the bootstrap process.  You can use any executable script that's located in the gce_compute modules files directory and can
-  be interpreted by the OS GCE provisisions.
+  the bootstrap process.  You can use any manifest that's located in the gce_compute modules files directory.
 * `puppet_modules` - List of modules that should be installed from the
   [forge](http://forge.puppetlabs.com/).
 * `puppet_module_repos` - Modules that should be installed from GitHub. Accepts a hash
