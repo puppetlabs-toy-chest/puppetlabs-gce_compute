@@ -7,7 +7,6 @@
 3. [Setup - The basics of getting started with gce_compute](#setup)
 4. [Quick Start - Get going quickly with Puppet Enterprise trial](#quick-start-with-puppet-enterprise)
 4. [Usage - Configuration options and additional functionality](#usage)
-5. [Reference - An under-the-hood peek at what the module is doing and how](#reference)
 5. [Limitations - OS compatibility, etc.](#limitations)
 6. [Development - Guide for contributing to the module](#development)
 
@@ -169,7 +168,7 @@ One of the easiest ways to take advantage of this module is to build a single in
     puppet apply agent.pp --parser future
     ```
 
-## Reference
+## Usage
 
 The gce_compute module provides the following resource types:
 
