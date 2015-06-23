@@ -57,7 +57,7 @@ describe Puppet::Type.type(:gce_instance).provider(:gcloud) do
 
   context "with puppet_manifest" do
     it_behaves_like "a resource that can be created" do
-      let(:additional_params) { {:puppet_manifest => '../examples/gce_instance/example-puppet-manifest.pp'} }
+      let(:additional_params) { {:puppet_manifest => '../examples/manifests/init.pp'} }
       let(:gcloud_additional_params) { ['--metadata-from-file', "puppet_manifest=#{puppet_manifest_file}"] }
     end
   end

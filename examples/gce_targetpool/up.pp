@@ -1,7 +1,8 @@
 gce_targetpool { 'puppet-test-target-pool-backup':
   ensure      => present,
   region      => 'us-central1',
-  description => 'Target pool for testing the puppetlabs-gce_compute module target pool backup_pool'
+  description => "Target pool for testing the puppetlabs-gce_compute module \
+target pool backup_pool"
 }
 
 gce_httphealthcheck { 'puppet-test-target-pool-http-health-check':
@@ -16,7 +17,8 @@ gce_instance { 'puppet-test-target-pool-instance':
 gce_targetpool { 'puppet-test-target-pool':
   ensure           => present,
   region           => 'us-central1',
-  description      => 'Target pool for testing the puppetlabs-gce_compute module',
+  description      => "Target pool for testing the puppetlabs-gce_compute \
+module",
   health_check     => 'puppet-test-target-pool-http-health-check',
   instances        => {
     'us-central1-f' => ['puppet-test-target-pool-instance']
