@@ -169,11 +169,6 @@ One of the easiest ways to take advantage of this module is to build a single in
     puppet apply agent.pp --parser future
     ```
 
-## A Complete Demo Stack
-
-As of right now, the [complete demo stack on GitHub](https://github.com/GoogleCloudPlatform/compute-video-demo-puppet) works with v0, but not v1.  Check it out for inspiration,
-but you may have to change parameters to get it to work.  See [Migrating from v0](#migrating-from-v0).
-
 ## Reference
 
 The gce_compute module provides the following resource types:
