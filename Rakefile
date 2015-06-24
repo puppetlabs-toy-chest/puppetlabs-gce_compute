@@ -48,3 +48,11 @@ namespace :spec do
     end
   end
 end
+
+desc "Run lint and spec tests and check metadata format"
+task :test => [
+  :syntax,
+  :lint,
+  :metadata,
+  :spec
+]
