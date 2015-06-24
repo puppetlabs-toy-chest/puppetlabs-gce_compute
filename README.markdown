@@ -22,31 +22,31 @@ In order to use this module, you will need to
 [signup](https://developers.google.com/compute/docs/signup)
 for a Google Cloud Platform account and enable Google Compute Engine.
 
-### Setup a Puppet Agent with Google Cloud SDK
+### Setup a host with Google Cloud SDK
 
-You will need to designate one machine to be your Puppet Agent.
+You will need to designate one machine to be your host.
 This machine will be responsible for provisioning objects into Google Compute
 using the `gcloud compute` command-line utility that is bundled as part of the Cloud
 SDK.
 
-You may either use a virtual machine inside of your Google Cloud project as your Puppet Agent, or you may use a machine outside of the project.
+You may either use a virtual machine inside of your Google Cloud project as your host, or you may use a machine outside of the project.
 
-#### Setup a Puppet Agent inside of your Google Cloud project
+#### Setup a host inside of your Google Cloud project
 
-If you would like to use a virtual machine inside of your project as your Puppet Agent, setup is simple.  Create the instance manually, either on the [Developers Console](https://console.developers.google.com/) or via the `gcloud` command-line interface, making sure to enable the `compute-rw` scope for your instance.
+If you would like to use a virtual machine inside of your project as your host, setup is simple.  Create the instance manually, either on the [Developers Console](https://console.developers.google.com/) or via the `gcloud` command-line interface, making sure to enable the `compute-rw` scope for your instance.
 
 - In the Developers Console, create an instance via `Compute > Compute Engine > VM instances > New instance`, show the security options, and select "Read Write" under `Project Access > Compute`.
 - In `gcloud`, just use `gcloud compute instances create` with the `--scopes compute-rw` flag.
 
 Once you've setup your instance with the `compute-rw` scope, you don't need do anything else: `gcloud` comes preinstalled on the VM, and the instance is able to read and write resources within its project.
 
-#### Setup a Puppet Agent outside of your Google Cloud project
+#### Setup a host outside of your Google Cloud project
 
-If you would like to use a machine outside of your project as your Puppet Agent, you'll need to [install and authenticate gcloud](https://cloud.google.com/sdk/).
+If you would like to use a machine outside of your project as your host, you'll need to [install and authenticate gcloud](https://cloud.google.com/sdk/).
 
 ### Install Puppet and this module
 
-You'll now want to [install Puppet](https://docs.puppetlabs.com/guides/install_puppet/pre_install.html) on your Puppet Agent.  Once you've installed Puppet, do
+You'll now want to [install Puppet](https://docs.puppetlabs.com/guides/install_puppet/pre_install.html) on your host.  Once you've installed Puppet, do
 
 ```bash
 $ puppet module install puppetlabs-gce_compute
@@ -230,7 +230,7 @@ To use this capability, you must specify particular properties in your gce_insta
     manifest => 'include gce_compute::autosign',
     ```
 
-- Within the Puppet Agent resources, assign the `pe-simplified-agent.sh` startup script.
+- Within the host resources, assign the `pe-simplified-agent.sh` startup script.
 
 `startupscript  => 'pe-simplified-agent.sh',`
 
