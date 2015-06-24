@@ -9,7 +9,7 @@ and also tear them down again.
   installed.
 
   ```
-  $ gcutil ssh pe3-wheezy --zone=us-central1-a
+  $ gcutil ssh pe3-wheezy --zone=us-central1-f
   $ sudo puppet module list
   /etc/puppet/modules
   |--- puppetlabs-apache (v0.9.0)

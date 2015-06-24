@@ -1,11 +1,11 @@
 # manifests/site.pp
 gce_disk { 'puppet-disk':
     ensure      => absent,
-    zone        => 'us-central1-a',
+    zone        => 'us-central1-f',
 }
 gce_disk { 'www1':
     ensure      => absent,
-    zone        => 'us-central1-a',
+    zone        => 'us-central1-f',
 }
 gce_disk { 'www2':
     ensure      => absent,
@@ -16,7 +16,7 @@ gce_firewall { 'allow-http':
 }
 gce_instance { 'www1':
     ensure       => absent,
-    zone         => 'us-central1-a',
+    zone         => 'us-central1-f',
 }
 gce_instance { 'www2':
     ensure       => absent,

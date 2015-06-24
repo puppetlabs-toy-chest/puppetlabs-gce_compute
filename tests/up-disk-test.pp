@@ -1,4 +1,4 @@
-$zone = 'us-central1-a'
+$zone = 'us-central1-f'
 
 gce_instance { 'min-params':
     ensure                 => present,

@@ -4,7 +4,7 @@ gce_disk { 'puppet-disk':
     ensure      => present,
     description => 'small data disk',
     size_gb     => '2',
-    zone        => 'us-central1-a',
+    zone        => 'us-central1-f',
 }
 gce_firewall { 'allow-http':
     ensure      => present,
@@ -17,7 +17,7 @@ gce_instance { 'www1':
     description  => 'web server',
     disk         => 'puppet-disk',
     machine_type => 'n1-standard-1',
-    zone         => 'us-central1-a',
+    zone         => 'us-central1-f',
     network      => 'default',
     image        => 'projects/debian-cloud/global/images/debian-7-wheezy-v20131120',
     tags         => ['web'],
@@ -72,7 +72,7 @@ gce_targetpool { 'www-pool':
     ensure       => present,
     require      => Gce_httphealthcheck['basic-http'],
     health_checks => 'basic-http',
-    instances    => 'us-central1-a/www1,us-central1-b/www2',
+    instances    => 'us-central1-f/www1,us-central1-b/www2',
     region       => 'us-central1',
 }
 gce_forwardingrule { 'www-rule':

@@ -2,7 +2,7 @@ gce_instance { 'pe3-wheezy':
     ensure                 => present,
     description            => 'web server',
     machine_type           => 'n1-standard-1',
-    zone                   => 'us-central1-a',
+    zone                   => 'us-central1-f',
     puppet_master          => 'master-blaster',
     puppet_service         => present,
     on_host_maintenance    => 'terminate',
