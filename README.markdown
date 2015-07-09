@@ -1,14 +1,13 @@
 #Puppet for Google Compute Engine
 
-####Table of Contents
+##Table of Contents
 
 1. [Overview](#overview)
-2. [Module Description - What the module does and why it is useful](#module-description)
-3. [Setup - The basics of getting started with gce_compute](#setup)
-4. [Quick Start - Get going quickly with Puppet Enterprise trial](#quick-start-with-puppet-enterprise)
-4. [Usage - Configuration options and additional functionality](#usage)
-5. [Limitations - OS compatibility, etc.](#limitations)
-6. [Development - Guide for contributing to the module](#development)
+1. [Setup](#setup)
+1. [Quick Start with Puppet Enterprise](#quick-start-with-puppet-enterprise)
+1. [Usage](#usage)
+1. [Development](#development)
+1. [Migrating from v0](#migrating-from-v0)
 
 ##Overview
 
@@ -196,7 +195,7 @@ Engine using Puppet's DSL. This provides the following benefits:
 * Allows Puppet to support ongoing management of application stacks created in
   GCE.
 
-#### Service Account Scopes
+### Service Account Scopes
 
 Note that if your GCE instances will need access to other Google Cloud
 services (e.g.
@@ -210,7 +209,7 @@ The PE Quick Start example assigns the Master a compute-ro service scope which
 allows it to query metadata about other instances within the GCE project. This
 information is used for automatic certificate signing.
 
-#### Automatic Certificate Signing
+### Automatic Certificate Signing
 
 If you plan to host your Puppet master and agents in Google Compute Engine, this
 module can take advantage of Google's API and Metadata services to verify and
