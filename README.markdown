@@ -55,117 +55,52 @@ At this point, you should be ready to go!
 
 ## Quick Start with Puppet Enterprise
 
-*Puppet Enterprise ships with `facter` and when run will attempt to read the
-value from executing `dmidecode` which can only by done by `root` (or sudo).
-If you run `puppet apply` as an unprivileged user, you will see permission
-denied errors.*
-
 These instructions assume you have installed and configured the Google Cloud
-SDK from the previous step. They also assume you have installed
-a [Puppet](http://docs.puppetlabs.com/guides/install_puppet/pre_install.html) or
-[Puppet Enterprise](http://docs.puppetlabs.com/pe/latest/install_agents.html)
-Agent.
+SDK and Puppet from the previous step.
 
 [Puppet Enterprise](http://puppetlabs.com/download-puppet-enterprise) is free to evaluate on up to 10 nodes and is installed for you as part of these examples.
 
-1. Install the Google Compute Engine Puppet module  
+### Bring up a GCE instance that will auto-install the PE Master
 
-    `puppet module install puppetlabs-gce_compute`
+One of the easiest ways to take advantage of this module is to build a single
+instance in Google Compute Engine to serve as your Puppet Enterprise master and
+console. After going through the [setup](#setup), copy the the manifest in `examples/puppet_enterprise/up.pp`, to your host, and run
 
+```bash
+$ puppet apply up.pp
+```
 
-2. Bring up a GCE instance that will auto-install the PE Master
+The install may take up to ten minutes but the master instance should be up
+within a minute or two.  The manifest is configured to wait until all of the
+startup scripts are finished running.
 
-One of the easiest ways to take advantage of this module is to build a single instance in Google Compute Engine to serve as your Puppet Enterprise master and console. After going through the [setup](#setup), save the following resource to a file (like `gce.pp`) and run `puppet apply gce.pp`.
+*As of right now, the `puppet-test-enterprise-agent-instance` doesn't properly
+connect to the master.*
 
-  ```puppet
-    gce_instance { 'puppet-enterprise-master':
-        ensure       => present,
-        description  => 'A Puppet Enterprise Master and Console',
-        machine_type => 'n1-standard-1',
-        zone         => 'us-central1-f',
-        network      => 'default',
-        image        => 'projects/centos-cloud/global/images/centos-6-v20131120',
-        tags         => ['puppet', 'pe-master'],
-        startupscript        => 'puppet-enterprise.sh',
-        metadata             => {
-          'pe_role'          => 'master',
-          'pe_version'       => '3.3.1',
-          'pe_consoleadmin'  => 'admin@example.com',
-          'pe_consolepwd'    => 'puppetize',
-        },
-        service_account_scopes => ['compute-ro'],
+#### Use the future parser to build many more instances.
+
+You can do something like this, in `agent.pp`:
+
+```puppet
+$a = ['1','2','3','4','5','6','7','8']
+each( $a ) |$value|{
+
+  gce_instance { "sample-agent-${value}":
+    ensure                   => present,
+    zone                     => 'us-central1-f',
+    startup_script           => 'pe-simplified-agent.sh',
+    block_for_startup_script => true,
+    metadata                 => {
+      'pe_role'    => 'agent',
+      'pe_master'  => 'puppet-test-enterprise-master-instance',
+      'pe_version' => '3.3.1',
     }
-   ```
+  }
+```
 
-   The install may take up to ten minutes but the instance should be up within a
-   minute or two. You can SSH into it...
-
-   ```
-   gcutil ssh puppet-enterprise-master
-   ```
-
-   and tail the log until it's finished.
-
-   ```
-   sudo tail -f /var/log/messages
-   ```
-
-   When finished, you'll see a line like this in your log.
-
-   ```
-   puppet-enterprise-master startupscript: Puppet installation finished!
-   ```
-
-3. Use Puppet to build an additional instance, automatically connected to your PE Master.
-
-  ```puppet
-    gce_instance { 'sample-agent':
-      ensure         => present,
-      zone           => 'us-central1-f',
-      machine_type   => 'g1-small',
-      network        => 'default',
-      image          => 'projects/centos-cloud/global/images/centos-6-v20131120',
-      startupscript  => 'pe-simplified-agent.sh',
-      metadata       => {
-        'pe_role'    => 'agent',
-        'pe_master'  => 'puppet-enterprise-master',
-        'pe_version' => '3.3.1',
-      },
-      tags           => ['puppet', 'pe-agent'],
-    }
-    ```
-
-    ```
-    puppet apply agent.pp
-    ```
-
-4. (Optionally) Use the future parser to build many more instances.
-
-    ```puppet
-    $a = ['1','2','3','4','5','6','7','8']
-    each( $a ) |$value|{
-
-      gce_instance { "sample-agent-${value}":
-        ensure         => present,
-        zone           => 'us-central1-f',
-        machine_type   => 'g1-small',
-        network        => 'default',
-        image          => 'projects/centos-cloud/global/images/centos-6-v20131120',
-        startupscript  => 'pe-simplified-agent.sh',
-        metadata       => {
-          'pe_role'    => 'agent',
-          'pe_master'  => 'puppet-enterprise-master',
-          'pe_version' => '3.3.1',
-        },
-        tags           => ['puppet', 'pe-agent'],
-      }
-
-    }
-    ```
-
-    ```
-    puppet apply agent.pp --parser future
-    ```
+```bash
+$ puppet apply agent.pp --parser future
+```
 
 ## Usage
 
