@@ -3,7 +3,7 @@
   "version": "0.5.0",
   "author": "Puppet Labs",
   "summary": "Native types for managing Google Cloud Platform infrastructure as Puppet DSL.",
-  "license": "Apache 2.0",
+  "license": "Apache-2.0",
   "source": "https://github.com/puppetlabs/puppetlabs-gce_compute",
   "project_page": "https://github.com/puppetlabs/puppetlabs-gce_compute",
   "issues_url": "https://tickets.puppetlabs.com/browse/MODULES",

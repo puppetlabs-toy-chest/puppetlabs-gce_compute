@@ -1,24 +1,19 @@
-require 'puppet'
 require 'spec_helper'
+require 'helpers/unit_spec_helper'
 
-gce_disk = Puppet::Type.type(:gce_disk)
+describe Puppet::Type.type(:gce_disk) do
+  let(:params) { [:name,
+                  :zone,
+                  :description,
+                  :size,
+                  :image] }
+  let(:create_params) { {:name => 'name', :zone => 'zone'} }
 
-describe gce_disk do
+  it_behaves_like "a resource with expected parameters"
+  it_behaves_like "it has a validated name"
 
-  let :params do
-    [
-     :name,
-     :zone,
-     :size_gb,
-     :source_image,
-     :wait_until_complete,
-     :description
-    ]
-  end
-
-  it "should have expected parameters" do
-    params.each do |param|
-      gce_disk.parameters.should be_include(param)
-    end
+  it "should be invalid without a zone" do
+    create_params[:zone] = nil
+    expect { described_class.new(create_params) }.to raise_error(/zone/)
   end
 end

@@ -92,9 +92,8 @@ function install_puppetmaster() {
 }
 
 function download_modules() {
-  if [ -n $1 ]; then
-    MODULE_LIST=`echo "$1" | sed 's/,/ /g'`
-    for i in $MODULE_LIST; do puppet module install --force $i ; done;
+  if [ -n "$1" ]; then
+    for i in $1; do puppet module install --force $i ; done;
   fi
 }
 
@@ -122,8 +121,7 @@ function clone_modules() {
     #get git, regardless of platform
     apt-get install -y git-core 2>/dev/null || yum install -y git 2>/dev/null
     pushd /etc/puppetlabs/puppet/modules
-    MODULE_LIST=`echo "$1" | sed 's/,/ /g'`
-    for i in $MODULE_LIST; do
+    for i in $1; do
       MODULE=`echo "$i" | sed 's/#/ /'`
       if [ ! -d `echo $MODULE | cut -d' ' -f2` ]; then
         git clone $MODULE ;
@@ -131,14 +129,6 @@ function clone_modules() {
     done;
     popd
   fi
-}
-
-function classify_master () {
-  declare -a class_array=($PUPPET_PE_CLASSES)
-  for class in ${class_array[@]}; do
-    /opt/puppet/bin/rake -f /opt/puppet/share/puppet-dashboard/Rakefile RAILS_ENV=production nodeclass:add["${class}",'skip']
-    /opt/puppet/bin/rake -f /opt/puppet/share/puppet-dashboard/Rakefile RAILS_ENV=production node:addclass[`hostname -f`,"${class}"]
-  done
 }
 
 function provision_puppet() {
@@ -153,33 +143,14 @@ function provision_puppet() {
   
   # For more on metadata, see https://developers.google.com/compute/docs/metadata
   MD="http://metadata/computeMetadata/v1beta1/instance"
-  PUPPET_CLASSES=$(curl -fs $MD/attributes/puppet_classes)
-  PUPPET_MANIFEST=$(curl -fs $MD/attributes/puppet_manifest)
   PUPPET_MODULES=$(curl -fs $MD/attributes/puppet_modules)
-  PUPPET_REPOS=$(curl -fs $MD/attributes/puppet_repos)
+  PUPPET_REPOS=$(curl -fs $MD/attributes/puppet_module_repos)
   PUPPET_HOSTNAME=$(curl -fs $MD/hostname)
   PUPPET_PE_ROLE=$(curl -fs $MD/attributes/pe_role)
   PUPPET_PE_VERSION=$(curl -fs $MD/attributes/pe_version)
   PUPPET_PE_CONSOLEADMIN=$(curl -fs $MD/attributes/pe_consoleadmin)
   PUPPET_PE_CONSOLEPWD=$(curl -fs $MD/attributes/pe_consolepwd)
   PUPPET_PE_MASTER=$(curl -fs $MD/attributes/pe_master)
-  #turn csl in metadata to spaces for array
-  PUPPET_PE_CLASSES=$(curl -fs $MD/attributes/pe_classes | tr "," " ")
-  # BEGIN HACK
-  #
-  # This is a pretty awful hack, but I did not really understand a better way to do it.
-  # The problem is that applications may need to specify facts or other system specific information
-  # as a part of the classifaction process. I this case, I need to be able to figure out my own internal
-  # and external ip addresses.
-  # I am going to just pass in these specific things as variables in the puppetcode and parse them out here.
-  # Eventually, I may want to do some kind of a fact lookup
-  GCE_EXTERNAL_IP=$(curl -fs $MD/network-interfaces/0/access-configs/0/external-ip)
-  #GCE_EXTERNAL_IP=$(curl -fs http://bot.whatismyipaddress.com)
-  GCE_INTERNAL_IP=$(curl -fs $MD/network-interfaces/0/ip)
-  #GCE_INTERNAL_IP=$(ifconfig eth0 |grep "inet addr:" | cut -c21-34)
-  PUPPET_CLASSES=$(echo "$PUPPET_CLASSES" | sed -e "s/\$gce_external_ip/$GCE_EXTERNAL_IP/" -e "s/\$gce_internal_ip/$GCE_INTERNAL_IP/")
-  PUPPET_MANIFEST=$(echo "$PUPPET_MANIFEST" | sed -e "s/\$gce_external_ip/$GCE_EXTERNAL_IP/" -e "s/\$gce_internal_ip/$GCE_INTERNAL_IP/")
-  # END HACK
   
   if [ $PUPPET_PE_ROLE = 'master' ]; then
     install_puppetmaster

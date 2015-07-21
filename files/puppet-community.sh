@@ -107,17 +107,15 @@ EOFPUPPETDEFAULT
 }
 
 function download_modules() {
-  if [ -n $1 ]; then
-    MODULE_LIST=`echo "$1" | sed 's/,/ /g'`
-    for i in $MODULE_LIST; do puppet module install --force $i ; done;
+  if [ -n "$1" ]; then
+    for i in $1; do puppet module install --force $i ; done;
   fi
 }
 
 function clone_modules() {
   if [ -n "$1" ]; then
     pushd /etc/puppet/modules
-    MODULE_LIST=`echo "$1" | sed 's/,/ /g'`
-    for i in $MODULE_LIST; do
+    for i in $1; do
       MODULE=`echo "$i" | sed 's/#/ /'`
       if [ ! -d `echo $MODULE | cut -d' ' -f2` ]; then
         git clone $MODULE ;
@@ -134,67 +132,6 @@ function run_manifest_apply() {
     puppet apply --trace --debug /etc/puppet/manifests/"$2".pp
   fi
 }
-
-function run_enc_apply() {
-  if [ -n "$1" ]; then
-    mkdir -p /etc/puppet/manifests
-    mkdir -p /etc/puppet/nodes
-    echo '' > /etc/puppet/manifests/empty.pp
-    echo '#!/bin/bash
-      cat /etc/puppet/nodes/$1.yaml' > /etc/puppet/nodes/enc.sh
-    chmod a+x /etc/puppet/nodes/enc.sh
-    # TODO(erjohnso) fix this hack in the gce_compute module
-    #
-    # The pupppet module is using a hash for the ENC values so each key
-    # needs to have value.  But the puppet yaml syntax for ENC
-    # doesn't technically require values for some keys.  For example,
-    #
-    #     class {'apache:'}
-    #
-    # versus something like,
-    #
-    #     class {'mysql::server' => {'config_hash' => {....
-    #
-    # It seems a good ruby way to handle this would be to allow the user
-    # to use the 'nil' object to indicate that there is no value for the
-    # key.  So, the ruby manifest would contain...
-    #
-    # enc_classes => {'apache' => nil}
-    #
-    # But when this hash is converted to_yaml and pumped into the metadata
-    # server, the 'nil's are converted to ruby Strings during the method
-    # lib/puppet/provider/gce_instance/gcutil.rb:parse_methods_from_hash()
-    # to do some param substitutions.  Ideally, this method would ignore
-    # ruby nil objects...
-    #
-    # The ****HACK**** below uses sed to strip out 'nil$' before writing
-    # the YAML from the metadata server to disk.
-    #
-    # e.g. convert this string...
-    # ---
-    #   classes:
-    #     "mysql::server":
-    #       config_hash:
-    #         bind_address: "127.0.0.1"
-    #     apache: nil
-    #     "mysql::python": nil
-    #
-    ## to this yaml
-    #
-    # ---
-    #   classes:
-    #     "mysql::server":
-    #       config_hash:
-    #         bind_address: "127.0.0.1"
-    #     apache:
-    #     "mysql::python":
-    echo "$1" | sed -e "s|nil$||" > /etc/puppet/nodes/"$2".yaml
-    # yaml terminus does not merge facts, so it failed with puppet
-    # apply
-    puppet apply --trace --debug --node_terminus=exec --external_nodes=/etc/puppet/nodes/enc.sh /etc/puppet/manifests/empty.pp
-  fi
-}
-
 
 function provision_puppet() {
   if [ -f /etc/redhat-release ]; then
@@ -213,7 +150,7 @@ function provision_puppet() {
   PUPPET_CLASSES=$(curl -fs $MD/attributes/puppet_classes)
   PUPPET_MANIFEST=$(curl -fs $MD/attributes/puppet_manifest)
   PUPPET_MODULES=$(curl -fs $MD/attributes/puppet_modules)
-  PUPPET_REPOS=$(curl -fs $MD/attributes/puppet_repos)
+  PUPPET_REPOS=$(curl -fs $MD/attributes/puppet_module_repos)
   PUPPET_HOSTNAME=$(curl -fs $MD/hostname)
 
   # BEGIN HACK
@@ -236,7 +173,6 @@ function provision_puppet() {
   configure_puppet "$PUPPET_HOSTNAME" "$PUPPET_MASTER" "$PUPPET_SERVICE"
   download_modules "$PUPPET_MODULES"
   clone_modules    "$PUPPET_REPOS"
-  run_enc_apply "$PUPPET_CLASSES" "$PUPPET_HOSTNAME"
   run_manifest_apply "$PUPPET_MANIFEST" "$PUPPET_HOSTNAME"
 
   if [[ ${PUPPET_SERVICE} == 'present' ]]; then

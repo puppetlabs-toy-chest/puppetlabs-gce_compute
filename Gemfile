@@ -3,14 +3,14 @@ source "http://rubygems.org"
 if ENV.key?('PUPPET_VERSION')
   puppetversion = "= #{ENV['PUPPET_VERSION']}"
 else
-  puppetversion = ['~> 2.7']
+  puppetversion = ['~> 3.7']
 end
 
 gem "rake"
 gem "puppet", puppetversion
 gem "puppet-lint"
+gem "metadata-json-lint"
 gem "rspec-puppet"
-gem "rspec-system-puppet"
 gem "puppetlabs_spec_helper"
 gem "puppet-syntax"
 gem "diff-lcs"

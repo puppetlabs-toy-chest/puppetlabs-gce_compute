@@ -1,22 +1,12 @@
-require 'puppet'
 require 'spec_helper'
+require 'helpers/unit_spec_helper'
 
-gce_network = Puppet::Type.type(:gce_network)
+describe Puppet::Type.type(:gce_network) do
+  let(:params) { [:name,
+                  :description,
+                  :range] }
+  let(:create_params) { {:name => 'name', :region => 'region'} }
 
-describe gce_network do
-
-  let :params do
-    [
-     :name,
-     :description,
-     :gateway,
-     :range,
-    ]
-  end
-
-  it "should have expected parameters" do
-    params.each do |param|
-      gce_network.parameters.should be_include(param)
-    end
-  end
+  it_behaves_like "a resource with expected parameters"
+  it_behaves_like "it has a validated name"
 end

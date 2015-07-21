@@ -1,33 +1,87 @@
-require 'puppet'
 require 'spec_helper'
+require 'helpers/unit_spec_helper'
 
-gce_instance = Puppet::Type.type(:gce_instance)
+describe Puppet::Type.type(:gce_instance) do
+  let(:params) { [:name,
+                  :zone,
+                  :address,
+                  :can_ip_forward,
+                  :description,
+                  :boot_disk,
+                  :image,
+                  :machine_type,
+                  :metadata,
+                  :network,
+                  :maintenance_policy,
+                  :scopes,
+                  :startup_script,
+                  :block_for_startup_script,
+                  :startup_script_timeout,
+                  :tags,
+                  :puppet_master,
+                  :puppet_service,
+                  :puppet_manifest,
+                  :puppet_modules,
+                  :puppet_module_repos] }
+  let(:create_params) { {:name => 'name', :zone => 'zone'} }
 
-describe gce_instance do
+  it_behaves_like "a resource with expected parameters"
+  it_behaves_like "it has a validated name"
 
-  let :params do
-    [
-     :name,
-     :authorized_ssh_keys,
-     :description,
-     :disk,
-     :zone,
-     :tags,
-     :use_compute_key,
-     :network,
-     :image,
-     :machine_type,
-     :on_host_maintenance,
-     :puppet_master,
-     :puppet_service,
-     :can_ip_forward,
-     :add_compute_key_to_project,
-    ]
+  it "should be invalid without a zone" do
+    expect { described_class.new({:name => 'name'}) }.to raise_error(/zone/)
   end
 
-  it "should have expected parameters" do
-    params.each do |param|
-      gce_instance.parameters.should be_include(param)
-    end
+  it "should be invalid if given block_for_startup_script without a startup_script" do
+    expect { described_class.new({:name => 'name',
+                                  :zone => 'zone',
+                                  :block_for_startup_script => true}) }.to raise_error(/block_for_startup_script/)
+  end
+
+  it "should be invalid if given startup_script_timeout without block_for_startup_script" do
+    expect { described_class.new({:name => 'name',
+                                  :zone => 'zone',
+                                  :startup_script_timeout => 10}) }.to raise_error(/block_for_startup_script/)
+  end
+
+  it "should valid if given a startup_script, block_for_startup_script, and startup_script_timeout" do
+    expect { described_class.new({:name => 'name',
+                                  :zone => 'zone',
+                                  :startup_script => 'some_startup_script',
+                                  :block_for_startup_script => true,
+                                  :startup_script_timeout => 10}) }.not_to raise_error
+  end
+
+  it "should be valid if given a valid puppet_service" do
+    expect { described_class.new({:name => 'name',
+                                  :zone => 'zone',
+                                  :puppet_service => 'present'}) }.not_to raise_error
+  end
+
+  it "should be invalid if given puppet_service that isn't absent or present" do
+    expect { described_class.new({:name => 'name',
+                                  :zone => 'zone',
+                                  :puppet_service => 'hello'}) }.to raise_error(/puppet_service/)
+  end
+
+  it "should munge startup_script_timeout to a Float" do
+    expect(described_class.new({:name => 'name',
+                                :zone => 'zone',
+                                :startup_script => 'some_startup_script',
+                                :block_for_startup_script => true,
+                                :startup_script_timeout => 10})[:startup_script_timeout]).to be_an_instance_of(Float)
+  end
+
+  it "should munge puppet_modules to a space-separated string" do
+    expect(described_class.new({:name => 'name',
+                                :zone => 'zone',
+                                :puppet_modules => ['module1', 'module2']})[:puppet_modules]).to eq('module1 module2')
+  end
+
+  it "should munge puppet_module_repos to a properly-formatted space-separated string" do
+    expect(described_class.new({:name => 'name',
+                                :zone => 'zone',
+                                :puppet_module_repos => {'module1' => 'git1',
+                                                         'module2' => 'git2'}})[:puppet_module_repos]).to eq('git1#module1 git2#module2')
   end
 end

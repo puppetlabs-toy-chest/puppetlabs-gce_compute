@@ -2,3 +2,6 @@
 *.swp
 *.swo
 *.lock
+.ruby-version
+pkg
+spec/fixtures

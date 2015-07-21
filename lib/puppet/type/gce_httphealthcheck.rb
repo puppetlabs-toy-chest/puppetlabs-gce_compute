@@ -1,76 +1,46 @@
+require 'puppet_x/puppetlabs/name_validator'
+
 Puppet::Type.newtype(:gce_httphealthcheck) do
-  desc 'httphealthcheck'
+  desc 'Google Compute Engine HTTP health check for load balanced instances'
 
   ensurable
 
   newparam(:name, :namevar => true) do
-    validate do |value|
-      unless value =~ /[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?/
-        raise(Puppet::Error, "Invalid httphealthcheck name: #{v}")
-      end
-    end
-  end
-
-  newparam(:check_interval_sec) do
-    desc 'How often in seconds to send a health check'
-    validate do |value|
-      unless value.is_a? Integer and value > 0
-        raise "Check interval needs to be integer seconds greater than zero #{value}"
-      end
-    end
-  end
-
-  newparam(:check_timeout_sec) do
-    desc 'How long to wait on a check before declaring failure'
-    validate do |value|
-      unless value.is_a? Integer and value > 0
-        raise "Check timeout needs to be integer seconds greater than zero #{value}"
-      end
+    desc 'The name of the disk.'
+    validate do |v|
+      PuppetX::Puppetlabs::NameValidator.validate(v)
     end
   end
 
   newparam(:description) do
-    desc 'forwardingrule description'
+    desc 'An optional, textual description for the HTTP health check.'
+  end
+
+  newparam(:check_interval) do
+    desc 'How often to perform a health check for an instance.'
+  end
+
+  newparam(:timeout) do
+    desc "If Google Compute Engine doesn't receive an HTTP 200 response from the instance by the time specified by the value of this flag, the health check request is considered a failure."
   end
 
   newparam(:healthy_threshold) do
-    desc 'A so-far unhealthy instance will be marked healthy after this many postivie checks'
-    validate do |value|
-      unless value.is_a? Integer and value > 0
-        raise "Healthy threshold must an integer greather than zero #{value}"
-      end
-    end
+    desc 'The number of consecutive successful health checks before an unhealthy instance is marked as healthy.'
   end
 
   newparam(:host) do
-    desc 'The hostname of the instance to check'
+    desc 'The value of the host header used in this HTTP health check request.'
   end
 
   newparam(:port) do
-    desc 'The port to use for HTTP health check requests'
-    validate do |value|
-      unless value.is_a? Integer and value > 0
-        raise "The port must an integer greather than zero #{value}"
-      end
-    end
+    desc 'The TCP port number that this health check monitors.'
   end
 
   newparam(:request_path) do
-    desc 'The request path for the HTTP health check'
-    validate do |value|
-      unless value.is_a? String and value.start_with? "/"
-        raise "Request path must start with '/' #{value}"
-      end
-    end
+    desc 'The request path that this health check monitors.'
   end
 
   newparam(:unhealthy_threshold) do
-    desc 'Number of times to fail a healthcheck before being marked as failed'
-    validate do |value|
-      unless value.is_a? Integer and value > 0
-        raise "Unhealthy threshold must an integer greather than zero #{value}"
-      end
-    end
+    desc 'The number of consecutive health check failures before a healthy instance is marked as unhealthy.'
   end
-
 end
