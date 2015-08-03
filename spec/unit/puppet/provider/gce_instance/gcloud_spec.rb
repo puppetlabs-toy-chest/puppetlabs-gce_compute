@@ -9,7 +9,6 @@ describe Puppet::Type.type(:gce_instance).provider(:gcloud) do
   let(:gcloud_base_params) { ['compute', 'instances', 'create', 'name', '--zone', 'us-central1-f'] }
   let(:gcloud_additional_params) { [] }
   let(:startup_script_file) { File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..', '..', '..', 'files', "#{resource[:startup_script]}")) }
-  let(:puppet_manifest_file) { File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..', '..', '..', 'files', "#{resource[:puppet_manifest]}")) }
 
   it_behaves_like "a resource that can be created"
 
@@ -57,8 +56,24 @@ describe Puppet::Type.type(:gce_instance).provider(:gcloud) do
 
   context "with puppet_manifest" do
     it_behaves_like "a resource that can be created" do
-      let(:additional_params) { {:puppet_manifest => '../examples/manifests/init.pp'} }
-      let(:gcloud_additional_params) { ['--metadata-from-file', "puppet_manifest=#{puppet_manifest_file}"] }
+      let(:additional_params) { {:puppet_manifest => "# install apache2 package and serve a page
+class examples ($version = 'latest') {
+  package {'apache2':
+    ensure => $version, # Using the class parameter from above
+  }
+  file {'/var/www/index.html':
+    ensure  => present,
+    content => 'Pinocchio says hello!',
+    require => Package['apache2'],
+  }
+  service {'apache2':
+    ensure  => running,
+    enable  => true,
+    require => File['/var/www/index.html'],
+  }
+}
+include examples"} }
+      let(:gcloud_additional_params) { ['--metadata', "puppet_manifest=#{puppet_manifest}"] }
     end
   end
 

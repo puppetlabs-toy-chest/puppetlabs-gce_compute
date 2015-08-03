@@ -209,8 +209,8 @@ Classification is specified with the following `gce_instance` parameters:
 `puppet.conf`.
 * `puppet_service` - `absent` or `present`; if this parameter is specified, then the puppet service is automatically started
 on the managed instance and set to restart on boot (in `/etc/default/puppet`).
-* `puppet_manifest` - A string to pass in as a local manifest file and applied during
-  the bootstrap process.  You can use any manifest that's located in the gce_compute modules files directory.
+* `puppet_manifest` - A string containing an inline manifest which is applied during
+  the bootstrap process.
 * `puppet_modules` - List of modules that should be installed from the
   [forge](http://forge.puppetlabs.com/).
 * `puppet_module_repos` - Modules that should be installed from GitHub. Accepts a hash
@@ -336,7 +336,7 @@ This resource used to be called gce_firewall.
 - `add_compute_key_to_project` is no longer supported, (read more at [Connecting to an instance using ssh](https://cloud.google.com/compute/docs/instances/#sshing));
 - `use_compute_key` is no longer supported, (read more at [Connecting to an instance using ssh](https://cloud.google.com/compute/docs/instances/#sshing));
 - `enc_classes` is no longer supported;
-- `manifest` is now `puppet_manifest`, and takes a manifest filename, rather than an inline manifest;
+- `manifest` is now `puppet_manifest`;
 - `modules` is now `puppet_modules`, and the metadata is space-separated rather than comma-separated; and
 - `module_repos` is now `puppet_module_repos`, is now stored in `puppet_module_repos` metadata, instead of `puppet_repos`, and that metadata is space-separated rather than comma-separated.
 
