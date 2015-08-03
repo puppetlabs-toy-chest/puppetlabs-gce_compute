@@ -210,7 +210,8 @@ Classification is specified with the following `gce_instance` parameters:
 * `puppet_service` - `absent` or `present`; if this parameter is specified, then the puppet service is automatically started
 on the managed instance and set to restart on boot (in `/etc/default/puppet`).
 * `puppet_manifest` - A string containing an inline manifest which is applied during
-  the bootstrap process.
+  the bootstrap process. _**Note**: this manifest cannot cannot contain the string "-zz-",
+  as it is being used as a field delimiter for the underlying `--metadata` argument._
 * `puppet_modules` - List of modules that should be installed from the
   [forge](http://forge.puppetlabs.com/).
 * `puppet_module_repos` - Modules that should be installed from GitHub. Accepts a hash
