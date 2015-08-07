@@ -83,7 +83,7 @@ Puppet::Type.newtype(:gce_instance) do
   end
 
   newparam(:puppet_manifest) do
-    desc 'A local manifest file specific to this instance.'
+    desc 'An inline manifest specific to this instance.'
   end
 
   newparam(:puppet_modules) do
