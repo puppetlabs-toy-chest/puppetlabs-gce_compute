@@ -6,9 +6,9 @@ module and the puppet-enterprise.sh startup script",
   startup_script           => 'puppet-enterprise.sh',
   block_for_startup_script => true,
   puppet_manifest          => "# install apache2 package and serve a page
-class examples ($version = 'latest') {
+class examples (\$version = 'latest') {
   package {'apache2':
-    ensure => $version, # Using the class parameter from above
+    ensure => \$version, # Using the class parameter from above
   }
   file {'/var/www/index.html':
     ensure  => present,

@@ -8,9 +8,9 @@ module and the puppet-community.sh startup script",
   puppet_master            => 'master-blaster',
   puppet_service           => present,
   puppet_manifest          => "# install apache2 package and serve a page
-class examples ($version = 'latest') {
+class examples (\$version = 'latest') {
   package {'apache2':
-    ensure => $version, # Using the class parameter from above
+    ensure => \$version, # Using the class parameter from above
   }
   file {'/var/www/index.html':
     ensure  => present,
