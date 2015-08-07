@@ -160,8 +160,8 @@ To use this capability, you must specify particular properties in your gce_insta
 - The Puppet Master resource also needs to install the gce_compute module and configure itself with the provided autosigner class.
 
   ```puppet
-    modules  => ['puppetlabs-gce_compute'],
-    manifest => 'include gce_compute::autosign',
+    modules         => ['puppetlabs-gce_compute'],
+    puppet_manifest => 'include gce_compute::autosign',
     ```
 
 - Within the host resources, assign the `pe-simplified-agent.sh` startup script.
@@ -200,7 +200,7 @@ In the `gce_instance` resource, you may provide the following parameter to choos
 
 The classification is currently only supported by running `puppet apply`
 during the bootstrapping process of the created instances
-by passing in the contents of a manifest file with the `manifest` parameter.
+by passing in the contents of a manifest file with the `puppet_manifest` parameter.
 
 Classification is specified with the following `gce_instance` parameters:
 
