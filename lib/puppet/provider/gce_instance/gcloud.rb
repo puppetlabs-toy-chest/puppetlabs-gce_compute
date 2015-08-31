@@ -37,6 +37,7 @@ Puppet::Type.type(:gce_instance).provide(:gcloud, :parent => Puppet::Provider::G
     args = build_gcloud_args('create') + build_gcloud_flags(gcloud_optional_create_args)
     append_can_ip_forward_args(args, resource)
     append_boot_disk_args(args, resource)
+    append_secondary_disk_args(args, resource)
     append_metadata_args(args, resource)
     append_startup_script_args(args, resource)
     gcloud(*args)
@@ -52,6 +53,13 @@ Puppet::Type.type(:gce_instance).provide(:gcloud, :parent => Puppet::Provider::G
       args << '--disk'
       args << "name=#{resource[:boot_disk]},boot=yes"
     end
+  end
+
+  def append_secondary_disk_args(args, resource)
+      if resource[:secondary_disk]
+          args << '--disk'
+          args << "name=#{resource[:secondary_disk]}"
+      end
   end
 
   def append_metadata_args(args, resource)
