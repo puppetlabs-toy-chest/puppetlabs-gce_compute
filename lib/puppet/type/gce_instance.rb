@@ -33,7 +33,7 @@ Puppet::Type.newtype(:gce_instance) do
   end
 
   newparam(:secondary_disk) do
-    desc 'Specifies an optional list of secondary disks to be attached to this instance.'
+    desc 'Specifies an optional secondary disk to be attached to this instance.'
   end
 
   newparam(:image) do
