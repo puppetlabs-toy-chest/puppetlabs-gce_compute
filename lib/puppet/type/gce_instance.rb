@@ -32,6 +32,14 @@ Puppet::Type.newtype(:gce_instance) do
     desc 'Specifies a persistent disk as the boot disk for this instance.'
   end
 
+  newparam(:secondary_disk) do
+    desc 'Specifies an optional secondary disk to be attached to this instance.'
+  end
+
+  newparam(:secondary_disk_name) do
+    desc 'Specifies the device name of the secondary disk. Only applies if secondary_disk is specified.'
+  end
+
   newparam(:image) do
    desc 'Specifies the boot image for the instance.'
   end
