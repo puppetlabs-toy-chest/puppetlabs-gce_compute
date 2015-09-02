@@ -58,7 +58,7 @@ Puppet::Type.type(:gce_instance).provide(:gcloud, :parent => Puppet::Provider::G
   def append_secondary_disk_args(args, resource)
       if resource[:secondary_disk]
           args << '--disk'
-          args << "name=#{resource[:secondary_disk]}"
+          args << "name=#{resource[:secondary_disk]}#{resource[:secondary_disk_name] ? ',device-name=' + resource[:secondary_disk_name] : ''}"
       end
   end
 
