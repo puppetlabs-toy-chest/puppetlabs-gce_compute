@@ -48,6 +48,10 @@ Puppet::Type.newtype(:gce_instance) do
     desc 'Specifies the network that the instance will be part of.'
   end
 
+  newparam(:private_network_ip) do
+    desc 'Specifies the RFC1918 IP to assign to the instance. The IP should be in the subnet or legacy network IP range.'
+  end
+
   newparam(:maintenance_policy) do
     desc 'Specifies the behavior of the instances when their host machines undergo maintenance.'
   end
